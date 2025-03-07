@@ -11,11 +11,13 @@ import { fetchOrders, Order } from '@/services/api';
 const Profile: React.FC = () => {
   const { username, email, avatarEmoji } = useUser();
 
-  // Fetch orders
-  const { data: orders, isLoading, error } = useQuery({
+  // Fetch orders with better error handling
+  const { data: orders, isLoading, error, isError, refetch } = useQuery({
     queryKey: ['orders', username],
     queryFn: () => fetchOrders(username),
     staleTime: 60 * 1000, // 1 minute
+    retry: 1,
+    retryDelay: 1000,
   });
 
   // Mock rank for UI demonstration - would come from API in real implementation
@@ -33,15 +35,15 @@ const Profile: React.FC = () => {
   }
 
   // Handle error state
-  if (error) {
+  if (isError) {
     return (
       <PageLayout>
         <div className="p-4 text-center">
           <h2 className="text-lg font-medium text-red-600 mb-2">Error loading profile</h2>
-          <p className="text-gray-600">Please try again later</p>
+          <p className="text-gray-600 mb-4">Please try again later</p>
           <button 
-            className="mt-4 px-4 py-2 bg-telegram-blue text-white rounded-lg"
-            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-telegram-blue text-white rounded-lg"
+            onClick={() => refetch()}
           >
             Retry
           </button>
@@ -50,29 +52,8 @@ const Profile: React.FC = () => {
     );
   }
 
-  // We'll use demo orders if API doesn't return any
-  const displayOrders: Order[] = orders && orders.length > 0 ? orders : [
-    {
-      order_id: 1001,
-      order_date: '2023-06-15',
-      total_amount: 78.99,
-      status: 'paid',
-      items: [
-        { sku: 'TS001', item_name: 'Classic T-Shirt', color_code: 'Blue', size: 'M', price_rub: 2999 },
-        { sku: 'JN001', item_name: 'Premium Jeans', color_code: 'Indigo', size: '32', price_rub: 4900 }
-      ]
-    },
-    {
-      order_id: 1002,
-      order_date: '2023-07-22',
-      total_amount: 125.50,
-      status: 'pending',
-      items: [
-        { sku: 'HD001', item_name: 'Hoodie', color_code: 'Black', size: 'L', price_rub: 4550 },
-        { sku: 'SN001', item_name: 'Sneakers', color_code: 'White', size: '42', price_rub: 8000 }
-      ]
-    }
-  ];
+  // We'll use orders from API or empty array if undefined
+  const displayOrders = orders || [];
 
   return (
     <PageLayout>
@@ -117,16 +98,22 @@ const Profile: React.FC = () => {
 
         {/* Order History */}
         <h2 className="text-xl font-medium mb-4">Order History</h2>
-        <div className="space-y-4">
-          {displayOrders.map((order, index) => (
-            <OrderHistoryItem 
-              key={order.order_id} 
-              order={order} 
-              className="animate-fade-in"
-              animationDelay={`${index * 0.1}s`}
-            />
-          ))}
-        </div>
+        {displayOrders.length === 0 ? (
+          <div className="text-center py-6 bg-white rounded-lg shadow-sm">
+            <p className="text-gray-500">No orders found</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {displayOrders.map((order, index) => (
+              <OrderHistoryItem 
+                key={order.order_id} 
+                order={order} 
+                className="animate-fade-in"
+                animationDelay={`${index * 0.1}s`}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Settings Section */}
         <div className="mt-8 bg-white rounded-lg shadow-sm p-4 animate-fade-in">

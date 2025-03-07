@@ -12,11 +12,13 @@ const Shop: React.FC = () => {
   const [selectedSize, setSelectedSize] = useState<string | 'all'>('all');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Fetch products using React Query
-  const { data: products, isLoading, error } = useQuery({
+  // Fetch products using React Query with retry and longer staleTime
+  const { data: products, isLoading, error, isError, refetch } = useQuery({
     queryKey: ['products'],
     queryFn: fetchProducts,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1,
+    retryDelay: 1000,
   });
 
   // Extract all available sizes from products
@@ -53,24 +55,6 @@ const Shop: React.FC = () => {
       return matchesSearch && matchesSize;
     });
   }, [products, searchTerm, selectedSize]);
-
-  // Handle errors
-  if (error) {
-    return (
-      <PageLayout>
-        <div className="p-4 text-center">
-          <h2 className="text-lg font-medium text-red-600 mb-2">Error loading products</h2>
-          <p className="text-gray-600">Please try again later</p>
-          <button 
-            className="mt-4 px-4 py-2 bg-telegram-blue text-white rounded-lg"
-            onClick={() => window.location.reload()}
-          >
-            Retry
-          </button>
-        </div>
-      </PageLayout>
-    );
-  }
 
   return (
     <PageLayout>
@@ -134,6 +118,17 @@ const Shop: React.FC = () => {
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <LoadingSpinner size="lg" />
+          </div>
+        ) : isError ? (
+          <div className="text-center py-10">
+            <h2 className="text-lg font-medium text-red-600 mb-2">Error loading products</h2>
+            <p className="text-gray-600 mb-4">Please try again later</p>
+            <button 
+              className="px-4 py-2 bg-telegram-blue text-white rounded-lg"
+              onClick={() => refetch()}
+            >
+              Retry
+            </button>
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-10">

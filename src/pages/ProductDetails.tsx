@@ -16,11 +16,13 @@ const ProductDetails: React.FC = () => {
   const { addToCart: addItemToCart } = useCart();
   const [selectedSize, setSelectedSize] = useState<string>('');
   
-  // Fetch all products
-  const { data: products, isLoading, error } = useQuery({
+  // Fetch all products with retry and longer staleTime
+  const { data: products, isLoading, error, isError, refetch } = useQuery({
     queryKey: ['products'],
     queryFn: fetchProducts,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1,
+    retryDelay: 1000,
   });
   
   // Find the current product
@@ -77,17 +79,32 @@ const ProductDetails: React.FC = () => {
     );
   }
   
-  if (error || !product) {
+  if (isError || !product) {
     return (
       <PageLayout>
         <div className="p-4 text-center">
-          <h2 className="text-lg font-medium text-red-600 mb-2">Product not found</h2>
-          <button 
-            className="mt-4 px-4 py-2 bg-telegram-blue text-white rounded-lg"
-            onClick={() => navigate('/shop')}
-          >
-            Back to Shop
-          </button>
+          <h2 className="text-lg font-medium text-red-600 mb-2">
+            {isError ? "Error loading product" : "Product not found"}
+          </h2>
+          <p className="text-gray-600 mb-4">
+            {isError ? "Please try again later" : "This product may no longer be available"}
+          </p>
+          <div className="flex justify-center gap-4">
+            {isError && (
+              <button 
+                className="px-4 py-2 bg-telegram-blue text-white rounded-lg"
+                onClick={() => refetch()}
+              >
+                Retry
+              </button>
+            )}
+            <button 
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg"
+              onClick={() => navigate('/shop')}
+            >
+              Back to Shop
+            </button>
+          </div>
         </div>
       </PageLayout>
     );

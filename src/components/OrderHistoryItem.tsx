@@ -1,9 +1,11 @@
 
 import React from 'react';
+import { format } from 'date-fns';
+import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Order } from '@/services/api';
 
-export interface OrderHistoryItemProps {
+interface OrderHistoryItemProps {
   order: Order;
   className?: string;
   animationDelay?: string;
@@ -14,75 +16,61 @@ const OrderHistoryItem: React.FC<OrderHistoryItemProps> = ({
   className,
   animationDelay 
 }) => {
-  // Format date string
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }).format(date);
-  };
-
-  // Get status badge color
+  // Format the date
+  const formattedDate = format(new Date(order.order_date), 'MMM d, yyyy');
+  
+  // Get status color
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+    switch(status) {
+      case 'paid': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   return (
     <div 
       className={cn(
-        'bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 animate-fade-in',
+        'bg-white rounded-lg shadow-sm overflow-hidden',
         className
       )}
-      style={animationDelay ? { animationDelay } : {}}
+      style={animationDelay ? { animationDelay } : undefined}
     >
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex justify-between items-center">
-          <div>
-            <span className="text-sm text-gray-500">Order #{order.order_id}</span>
-            <h3 className="font-medium">{formatDate(order.order_date)}</h3>
-          </div>
-          <div>
-            <span className={cn(
-              'px-2 py-1 rounded-full text-xs font-medium',
-              getStatusColor(order.status)
-            )}>
-              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-            </span>
-          </div>
+      <div className="p-4 flex justify-between items-center border-b border-gray-100">
+        <div>
+          <h3 className="font-medium">Order #{order.order_id}</h3>
+          <p className="text-sm text-gray-500">{formattedDate}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={cn(
+            'px-2 py-1 text-xs rounded-full',
+            getStatusColor(order.status)
+          )}>
+            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+          </span>
+          <span className="font-medium">₽{order.total_amount.toLocaleString()}</span>
         </div>
       </div>
       
       <div className="p-4">
-        <div className="space-y-3">
+        <h4 className="text-sm font-medium mb-2">Items</h4>
+        <div className="space-y-2">
           {order.items.map((item, index) => (
             <div key={index} className="flex justify-between text-sm">
-              <div>
-                <span className="font-medium">{item.item_name}</span>
-                <p className="text-gray-500">
-                  {item.color_code}, {item.size}
-                </p>
-              </div>
-              <span className="font-medium">₽{item.price_rub.toFixed(0)}</span>
+              <span className="text-gray-700">
+                {item.item_name} ({item.color_code}, {item.size})
+              </span>
+              <span className="font-medium">₽{item.price_rub.toLocaleString()}</span>
             </div>
           ))}
         </div>
-        
-        <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between font-medium">
-          <span>Total:</span>
-          <span className="text-telegram-blue">₽{order.total_amount.toFixed(0)}</span>
-        </div>
       </div>
+      
+      <button className="w-full py-2 px-4 flex justify-between items-center bg-gray-50 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+        <span>Order Details</span>
+        <ChevronRight size={16} />
+      </button>
     </div>
   );
 };
