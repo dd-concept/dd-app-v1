@@ -1,12 +1,23 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
-import { Product } from '../services/api';
 
+// This matches more closely what our API structure needs
 interface CartItem {
-  productId: number;
+  productId: string; // SKU from the API
   name: string;
   color: string;
   size: string;
+  price: number; // Will be updated when we have real prices
+  quantity: number;
+}
+
+// For compatibility with existing code
+interface Product {
+  id: string; // SKU
+  name: string;
+  color: string;
+  sizes: string[];
   price: number;
   quantity: number;
 }
@@ -14,7 +25,7 @@ interface CartItem {
 interface CartContextType {
   items: CartItem[];
   addToCart: (product: Product, size: string) => void;
-  removeFromCart: (productId: number, size: string) => void;
+  removeFromCart: (productId: string, size: string) => void;
   clearCart: () => void;
   itemCount: number;
   totalPrice: number;
@@ -74,7 +85,7 @@ export const CartProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     });
   };
 
-  const removeFromCart = (productId: number, size: string) => {
+  const removeFromCart = (productId: string, size: string) => {
     setItems(currentItems => {
       const existingItemIndex = currentItems.findIndex(
         item => item.productId === productId && item.size === size

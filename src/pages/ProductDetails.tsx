@@ -6,14 +6,14 @@ import { ChevronLeft, ShoppingBag } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SizeSelector from '@/components/SizeSelector';
-import { fetchProducts, Product } from '@/services/api';
+import { fetchProducts, addToCart, StockItem } from '@/services/api';
 import { useCart } from '@/contexts/CartContext';
 import { getConsistentEmoji } from '@/utils/emojiUtils';
 
 const ProductDetails: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart: addItemToCart } = useCart();
   const [selectedSize, setSelectedSize] = useState<string>('');
   
   // Fetch all products
@@ -24,24 +24,47 @@ const ProductDetails: React.FC = () => {
   });
   
   // Find the current product
-  const product = products?.find(p => p.id === Number(productId));
+  const product = products?.find(p => p.sku === productId);
   
+  // Get available sizes (only those with count > 0)
+  const availableSizes = useMemo(() => {
+    if (!product) return [];
+    return product.sizes
+      .filter(sizeObj => sizeObj.count > 0)
+      .map(sizeObj => sizeObj.size);
+  }, [product]);
+
   // Set default selected size when product loads
   useEffect(() => {
-    if (product && product.sizes.length > 0 && !selectedSize) {
-      setSelectedSize(product.sizes[0]);
+    if (availableSizes.length > 0 && !selectedSize) {
+      setSelectedSize(availableSizes[0]);
     }
-  }, [product]);
+  }, [availableSizes, selectedSize]);
   
   // Get emoji for product
   const productEmoji = product 
-    ? getConsistentEmoji(`${product.name}-${product.color}`, 'product')
+    ? getConsistentEmoji(`${product.item_name}-${product.color_code}`, 'product')
     : '📦';
   
   const handleAddToCart = () => {
     if (!product || !selectedSize) return;
     
-    addToCart(product, selectedSize);
+    // Call the cart context method to add the product
+    // Create a temporary product object that matches what the cart context expects
+    const tempProduct = {
+      id: product.sku,
+      name: product.item_name,
+      color: product.color_code,
+      sizes: availableSizes,
+      // These fields aren't in the API, but our cart context needs them
+      price: 1999, // Placeholder price
+      quantity: 1
+    };
+    
+    addItemToCart(tempProduct, selectedSize);
+    
+    // Also call the API method (which is just a placeholder for now)
+    addToCart(product.sku, selectedSize);
   };
   
   if (isLoading) {
@@ -89,16 +112,19 @@ const ProductDetails: React.FC = () => {
         {/* Product details */}
         <div className="flex-1 p-6 bg-white">
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold mb-2">{product.name}</h1>
+            <h1 className="text-2xl font-semibold mb-2">{product.item_name}</h1>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">{product.color}</span>
-              <span className="text-xl font-medium text-telegram-blue">${product.price}</span>
+              <span className="text-gray-600">{product.color_code}</span>
+              <span className="text-xl font-medium text-telegram-blue">
+                {/* Placeholder price since API doesn't provide it */}
+                ₽1,999
+              </span>
             </div>
           </div>
           
           {/* Size selector */}
           <SizeSelector
-            sizes={product.sizes}
+            sizes={availableSizes}
             onChange={setSelectedSize}
             className="mb-8"
           />
@@ -117,7 +143,7 @@ const ProductDetails: React.FC = () => {
           <div className="mt-8 pb-10">
             <h2 className="text-lg font-medium mb-2">Product Details</h2>
             <p className="text-gray-600">
-              This premium {product.name.toLowerCase()} in {product.color.toLowerCase()} offers exceptional comfort and style. 
+              This premium {product.item_name.toLowerCase()} in {product.color_code.toLowerCase()} offers exceptional comfort and style. 
               Perfect for any occasion, it features high-quality materials and expert craftsmanship.
             </p>
             

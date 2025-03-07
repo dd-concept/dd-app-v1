@@ -3,35 +3,39 @@ import { toast } from 'sonner';
 
 const API_BASE_URL = 'http://185.154.12.121:8000/api';
 
-export interface Product {
-  id: number;
-  name: string;
-  color: string;
-  sizes: string[];
-  price: number;
-  quantity: number;
+// Updated interfaces to match real API
+export interface StockItem {
+  sku: string;
+  item_name: string;
+  color_code: string;
+  sizes: SizeAvailability[];
+}
+
+export interface SizeAvailability {
+  size: string;
+  count: number; // Number of items available in this size
 }
 
 export interface Order {
-  id: number;
-  date: string;
-  totalAmount: number;
+  order_id: number;
+  order_date: string;
+  total_amount: number;
   status: 'pending' | 'paid' | 'cancelled';
   items: OrderItem[];
 }
 
 export interface OrderItem {
-  name: string;
-  color: string;
+  sku: string;
+  item_name: string;
+  color_code: string;
   size: string;
-  price: number;
-  quantity: number;
+  price_rub: number;
 }
 
 export interface UserProfile {
-  username: string;
-  email: string;
+  telegram_username: string;
   rank: number;
+  total_orders: number;
 }
 
 // Helper function to handle API errors
@@ -58,8 +62,8 @@ const handleApiError = (error: any) => {
   return Promise.reject(error);
 };
 
-// Fetch products
-export const fetchProducts = async (): Promise<Product[]> => {
+// Fetch stock items
+export const fetchProducts = async (): Promise<StockItem[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/stock`);
     if (!response.ok) {
@@ -84,36 +88,38 @@ export const fetchOrders = async (username: string): Promise<Order[]> => {
   }
 };
 
-// Fetch user profile
-export const fetchUserProfile = async (username: string): Promise<UserProfile> => {
+// Check/create user profile
+export const checkUserProfile = async (username: string, userId: number): Promise<UserProfile> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/client/${username}`);
-    if (!response.ok) {
-      throw new Error(`HTTP error ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    return handleApiError(error);
-  }
-};
-
-// Add product to cart
-export const addToCart = async (productId: number, size: string): Promise<void> => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/cart/add`, {
+    const response = await fetch(`${API_BASE_URL}/client/check`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ productId, size }),
+      body: JSON.stringify({ username, user_id: userId }),
     });
     
     if (!response.ok) {
       throw new Error(`HTTP error ${response.status}`);
     }
     
-    toast.success('Added to cart');
     return await response.json();
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+// Add product to cart (placeholder - to be implemented with actual API)
+export const addToCart = async (sku: string, size: string): Promise<void> => {
+  try {
+    // Since there's no cart API yet, we're just simulating a successful addition
+    console.log('Adding to cart:', sku, size);
+    
+    // Fake success response
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    toast.success('Added to cart');
+    return;
   } catch (error) {
     return handleApiError(error);
   }

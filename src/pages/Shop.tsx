@@ -5,7 +5,7 @@ import { Filter, Search } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { fetchProducts, Product } from '@/services/api';
+import { fetchProducts, StockItem } from '@/services/api';
 
 const Shop: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,7 +25,11 @@ const Shop: React.FC = () => {
     
     const sizes = new Set<string>();
     products.forEach(product => {
-      product.sizes.forEach(size => sizes.add(size));
+      product.sizes.forEach(sizeObj => {
+        if (sizeObj.count > 0) {
+          sizes.add(sizeObj.size);
+        }
+      });
     });
     
     return Array.from(sizes).sort();
@@ -37,11 +41,14 @@ const Shop: React.FC = () => {
     
     return products.filter(product => {
       // Filter by search term
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           product.color.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = product.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           product.color_code.toLowerCase().includes(searchTerm.toLowerCase());
       
       // Filter by size
-      const matchesSize = selectedSize === 'all' || product.sizes.includes(selectedSize);
+      const matchesSize = selectedSize === 'all' || 
+                          product.sizes.some(sizeObj => 
+                            sizeObj.size === selectedSize && sizeObj.count > 0
+                          );
       
       return matchesSearch && matchesSize;
     });
@@ -137,7 +144,7 @@ const Shop: React.FC = () => {
           <div className="grid grid-cols-2 gap-4">
             {filteredProducts.map((product) => (
               <ProductCard 
-                key={product.id} 
+                key={product.sku} 
                 product={product}
                 className="animate-fade-in"
               />

@@ -1,31 +1,31 @@
 
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import React from 'react';
 import { cn } from '@/lib/utils';
 import { Order } from '@/services/api';
 
-interface OrderHistoryItemProps {
+export interface OrderHistoryItemProps {
   order: Order;
   className?: string;
+  animationDelay?: string;
 }
 
-const OrderHistoryItem: React.FC<OrderHistoryItemProps> = ({
-  order,
+const OrderHistoryItem: React.FC<OrderHistoryItemProps> = ({ 
+  order, 
   className,
+  animationDelay 
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
+  // Format date string
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric',
+      day: 'numeric'
     }).format(date);
   };
 
-  // Map status to color
-  const getStatusStyles = (status: string) => {
+  // Get status badge color
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'paid':
         return 'bg-green-100 text-green-800';
@@ -41,60 +41,48 @@ const OrderHistoryItem: React.FC<OrderHistoryItemProps> = ({
   return (
     <div 
       className={cn(
-        'border rounded-lg overflow-hidden transition-all duration-300',
-        isExpanded ? 'shadow-md' : 'shadow-sm',
+        'bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 animate-fade-in',
         className
       )}
+      style={animationDelay ? { animationDelay } : {}}
     >
-      {/* Order header */}
-      <div 
-        className="p-4 bg-white flex items-center justify-between cursor-pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div>
-          <div className="flex items-center gap-3">
-            <h3 className="font-medium">Order #{order.id}</h3>
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex justify-between items-center">
+          <div>
+            <span className="text-sm text-gray-500">Order #{order.order_id}</span>
+            <h3 className="font-medium">{formatDate(order.order_date)}</h3>
+          </div>
+          <div>
             <span className={cn(
-              'text-xs px-2 py-1 rounded-full font-medium capitalize',
-              getStatusStyles(order.status)
+              'px-2 py-1 rounded-full text-xs font-medium',
+              getStatusColor(order.status)
             )}>
-              {order.status}
+              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
             </span>
           </div>
-          <p className="text-sm text-gray-500 mt-1">{formatDate(order.date)}</p>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <span className="font-medium">${order.totalAmount.toFixed(2)}</span>
-          {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </div>
       </div>
       
-      {/* Order details */}
-      {isExpanded && (
-        <div className="p-4 bg-gray-50 border-t animate-slide-down">
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Order Items</h4>
-          
-          <div className="space-y-3">
-            {order.items.map((item, index) => (
-              <div key={index} className="flex items-center justify-between text-sm">
-                <div>
-                  <span className="font-medium">{item.name}</span>
-                  <div className="text-gray-500 text-xs">
-                    {item.color} • Size {item.size} • Qty: {item.quantity}
-                  </div>
-                </div>
-                <span>${item.price.toFixed(2)}</span>
+      <div className="p-4">
+        <div className="space-y-3">
+          {order.items.map((item, index) => (
+            <div key={index} className="flex justify-between text-sm">
+              <div>
+                <span className="font-medium">{item.item_name}</span>
+                <p className="text-gray-500">
+                  {item.color_code}, {item.size}
+                </p>
               </div>
-            ))}
-          </div>
-          
-          <div className="mt-4 pt-3 border-t flex justify-between">
-            <span className="font-medium">Total</span>
-            <span className="font-medium">${order.totalAmount.toFixed(2)}</span>
-          </div>
+              <span className="font-medium">₽{item.price_rub.toFixed(0)}</span>
+            </div>
+          ))}
         </div>
-      )}
+        
+        <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between font-medium">
+          <span>Total:</span>
+          <span className="text-telegram-blue">₽{order.total_amount.toFixed(0)}</span>
+        </div>
+      </div>
     </div>
   );
 };
