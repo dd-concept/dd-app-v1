@@ -1,0 +1,157 @@
+
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import PageLayout from '@/components/PageLayout';
+import EmojiAvatar from '@/components/EmojiAvatar';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import OrderHistoryItem from '@/components/OrderHistoryItem';
+import { useUser } from '@/contexts/UserContext';
+import { fetchOrders, Order } from '@/services/api';
+
+const Profile: React.FC = () => {
+  const { username, email, avatarEmoji } = useUser();
+
+  // Fetch orders
+  const { data: orders, isLoading, error } = useQuery({
+    queryKey: ['orders', username],
+    queryFn: () => fetchOrders(username),
+    staleTime: 60 * 1000, // 1 minute
+  });
+
+  // Mock rank for UI demonstration - would come from API in real implementation
+  const userRank = 3;
+
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="flex justify-center items-center h-64">
+          <LoadingSpinner size="lg" />
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <PageLayout>
+        <div className="p-4 text-center">
+          <h2 className="text-lg font-medium text-red-600 mb-2">Error loading profile</h2>
+          <p className="text-gray-600">Please try again later</p>
+          <button 
+            className="mt-4 px-4 py-2 bg-telegram-blue text-white rounded-lg"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </button>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // We'll use demo orders if API doesn't return any
+  const displayOrders: Order[] = orders && orders.length > 0 ? orders : [
+    {
+      id: 1001,
+      date: '2023-06-15',
+      totalAmount: 78.99,
+      status: 'paid',
+      items: [
+        { name: 'Classic T-Shirt', color: 'Blue', size: 'M', price: 29.99, quantity: 1 },
+        { name: 'Premium Jeans', color: 'Indigo', size: '32', price: 49.00, quantity: 1 }
+      ]
+    },
+    {
+      id: 1002,
+      date: '2023-07-22',
+      totalAmount: 125.50,
+      status: 'pending',
+      items: [
+        { name: 'Hoodie', color: 'Black', size: 'L', price: 45.50, quantity: 1 },
+        { name: 'Sneakers', color: 'White', size: '42', price: 80.00, quantity: 1 }
+      ]
+    }
+  ];
+
+  return (
+    <PageLayout>
+      <div className="p-4">
+        {/* Profile Header */}
+        <div className="flex items-center gap-4 mb-8 animate-fade-in">
+          <EmojiAvatar 
+            emoji={avatarEmoji} 
+            size="lg" 
+            className="hover-lift"
+          />
+          <div>
+            <h1 className="text-2xl font-semibold">@{username}</h1>
+            <p className="text-gray-600">{email}</p>
+            <div className="mt-2 flex items-center">
+              <span className="text-sm bg-telegram-light text-telegram-blue px-2 py-1 rounded-full">
+                Rank {userRank}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4 mb-8 animate-slide-up">
+          <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+            <h2 className="text-xl font-semibold text-telegram-blue">{displayOrders.length}</h2>
+            <p className="text-gray-600 text-sm">Orders</p>
+          </div>
+          <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+            <h2 className="text-xl font-semibold text-telegram-blue">
+              {displayOrders.filter(o => o.status === 'paid').length}
+            </h2>
+            <p className="text-gray-600 text-sm">Completed</p>
+          </div>
+          <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+            <h2 className="text-xl font-semibold text-telegram-blue">
+              {displayOrders.filter(o => o.status === 'pending').length}
+            </h2>
+            <p className="text-gray-600 text-sm">Pending</p>
+          </div>
+        </div>
+
+        {/* Order History */}
+        <h2 className="text-xl font-medium mb-4">Order History</h2>
+        <div className="space-y-4">
+          {displayOrders.map((order, index) => (
+            <OrderHistoryItem 
+              key={order.id} 
+              order={order} 
+              className="animate-fade-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            />
+          ))}
+        </div>
+
+        {/* Settings Section */}
+        <div className="mt-8 bg-white rounded-lg shadow-sm p-4 animate-fade-in">
+          <h2 className="text-lg font-medium mb-4">Settings</h2>
+          <div className="space-y-2">
+            <button className="w-full text-left py-2 px-3 hover:bg-gray-50 rounded-lg transition-colors">
+              Edit Profile
+            </button>
+            <button className="w-full text-left py-2 px-3 hover:bg-gray-50 rounded-lg transition-colors">
+              Notification Preferences
+            </button>
+            <button className="w-full text-left py-2 px-3 hover:bg-gray-50 rounded-lg transition-colors">
+              Shipping Addresses
+            </button>
+            <button className="w-full text-left py-2 px-3 hover:bg-gray-50 rounded-lg transition-colors">
+              Payment Methods
+            </button>
+            <button className="w-full text-left py-2 px-3 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+              Log Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </PageLayout>
+  );
+};
+
+export default Profile;
