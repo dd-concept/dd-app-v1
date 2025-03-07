@@ -53,23 +53,23 @@ const Profile: React.FC = () => {
   // We'll use demo orders if API doesn't return any
   const displayOrders: Order[] = orders && orders.length > 0 ? orders : [
     {
-      id: 1001,
-      date: '2023-06-15',
-      totalAmount: 78.99,
+      order_id: 1001,
+      order_date: '2023-06-15',
+      total_amount: 78.99,
       status: 'paid',
       items: [
-        { name: 'Classic T-Shirt', color: 'Blue', size: 'M', price: 29.99, quantity: 1 },
-        { name: 'Premium Jeans', color: 'Indigo', size: '32', price: 49.00, quantity: 1 }
+        { sku: 'TS001', item_name: 'Classic T-Shirt', color_code: 'Blue', size: 'M', price_rub: 2999 },
+        { sku: 'JN001', item_name: 'Premium Jeans', color_code: 'Indigo', size: '32', price_rub: 4900 }
       ]
     },
     {
-      id: 1002,
-      date: '2023-07-22',
-      totalAmount: 125.50,
+      order_id: 1002,
+      order_date: '2023-07-22',
+      total_amount: 125.50,
       status: 'pending',
       items: [
-        { name: 'Hoodie', color: 'Black', size: 'L', price: 45.50, quantity: 1 },
-        { name: 'Sneakers', color: 'White', size: '42', price: 80.00, quantity: 1 }
+        { sku: 'HD001', item_name: 'Hoodie', color_code: 'Black', size: 'L', price_rub: 4550 },
+        { sku: 'SN001', item_name: 'Sneakers', color_code: 'White', size: '42', price_rub: 8000 }
       ]
     }
   ];
@@ -120,10 +120,10 @@ const Profile: React.FC = () => {
         <div className="space-y-4">
           {displayOrders.map((order, index) => (
             <OrderHistoryItem 
-              key={order.id} 
+              key={order.order_id} 
               order={order} 
               className="animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
+              animationDelay={`${index * 0.1}s`}
             />
           ))}
         </div>
