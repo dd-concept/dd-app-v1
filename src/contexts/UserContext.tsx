@@ -41,11 +41,12 @@ export const UserProvider: React.FC<{children: ReactNode}> = ({ children }) => {
           // Fetch user profile from API
           try {
             const userProfile = await checkUserProfile(tgUser.username, tgUser.id);
-            setProfile(userProfile);
             console.log('User profile loaded:', userProfile);
+            setProfile(userProfile);
           } catch (error: any) {
             console.error('Error fetching user profile:', error);
-            toast.error(`Could not fetch user profile: ${error.message}`);
+            // Display a more specific error message with exact details
+            toast.error(`Profile error: ${error.message}`);
           }
         } else {
           // Default values for development/testing
@@ -55,7 +56,7 @@ export const UserProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         }
       } catch (error: any) {
         console.error('Error initializing user:', error);
-        toast.error(`Error initializing user: ${error.message}`);
+        toast.error(`User initialization error: ${error.message}`);
         setUsername('telegramUser');
       } finally {
         setLoading(false);

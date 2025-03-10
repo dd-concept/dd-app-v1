@@ -209,12 +209,12 @@ const handleApiError = (error: any) => {
   return Promise.reject(new Error(message));
 };
 
-// Fetch stock items with fallback to mock data
+// Fetch stock items with improved error handling
 export const fetchProducts = async (): Promise<StockItem[]> => {
   try {
     console.log('Fetching products from API...');
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
     
     const response = await fetch(`${API_BASE_URL}/stock`, {
       signal: controller.signal,
@@ -238,9 +238,30 @@ export const fetchProducts = async (): Promise<StockItem[]> => {
       throw new Error(errorDetail);
     }
     
-    const data = await response.json();
-    console.log('Products fetched successfully:', data);
-    return data;
+    let data;
+    
+    try {
+      // Get the response text first
+      const responseText = await response.text();
+      console.log('Raw API response:', responseText);
+      
+      // Then parse it as JSON
+      data = JSON.parse(responseText);
+      console.log('Products fetched successfully:', data);
+      
+      // Validate that we have an array
+      if (!Array.isArray(data)) {
+        console.error('API returned non-array data:', data);
+        toast.error('Invalid data format received from API');
+        return MOCK_STOCK;
+      }
+      
+      return data;
+    } catch (parseError) {
+      console.error('Error parsing JSON:', parseError);
+      toast.error(`Error parsing API response: ${parseError.message}`);
+      return MOCK_STOCK;
+    }
   } catch (error: any) {
     console.error('Error fetching products:', error);
     

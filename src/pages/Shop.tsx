@@ -6,6 +6,7 @@ import PageLayout from '@/components/PageLayout';
 import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { fetchProducts, StockItem } from '@/services/api';
+import { toast } from 'sonner';
 
 const Shop: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,6 +21,12 @@ const Shop: React.FC = () => {
     retry: 1,
     retryDelay: 1000,
   });
+
+  useEffect(() => {
+    if (isError && error instanceof Error) {
+      toast.error(`Shop error: ${error.message}`);
+    }
+  }, [isError, error]);
 
   // Extract all available sizes from products
   const availableSizes = useMemo(() => {
@@ -44,7 +51,8 @@ const Shop: React.FC = () => {
     return products.filter(product => {
       // Filter by search term
       const matchesSearch = product.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           product.color_code.toLowerCase().includes(searchTerm.toLowerCase());
+                           product.color_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (product.brand && product.brand.toLowerCase().includes(searchTerm.toLowerCase()));
       
       // Filter by size
       const matchesSize = selectedSize === 'all' || 
@@ -113,6 +121,16 @@ const Shop: React.FC = () => {
             </div>
           )}
         </header>
+
+        {/* Debug information - remove in production */}
+        {isError && (
+          <div className="p-3 bg-red-50 border border-red-300 rounded-lg mb-4">
+            <h3 className="text-sm font-medium text-red-700">Error Loading Products:</h3>
+            <p className="text-xs text-red-600">
+              {error instanceof Error ? error.message : 'Unknown error'}
+            </p>
+          </div>
+        )}
 
         {/* Products grid */}
         {isLoading ? (
