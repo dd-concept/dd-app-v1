@@ -172,7 +172,7 @@ export const getTelegramUser = (): TelegramUser | null => {
   }
 };
 
-// Helper function to handle API errors
+// Helper function to handle API errors with exact error messages
 const handleApiError = (error: any) => {
   console.error('API Error:', error);
   let message = 'An error occurred. Please try again.';
@@ -180,26 +180,24 @@ const handleApiError = (error: any) => {
   if (error.response) {
     // Server responded with an error status code
     const statusCode = error.response.status;
-    if (statusCode === 400) {
-      message = 'Bad request. Please check your input.';
-    } else if (statusCode === 404) {
-      message = 'Resource not found.';
-    } else if (statusCode === 500) {
-      message = 'Server error. Please try again later.';
-    }
     
     // Try to extract error detail from response
     try {
       const errorData = error.response.data;
       if (errorData && errorData.detail) {
-        message = errorData.detail;
+        message = `API Error (${statusCode}): ${errorData.detail}`;
+      } else {
+        message = `API Error (${statusCode}): ${error.response.statusText}`;
       }
     } catch (e) {
-      // Ignore parsing errors
+      message = `API Error (${statusCode}): Could not parse error details`;
     }
   } else if (error.request) {
     // Request made but no response received
-    message = 'No response from server. Using cached data instead.';
+    message = 'Network Error: No response from server. Using cached data instead.';
+  } else if (error instanceof Error) {
+    // Something else went wrong
+    message = `Error: ${error.message}`;
   }
   
   if (message.includes('Using cached data')) {
@@ -208,7 +206,7 @@ const handleApiError = (error: any) => {
     toast.error(message);
   }
   
-  return Promise.reject(error);
+  return Promise.reject(new Error(message));
 };
 
 // Fetch stock items with fallback to mock data
@@ -216,7 +214,7 @@ export const fetchProducts = async (): Promise<StockItem[]> => {
   try {
     console.log('Fetching products from API...');
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
     
     const response = await fetch(`${API_BASE_URL}/stock`, {
       signal: controller.signal,
@@ -229,21 +227,40 @@ export const fetchProducts = async (): Promise<StockItem[]> => {
     clearTimeout(timeoutId);
     
     if (!response.ok) {
-      throw new Error(`HTTP error ${response.status}`);
+      const errorText = await response.text();
+      let errorDetail;
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorDetail = errorJson.detail || errorText;
+      } catch (e) {
+        errorDetail = errorText || `HTTP error ${response.status}`;
+      }
+      throw new Error(errorDetail);
     }
     
-    return await response.json();
+    const data = await response.json();
+    console.log('Products fetched successfully:', data);
+    return data;
   } catch (error: any) {
     console.error('Error fetching products:', error);
     
     // If it's a network error or timeout, use mock data
-    if (error.name === 'AbortError' || error.message === 'Failed to fetch' || error.message.includes('NetworkError')) {
-      console.log('Using mock product data');
-      toast.info('Using demo data - couldn\'t connect to API');
+    if (error.name === 'AbortError') {
+      console.log('Request timeout, using mock product data');
+      toast.error('API request timed out. Using demo data.');
       return MOCK_STOCK;
     }
     
-    return handleApiError(error);
+    if (error.message === 'Failed to fetch' || error.message.includes('NetworkError')) {
+      console.log('Network error, using mock product data');
+      toast.error('Network error. Using demo data.');
+      return MOCK_STOCK;
+    }
+    
+    // Show the exact error message
+    toast.error(`Error fetching products: ${error.message}`);
+    console.log('Using mock product data after error');
+    return MOCK_STOCK;
   }
 };
 
@@ -252,7 +269,7 @@ export const fetchOrders = async (username: string): Promise<Order[]> => {
   try {
     console.log(`Fetching orders for ${username}...`);
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
     
     const response = await fetch(`${API_BASE_URL}/client/${username}/orders`, {
       signal: controller.signal,
@@ -265,21 +282,40 @@ export const fetchOrders = async (username: string): Promise<Order[]> => {
     clearTimeout(timeoutId);
     
     if (!response.ok) {
-      throw new Error(`HTTP error ${response.status}`);
+      const errorText = await response.text();
+      let errorDetail;
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorDetail = errorJson.detail || errorText;
+      } catch (e) {
+        errorDetail = errorText || `HTTP error ${response.status}`;
+      }
+      throw new Error(errorDetail);
     }
     
-    return await response.json();
+    const data = await response.json();
+    console.log('Orders fetched successfully:', data);
+    return data;
   } catch (error: any) {
     console.error('Error fetching orders:', error);
     
     // If it's a network error or timeout, use mock data
-    if (error.name === 'AbortError' || error.message === 'Failed to fetch' || error.message.includes('NetworkError')) {
-      console.log('Using mock order data');
-      toast.info('Using demo data - couldn\'t connect to API');
+    if (error.name === 'AbortError') {
+      console.log('Request timeout, using mock order data');
+      toast.error('API request timed out. Using demo data.');
       return MOCK_ORDERS;
     }
     
-    return handleApiError(error);
+    if (error.message === 'Failed to fetch' || error.message.includes('NetworkError')) {
+      console.log('Network error, using mock order data');
+      toast.error('Network error. Using demo data.');
+      return MOCK_ORDERS;
+    }
+    
+    // Show the exact error message
+    toast.error(`Error fetching orders: ${error.message}`);
+    console.log('Using mock order data after error');
+    return MOCK_ORDERS;
   }
 };
 
@@ -288,7 +324,7 @@ export const checkUserProfile = async (username: string, userId: number): Promis
   try {
     console.log(`Checking profile for ${username}...`);
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
     
     const response = await fetch(`${API_BASE_URL}/client/check`, {
       method: 'POST',
@@ -304,17 +340,27 @@ export const checkUserProfile = async (username: string, userId: number): Promis
     clearTimeout(timeoutId);
     
     if (!response.ok) {
-      throw new Error(`HTTP error ${response.status}`);
+      const errorText = await response.text();
+      let errorDetail;
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorDetail = errorJson.detail || errorText;
+      } catch (e) {
+        errorDetail = errorText || `HTTP error ${response.status}`;
+      }
+      throw new Error(errorDetail);
     }
     
-    return await response.json();
+    const data = await response.json();
+    console.log('Profile fetched successfully:', data);
+    return data;
   } catch (error: any) {
     console.error('Error checking profile:', error);
     
     // If it's a network error or timeout, use mock data
-    if (error.name === 'AbortError' || error.message === 'Failed to fetch' || error.message.includes('NetworkError')) {
-      console.log('Using mock profile data');
-      toast.info('Using demo data - couldn\'t connect to API');
+    if (error.name === 'AbortError') {
+      console.log('Request timeout, using mock profile data');
+      toast.error('API request timed out. Using demo data.');
       return {
         telegram_username: username,
         rank: 1,
@@ -322,7 +368,24 @@ export const checkUserProfile = async (username: string, userId: number): Promis
       };
     }
     
-    return handleApiError(error);
+    if (error.message === 'Failed to fetch' || error.message.includes('NetworkError')) {
+      console.log('Network error, using mock profile data');
+      toast.error('Network error. Using demo data.');
+      return {
+        telegram_username: username,
+        rank: 1,
+        total_orders: 2
+      };
+    }
+    
+    // Show the exact error message
+    toast.error(`Error checking profile: ${error.message}`);
+    console.log('Using mock profile data after error');
+    return {
+      telegram_username: username,
+      rank: 1,
+      total_orders: 2
+    };
   }
 };
 
@@ -337,7 +400,8 @@ export const addToCart = async (sku: string, size: string): Promise<void> => {
     
     toast.success('Added to cart');
     return;
-  } catch (error) {
-    return handleApiError(error);
+  } catch (error: any) {
+    toast.error(`Error adding to cart: ${error.message}`);
+    return Promise.reject(error);
   }
 };

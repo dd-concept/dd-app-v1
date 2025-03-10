@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import PageLayout from '@/components/PageLayout';
 import EmojiAvatar from '@/components/EmojiAvatar';
@@ -9,7 +9,7 @@ import { useUser } from '@/contexts/UserContext';
 import { fetchOrders, Order } from '@/services/api';
 
 const Profile: React.FC = () => {
-  const { username, email, avatarEmoji } = useUser();
+  const { username, avatarEmoji, telegramUser, profile } = useUser();
 
   // Fetch orders with better error handling
   const { data: orders, isLoading, error, isError, refetch } = useQuery({
@@ -19,9 +19,6 @@ const Profile: React.FC = () => {
     retry: 1,
     retryDelay: 1000,
   });
-
-  // Mock rank for UI demonstration - would come from API in real implementation
-  const userRank = 3;
 
   // Handle loading state
   if (isLoading) {
@@ -40,7 +37,9 @@ const Profile: React.FC = () => {
       <PageLayout>
         <div className="p-4 text-center">
           <h2 className="text-lg font-medium text-red-600 mb-2">Error loading profile</h2>
-          <p className="text-gray-600 mb-4">Please try again later</p>
+          <p className="text-gray-600 mb-4">
+            {error instanceof Error ? error.message : 'Please try again later'}
+          </p>
           <button 
             className="px-4 py-2 bg-telegram-blue text-white rounded-lg"
             onClick={() => refetch()}
@@ -67,10 +66,12 @@ const Profile: React.FC = () => {
           />
           <div>
             <h1 className="text-2xl font-semibold">@{username}</h1>
-            <p className="text-gray-600">{email}</p>
+            {telegramUser && telegramUser.first_name && (
+              <p className="text-gray-600">{telegramUser.first_name} {telegramUser.last_name || ''}</p>
+            )}
             <div className="mt-2 flex items-center">
               <span className="text-sm bg-telegram-light text-telegram-blue px-2 py-1 rounded-full">
-                Rank {userRank}
+                Rank {profile?.rank || 0}
               </span>
             </div>
           </div>
