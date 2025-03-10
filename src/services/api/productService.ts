@@ -1,6 +1,6 @@
 
 import { toast } from 'sonner';
-import { API_BASE_URL, TIMEOUTS } from './config';
+import { API_BASE_URL, TIMEOUTS, handleApiError } from './config';
 import { StockItem } from './types';
 import { MOCK_STOCK } from './mockData';
 
@@ -33,16 +33,24 @@ export const fetchProducts = async (): Promise<StockItem[]> => {
       throw new Error(errorDetail);
     }
     
-    let data;
+    // Get the response text first
+    const responseText = await response.text();
+    console.log('Raw API response:', responseText);
     
+    let data;
     try {
-      // Get the response text first
-      const responseText = await response.text();
-      console.log('Raw API response:', responseText);
-      
-      // Then parse it as JSON
-      data = JSON.parse(responseText);
-      console.log('Products fetched successfully:', data);
+      // Check if the response is already a JSON string enclosed in quotes
+      if (responseText.startsWith('"[') && responseText.endsWith(']"')) {
+        // This is a JSON string that's been double-stringified
+        // First remove the outer quotes and unescape
+        const unescaped = responseText.slice(1, -1).replace(/\\"/g, '"');
+        data = JSON.parse(unescaped);
+        console.log('Parsed from double-stringified JSON:', data);
+      } else {
+        // Normal JSON parsing
+        data = JSON.parse(responseText);
+        console.log('Parsed from regular JSON:', data);
+      }
       
       // Validate that we have an array
       if (!Array.isArray(data)) {

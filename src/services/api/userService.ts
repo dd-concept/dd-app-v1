@@ -1,6 +1,6 @@
 
 import { toast } from 'sonner';
-import { API_BASE_URL, TIMEOUTS } from './config';
+import { API_BASE_URL, TIMEOUTS, handleApiError } from './config';
 import { TelegramUser, UserProfile } from './types';
 
 // Helper function to get Telegram user data
@@ -57,9 +57,32 @@ export const checkUserProfile = async (username: string, userId: number): Promis
       throw new Error(errorDetail);
     }
     
-    const data = await response.json();
-    console.log('Profile fetched successfully:', data);
-    return data;
+    // Get the response text first
+    const responseText = await response.text();
+    console.log('Raw API response:', responseText);
+    
+    let data;
+    try {
+      // Check if the response is already a JSON string enclosed in quotes
+      if (responseText.startsWith('"') && responseText.endsWith('"') && responseText.includes('{')) {
+        // This is a JSON string that's been double-stringified
+        const unescaped = responseText.slice(1, -1).replace(/\\"/g, '"');
+        data = JSON.parse(unescaped);
+      } else {
+        // Normal JSON parsing
+        data = JSON.parse(responseText);
+      }
+      console.log('Profile fetched successfully:', data);
+      return data;
+    } catch (parseError: any) {
+      console.error('Error parsing profile JSON:', parseError);
+      toast.error(`Error parsing API response: ${parseError.message}`);
+      return {
+        telegram_username: username,
+        rank: 1,
+        total_orders: 2
+      };
+    }
   } catch (error: any) {
     console.error('Error checking profile:', error);
     

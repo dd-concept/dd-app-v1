@@ -1,6 +1,6 @@
 
 import { toast } from 'sonner';
-import { API_BASE_URL, TIMEOUTS } from './config';
+import { API_BASE_URL, TIMEOUTS, handleApiError } from './config';
 import { Order } from './types';
 import { MOCK_ORDERS } from './mockData';
 
@@ -33,9 +33,36 @@ export const fetchOrders = async (username: string): Promise<Order[]> => {
       throw new Error(errorDetail);
     }
     
-    const data = await response.json();
-    console.log('Orders fetched successfully:', data);
-    return data;
+    // Get the response text first
+    const responseText = await response.text();
+    console.log('Raw API response:', responseText);
+    
+    let data;
+    try {
+      // Check if the response is already a JSON string enclosed in quotes
+      if (responseText.startsWith('"[') && responseText.endsWith(']"')) {
+        // This is a JSON string that's been double-stringified
+        const unescaped = responseText.slice(1, -1).replace(/\\"/g, '"');
+        data = JSON.parse(unescaped);
+      } else {
+        // Normal JSON parsing
+        data = JSON.parse(responseText);
+      }
+      console.log('Orders fetched successfully:', data);
+      
+      // Validate that we have an array
+      if (!Array.isArray(data)) {
+        console.error('API returned non-array data:', data);
+        toast.error('Invalid data format received from API');
+        return MOCK_ORDERS;
+      }
+      
+      return data;
+    } catch (parseError: any) {
+      console.error('Error parsing JSON:', parseError);
+      toast.error(`Error parsing API response: ${parseError.message}`);
+      return MOCK_ORDERS;
+    }
   } catch (error: any) {
     console.error('Error fetching orders:', error);
     
