@@ -18,6 +18,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
   const availableSizes = product.sizes
     .filter(size => size.count > 0)
     .map(size => size.size);
+
+  // Check if product has photos
+  const hasPhoto = product.photos && product.photos.length > 0;
   
   return (
     <Link 
@@ -28,18 +31,37 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
       )}
     >
       <div className="aspect-square bg-telegram-light flex items-center justify-center">
-        <span className="text-5xl animate-float">{productEmoji}</span>
+        {hasPhoto ? (
+          <img 
+            src={product.photos![0].photo_url} 
+            alt={product.item_name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to emoji if image fails to load
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.parentElement!.innerHTML = `<span class="text-5xl animate-float">${productEmoji}</span>`;
+            }}
+          />
+        ) : (
+          <span className="text-5xl animate-float">{productEmoji}</span>
+        )}
       </div>
       
       <div className="p-4">
-        <h3 className="font-medium text-gray-900 mb-1 truncate">{product.item_name}</h3>
+        <div className="flex justify-between items-start mb-1">
+          <h3 className="font-medium text-gray-900 truncate">{product.item_name}</h3>
+          {product.brand && (
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+              {product.brand}
+            </span>
+          )}
+        </div>
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-500">
             Color: {product.color_code}
           </span>
           <span className="font-medium text-telegram-blue">
-            {/* If we had price in the API we'd show it here */}
-            In Stock
+            ₽{product.price_rub.toLocaleString()}
           </span>
         </div>
         <div className="mt-2 flex flex-wrap gap-1">

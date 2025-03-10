@@ -8,12 +8,20 @@ export interface StockItem {
   sku: string;
   item_name: string;
   color_code: string;
+  brand?: string;
+  price_rub: number;
   sizes: SizeAvailability[];
+  photos?: ItemPhoto[];
 }
 
 export interface SizeAvailability {
   size: string;
   count: number; // Number of items available in this size
+}
+
+export interface ItemPhoto {
+  photo_url: string;
+  photo_category: "front" | "side" | "packaging" | "other";
 }
 
 export interface Order {
@@ -38,64 +46,23 @@ export interface UserProfile {
   total_orders: number;
 }
 
+// Telegram Web App user interface
+export interface TelegramUser {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  language_code?: string;
+}
+
 // Mock data for fallback when API is unavailable
 const MOCK_STOCK: StockItem[] = [
   {
-    "sku": "SHOE-001",
-    "item_name": "Nike Air Max",
-    "color_code": "BLACK",
-    "sizes": [
-      {
-        "size": "40",
-        "count": 1
-      }
-    ]
-  },
-  {
-    "sku": "SHOE-002",
-    "item_name": "Nike Air Max",
-    "color_code": "WHITE",
-    "sizes": [
-      {
-        "size": "41",
-        "count": 1
-      }
-    ]
-  },
-  {
-    "sku": "SHOE-003",
-    "item_name": "Adidas Boost",
-    "color_code": "BLACK",
-    "sizes": [
-      {
-        "size": "42",
-        "count": 1
-      }
-    ]
-  },
-  {
-    "sku": "TSHIRT-001",
+    "sku": "TS001-BLK",
     "item_name": "Basic T-Shirt",
-    "color_code": "WHITE",
-    "sizes": [
-      {
-        "size": "S",
-        "count": 5
-      },
-      {
-        "size": "M",
-        "count": 7
-      },
-      {
-        "size": "L",
-        "count": 3
-      }
-    ]
-  },
-  {
-    "sku": "JACKET-001",
-    "item_name": "Leather Jacket",
-    "color_code": "BROWN",
+    "color_code": "BLK",
+    "brand": "FashionBrand",
+    "price_rub": 500.0,
     "sizes": [
       {
         "size": "M",
@@ -103,11 +70,59 @@ const MOCK_STOCK: StockItem[] = [
       },
       {
         "size": "L",
-        "count": 4
+        "count": 2
+      }
+    ],
+    "photos": [
+      {
+        "photo_url": "https://example.com/photos/ts001_front.jpg",
+        "photo_category": "front"
       },
       {
-        "size": "XL",
+        "photo_url": "https://example.com/photos/ts001_side.jpg",
+        "photo_category": "side"
+      }
+    ]
+  },
+  {
+    "sku": "JN002-BLU",
+    "item_name": "Slim Jeans",
+    "color_code": "BLU",
+    "brand": "DenimCo",
+    "price_rub": 1200.0,
+    "sizes": [
+      {
+        "size": "32",
+        "count": 2
+      }
+    ],
+    "photos": [
+      {
+        "photo_url": "https://example.com/photos/jn002_front.jpg",
+        "photo_category": "front"
+      }
+    ]
+  },
+  {
+    "sku": "SW003-RED",
+    "item_name": "Wool Sweater",
+    "color_code": "RED",
+    "brand": "WinterWear",
+    "price_rub": 1500.0,
+    "sizes": [
+      {
+        "size": "S",
         "count": 1
+      },
+      {
+        "size": "M",
+        "count": 3
+      }
+    ],
+    "photos": [
+      {
+        "photo_url": "https://example.com/photos/sw003_front.jpg",
+        "photo_category": "front"
       }
     ]
   }
@@ -115,25 +130,47 @@ const MOCK_STOCK: StockItem[] = [
 
 const MOCK_ORDERS: Order[] = [
   {
-    order_id: 1001,
-    order_date: '2023-06-15',
-    total_amount: 7899,
+    order_id: 1,
+    order_date: '2023-02-20T00:00:00',
+    total_amount: 1500.0,
     status: 'paid',
     items: [
-      { sku: 'TSHIRT-001', item_name: 'Basic T-Shirt', color_code: 'WHITE', size: 'M', price_rub: 2999 },
-      { sku: 'SHOE-001', item_name: 'Nike Air Max', color_code: 'BLACK', size: '40', price_rub: 4900 }
+      { sku: 'SW003-RED', item_name: 'Wool Sweater', color_code: 'RED', size: 'M', price_rub: 1500.0 }
     ]
   },
   {
-    order_id: 1002,
-    order_date: '2023-07-22',
-    total_amount: 12550,
+    order_id: 2,
+    order_date: '2023-05-15T00:00:00',
+    total_amount: 1700.0,
     status: 'pending',
     items: [
-      { sku: 'JACKET-001', item_name: 'Leather Jacket', color_code: 'BROWN', size: 'L', price_rub: 12550 }
+      { sku: 'TS001-BLK', item_name: 'Basic T-Shirt', color_code: 'BLK', size: 'L', price_rub: 500.0 },
+      { sku: 'JN002-BLU', item_name: 'Slim Jeans', color_code: 'BLU', size: '32', price_rub: 1200.0 }
     ]
   }
 ];
+
+// Helper function to get Telegram user data
+export const getTelegramUser = (): TelegramUser | null => {
+  try {
+    // Check if Telegram WebApp is available
+    if (window.Telegram && window.Telegram.WebApp) {
+      return window.Telegram.WebApp.initDataUnsafe.user;
+    }
+    
+    // Fallback for development
+    console.log('Telegram WebApp not available, using mock data');
+    return {
+      id: 123456789,
+      first_name: 'Test',
+      last_name: 'User',
+      username: 'testuser'
+    };
+  } catch (error) {
+    console.error('Error getting Telegram user:', error);
+    return null;
+  }
+};
 
 // Helper function to handle API errors
 const handleApiError = (error: any) => {
@@ -149,6 +186,16 @@ const handleApiError = (error: any) => {
       message = 'Resource not found.';
     } else if (statusCode === 500) {
       message = 'Server error. Please try again later.';
+    }
+    
+    // Try to extract error detail from response
+    try {
+      const errorData = error.response.data;
+      if (errorData && errorData.detail) {
+        message = errorData.detail;
+      }
+    } catch (e) {
+      // Ignore parsing errors
     }
   } else if (error.request) {
     // Request made but no response received
@@ -270,7 +317,7 @@ export const checkUserProfile = async (username: string, userId: number): Promis
       toast.info('Using demo data - couldn\'t connect to API');
       return {
         telegram_username: username,
-        rank: 3,
+        rank: 1,
         total_orders: 2
       };
     }
