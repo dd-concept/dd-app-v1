@@ -1,8 +1,6 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getRandomAvatarEmoji } from '../utils/emojiUtils';
-import { getTelegramUser } from '../services/api';
-import { checkUserProfile, UserProfile, TelegramUser } from '../services/api';
+import { getTelegramUser, checkUserProfile, UserProfile, TelegramUser } from '../services/api';
 import { toast } from 'sonner';
 
 interface UserContextType {
@@ -24,13 +22,11 @@ export const UserProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const [avatarEmoji, setAvatarEmoji] = useState(getRandomAvatarEmoji());
   const [loading, setLoading] = useState(true);
 
-  // Initialize with Telegram user data or defaults
   useEffect(() => {
     const initUser = async () => {
       try {
         setLoading(true);
         
-        // Try to get Telegram user data
         const tgUser = getTelegramUser();
         console.log('Telegram user data:', tgUser);
         
@@ -38,18 +34,15 @@ export const UserProvider: React.FC<{children: ReactNode}> = ({ children }) => {
           setTelegramUser(tgUser);
           setUsername(tgUser.username);
           
-          // Fetch user profile from API
           try {
             const userProfile = await checkUserProfile(tgUser.username, tgUser.id);
             console.log('User profile loaded:', userProfile);
             setProfile(userProfile);
           } catch (error: any) {
             console.error('Error fetching user profile:', error);
-            // Display a more specific error message with exact details
             toast.error(`Profile error: ${error.message}`);
           }
         } else {
-          // Default values for development/testing
           console.log('No Telegram username available, using default');
           setUsername('telegramUser');
           toast.info('Using demo user data - no Telegram user available');
