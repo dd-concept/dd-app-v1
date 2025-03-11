@@ -1,8 +1,7 @@
-
 import { toast } from 'sonner';
 
 // API configuration
-export const API_BASE_URL = 'http://185.154.12.121:8000/api';
+export const API_BASE_URL = 'https://www.ddconcept.ru/api';
 
 // Timeout configuration for different API calls
 export const TIMEOUTS = {

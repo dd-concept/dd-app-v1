@@ -1,17 +1,16 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import PageLayout from '@/components/PageLayout';
 import EmojiAvatar from '@/components/EmojiAvatar';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import OrderHistoryItem from '@/components/OrderHistoryItem';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useUser } from '@/contexts/UserContext';
-import { fetchOrders, Order } from '@/services/api';
+import { fetchOrders } from '@/services/api';
 
 const Profile: React.FC = () => {
   const { username, avatarEmoji, telegramUser, profile } = useUser();
 
-  // Fetch orders with better error handling
   const { data: orders, isLoading, error, isError, refetch } = useQuery({
     queryKey: ['orders', username],
     queryFn: () => fetchOrders(username),
@@ -20,7 +19,6 @@ const Profile: React.FC = () => {
     retryDelay: 1000,
   });
 
-  // Handle loading state
   if (isLoading) {
     return (
       <PageLayout>
@@ -31,7 +29,6 @@ const Profile: React.FC = () => {
     );
   }
 
-  // Handle error state
   if (isError) {
     return (
       <PageLayout>
@@ -51,13 +48,12 @@ const Profile: React.FC = () => {
     );
   }
 
-  // We'll use orders from API or empty array if undefined
   const displayOrders = orders || [];
 
   return (
     <PageLayout>
-      <div className="p-4">
-        {/* Profile Header */}
+      <div className="p-4 relative">
+        <ThemeToggle />
         <div className="flex items-center gap-4 mb-8 animate-fade-in">
           <EmojiAvatar 
             emoji={avatarEmoji} 
@@ -77,7 +73,6 @@ const Profile: React.FC = () => {
           </div>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-8 animate-slide-up">
           <div className="bg-white rounded-lg p-4 text-center shadow-sm">
             <h2 className="text-xl font-semibold text-telegram-blue">{displayOrders.length}</h2>
@@ -97,7 +92,6 @@ const Profile: React.FC = () => {
           </div>
         </div>
 
-        {/* Order History */}
         <h2 className="text-xl font-medium mb-4">Order History</h2>
         {displayOrders.length === 0 ? (
           <div className="text-center py-6 bg-white rounded-lg shadow-sm">
@@ -116,7 +110,6 @@ const Profile: React.FC = () => {
           </div>
         )}
 
-        {/* Settings Section */}
         <div className="mt-8 bg-white rounded-lg shadow-sm p-4 animate-fade-in">
           <h2 className="text-lg font-medium mb-4">Settings</h2>
           <div className="space-y-2">

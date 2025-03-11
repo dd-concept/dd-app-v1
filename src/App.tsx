@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { UserProvider } from "./contexts/UserContext";
 import { CartProvider } from "./contexts/CartContext";
+import { ThemeProvider } from "next-themes";
 import { useEffect } from "react";
 import { initTelegramWebApp } from "./utils/telegramUtils";
 import Home from "./pages/Home";
@@ -48,27 +49,29 @@ const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <UserProvider>
-        <CartProvider>
-          <Toaster />
-          <Sonner position="top-center" />
-          <BrowserRouter>
-            <TelegramInitializer>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/shop" element={<Shop />} />
-                <Route path="/product/:productId" element={<ProductDetails />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </TelegramInitializer>
-          </BrowserRouter>
-        </CartProvider>
-      </UserProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ThemeProvider defaultTheme="dark" attribute="class">
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <UserProvider>
+          <CartProvider>
+            <Toaster />
+            <Sonner position="top-center" />
+            <BrowserRouter>
+              <TelegramInitializer>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/shop" element={<Shop />} />
+                  <Route path="/product/:productId" element={<ProductDetails />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </TelegramInitializer>
+            </BrowserRouter>
+          </CartProvider>
+        </UserProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;
