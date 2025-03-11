@@ -13,6 +13,7 @@ import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import ProductDetails from "./pages/ProductDetails";
 import Profile from "./pages/Profile";
+import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -63,6 +64,7 @@ const App = () => (
                   <Route path="/shop" element={<Shop />} />
                   <Route path="/product/:productId" element={<ProductDetails />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/cart" element={<Cart />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </TelegramInitializer>

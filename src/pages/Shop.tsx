@@ -1,17 +1,20 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Filter, Search } from 'lucide-react';
+import { Filter, Search, ShoppingCart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
 import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { fetchProducts, StockItem } from '@/services/api';
 import { toast } from 'sonner';
+import { useCart } from '@/contexts/CartContext';
 
 const Shop: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSize, setSelectedSize] = useState<string | 'all'>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const { itemCount } = useCart();
 
   // Fetch products using React Query with retry and longer staleTime
   const { data: products, isLoading, error, isError, refetch } = useQuery({
@@ -68,7 +71,20 @@ const Shop: React.FC = () => {
     <PageLayout>
       <div className="p-4">
         <header className="mb-6">
-          <h1 className="text-2xl font-semibold mb-4">Shop</h1>
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-semibold">Shop</h1>
+            <Link 
+              to="/cart" 
+              className="relative p-2 bg-telegram-blue text-white rounded-full"
+            >
+              <ShoppingCart size={20} />
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                  {itemCount}
+                </span>
+              )}
+            </Link>
+          </div>
           
           {/* Search bar */}
           <div className="relative mb-4">
