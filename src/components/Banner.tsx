@@ -15,7 +15,7 @@ const Banner: React.FC<BannerProps> = ({
   title, 
   emoji, 
   className,
-  color = 'bg-telegram-blue'
+  color = 'bg-telegram-blue dark:bg-telegram-dark'
 }) => {
   const [displayEmoji, setDisplayEmoji] = useState(emoji || getRandomBannerEmoji());
 
@@ -28,7 +28,7 @@ const Banner: React.FC<BannerProps> = ({
   return (
     <div 
       className={cn(
-        'rounded-lg px-6 py-8 text-white flex flex-col items-center justify-center w-full transition-all duration-300 animate-scale-in card-shadow',
+        'rounded-lg px-6 py-8 text-white flex flex-col items-center justify-center w-full transition-all duration-300 animate-scale-in shadow-sm dark:shadow-none',
         color,
         className
       )}
@@ -121,8 +121,8 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
             className={cn(
               'w-2 h-2 rounded-full transition-all duration-300',
               index === currentIndex 
-                ? 'bg-telegram-blue w-4' 
-                : 'bg-gray-300'
+                ? 'bg-telegram-blue dark:bg-telegram-dark w-4' 
+                : 'bg-gray-300 dark:bg-gray-600'
             )}
             onClick={() => setCurrentIndex(index)}
           />
@@ -132,18 +132,18 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
       {/* Arrow controls */}
       <button
         onClick={prevBanner}
-        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center shadow-md hover:bg-white transition-colors"
+        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 dark:bg-gray-800/80 flex items-center justify-center shadow-md hover:bg-white dark:hover:bg-gray-700 transition-colors"
         aria-label="Previous banner"
       >
-        <ChevronLeft size={20} />
+        <ChevronLeft size={20} className="text-gray-800 dark:text-gray-200" />
       </button>
       
       <button
         onClick={nextBanner}
-        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center shadow-md hover:bg-white transition-colors"
+        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 dark:bg-gray-800/80 flex items-center justify-center shadow-md hover:bg-white dark:hover:bg-gray-700 transition-colors"
         aria-label="Next banner"
       >
-        <ChevronRight size={20} />
+        <ChevronRight size={20} className="text-gray-800 dark:text-gray-200" />
       </button>
     </div>
   );

@@ -26,7 +26,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
     <Link 
       to={`/product/${product.sku}`} 
       className={cn(
-        'block bg-white dark:bg-sidebar-accent rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover-lift',
+        'block bg-white dark:bg-sidebar-accent/70 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover-lift',
         className
       )}
     >
@@ -51,7 +51,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
         <div className="flex justify-between items-start mb-1">
           <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate">{product.item_name}</h3>
           {product.brand && (
-            <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+            <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/50 px-2 py-0.5 rounded-full">
               {product.brand}
             </span>
           )}
@@ -66,12 +66,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
         </div>
         <div className="mt-2 flex flex-wrap gap-1">
           {availableSizes.slice(0, 3).map((size) => (
-            <span key={size} className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full">
+            <span key={size} className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 rounded-full">
               {size}
             </span>
           ))}
           {availableSizes.length > 3 && (
-            <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full">
+            <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 rounded-full">
               +{availableSizes.length - 3}
             </span>
           )}

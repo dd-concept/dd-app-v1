@@ -31,8 +31,8 @@ const SizeSelector: React.FC<SizeSelectorProps> = ({
             className={cn(
               'px-4 py-2 rounded-full border transition-all duration-200',
               selectedSize === size
-                ? 'border-telegram-blue bg-telegram-light dark:bg-telegram-dark/20 text-telegram-blue'
-                : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-sidebar-accent text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600'
+                ? 'border-telegram-blue bg-telegram-light dark:bg-telegram-dark/20 text-telegram-blue dark:text-telegram-blue'
+                : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-sidebar-accent/70 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600'
             )}
             onClick={() => handleSizeChange(size)}
           >

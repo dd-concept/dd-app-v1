@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -104,15 +105,15 @@
   }
   
   .card-shadow {
-    @apply shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)];
+    @apply shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.15)];
   }
   
   .nav-link {
-    @apply relative flex flex-col items-center justify-center w-full p-2 transition-colors duration-200 text-foreground/60;
+    @apply relative flex flex-col items-center justify-center w-full p-2 transition-colors duration-200 text-foreground/60 dark:text-gray-400;
   }
   
   .nav-link.active {
-    @apply text-telegram-blue;
+    @apply text-telegram-blue dark:text-telegram-blue;
   }
   
   .nav-link.active::after {

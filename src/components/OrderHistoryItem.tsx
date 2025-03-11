@@ -25,19 +25,19 @@ const OrderHistoryItem: React.FC<OrderHistoryItemProps> = ({
       case 'paid': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
       case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
       case 'cancelled': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-400';
     }
   };
 
   return (
     <div 
       className={cn(
-        'bg-white dark:bg-sidebar-accent rounded-lg shadow-sm overflow-hidden',
+        'bg-white dark:bg-sidebar-accent/70 rounded-lg shadow-sm overflow-hidden',
         className
       )}
       style={animationDelay ? { animationDelay } : undefined}
     >
-      <div className="p-4 flex justify-between items-center border-b border-gray-100 dark:border-gray-800">
+      <div className="p-4 flex justify-between items-center border-b border-gray-100 dark:border-gray-800/50">
         <div>
           <h3 className="font-medium">Order #{order.order_id}</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">{formattedDate}</p>
@@ -67,7 +67,7 @@ const OrderHistoryItem: React.FC<OrderHistoryItemProps> = ({
         </div>
       </div>
       
-      <button className="w-full py-2 px-4 flex justify-between items-center bg-gray-50 dark:bg-sidebar-primary/10 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-sidebar-primary/20 transition-colors">
+      <button className="w-full py-2 px-4 flex justify-between items-center bg-gray-50 dark:bg-sidebar-primary/20 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-sidebar-primary/30 transition-colors">
         <span>Order Details</span>
         <ChevronRight size={16} />
       </button>
