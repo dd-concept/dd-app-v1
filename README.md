@@ -24,7 +24,7 @@ To run this project locally:
 
 ```sh
 # Step 1: Clone the repository
-git clone https://github.com/yourusername/dd-app-v1.git
+git clone https://github.com/d4nes1337/dd-app-v1.git
 
 # Step 2: Navigate to the project directory
 cd dd-app-v1
