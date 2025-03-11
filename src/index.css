@@ -104,7 +104,7 @@
   }
   
   .card-shadow {
-    @apply shadow-[0_4px_16px_rgba(0,0,0,0.08)];
+    @apply shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)];
   }
   
   .nav-link {
@@ -121,7 +121,7 @@
   }
   
   .emoji-avatar {
-    @apply flex items-center justify-center w-12 h-12 rounded-full bg-telegram-light text-2xl;
+    @apply flex items-center justify-center w-12 h-12 rounded-full bg-telegram-light dark:bg-sidebar-accent text-2xl;
   }
   
   .page-transition-enter {
@@ -150,10 +150,10 @@
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 rounded-full;
+    @apply bg-gray-300 dark:bg-gray-700 rounded-full;
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400;
+    @apply bg-gray-400 dark:bg-gray-600;
   }
 }

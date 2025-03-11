@@ -26,11 +26,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
     <Link 
       to={`/product/${product.sku}`} 
       className={cn(
-        'block bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover-lift',
+        'block bg-white dark:bg-sidebar-accent rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover-lift',
         className
       )}
     >
-      <div className="aspect-square bg-telegram-light flex items-center justify-center">
+      <div className="aspect-square bg-telegram-light dark:bg-sidebar-primary/20 flex items-center justify-center">
         {hasPhoto ? (
           <img 
             src={product.photos![0].photo_url} 
@@ -49,15 +49,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
       
       <div className="p-4">
         <div className="flex justify-between items-start mb-1">
-          <h3 className="font-medium text-gray-900 truncate">{product.item_name}</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate">{product.item_name}</h3>
           {product.brand && (
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+            <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
               {product.brand}
             </span>
           )}
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             Color: {product.color_code}
           </span>
           <span className="font-medium text-telegram-blue">
@@ -66,12 +66,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
         </div>
         <div className="mt-2 flex flex-wrap gap-1">
           {availableSizes.slice(0, 3).map((size) => (
-            <span key={size} className="text-xs px-2 py-1 bg-gray-100 rounded-full">
+            <span key={size} className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full">
               {size}
             </span>
           ))}
           {availableSizes.length > 3 && (
-            <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
+            <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full">
               +{availableSizes.length - 3}
             </span>
           )}
