@@ -1,11 +1,9 @@
-
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import EmojiAvatar from '@/components/EmojiAvatar';
 import { Banner, BannerSlider } from '@/components/Banner';
 import { useUser } from '@/contexts/UserContext';
 import { getRandomBannerEmoji } from '@/utils/emojiUtils';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 const Home: React.FC = () => {
   const { username, avatarEmoji } = useUser();
@@ -71,26 +69,24 @@ const Home: React.FC = () => {
 
       <section>
         <h2 className="text-xl font-medium mb-4">Latest News</h2>
-        <ScrollArea className="h-[200px] rounded-lg">
-          <div className="space-y-4 pr-4">
-            <div className="bg-white dark:bg-sidebar-accent/50 p-4 rounded-lg shadow-sm animate-slide-up">
-              <h3 className="font-medium">New Collection Arriving Soon</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Get ready for our summer collection dropping next week!</p>
-            </div>
-            <div className="bg-white dark:bg-sidebar-accent/50 p-4 rounded-lg shadow-sm animate-slide-up" style={{ animationDelay: '0.1s' }}>
-              <h3 className="font-medium">Free Shipping Weekend</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Enjoy free shipping on all orders this weekend</p>
-            </div>
-            <div className="bg-white dark:bg-sidebar-accent/50 p-4 rounded-lg shadow-sm animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              <h3 className="font-medium">Member Exclusive Discounts</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Members get 15% off all accessories this month</p>
-            </div>
-            <div className="bg-white dark:bg-sidebar-accent/50 p-4 rounded-lg shadow-sm animate-slide-up" style={{ animationDelay: '0.3s' }}>
-              <h3 className="font-medium">New Store Opening</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Visit our new flagship store in Moscow starting June 1st</p>
-            </div>
+        <div className="space-y-4">
+          <div className="bg-white dark:bg-sidebar-accent/50 p-4 rounded-lg shadow-sm animate-slide-up">
+            <h3 className="font-medium">New Collection Arriving Soon</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Get ready for our summer collection dropping next week!</p>
           </div>
-        </ScrollArea>
+          <div className="bg-white dark:bg-sidebar-accent/50 p-4 rounded-lg shadow-sm animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            <h3 className="font-medium">Free Shipping Weekend</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Enjoy free shipping on all orders this weekend</p>
+          </div>
+          <div className="bg-white dark:bg-sidebar-accent/50 p-4 rounded-lg shadow-sm animate-slide-up" style={{ animationDelay: '0.2s' }}>
+            <h3 className="font-medium">Member Exclusive Discounts</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Members get 15% off all accessories this month</p>
+          </div>
+          <div className="bg-white dark:bg-sidebar-accent/50 p-4 rounded-lg shadow-sm animate-slide-up" style={{ animationDelay: '0.3s' }}>
+            <h3 className="font-medium">New Store Opening</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Visit our new flagship store in Moscow starting June 1st</p>
+          </div>
+        </div>
       </section>
     </PageLayout>
   );
