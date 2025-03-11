@@ -17,7 +17,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   return (
     <div
       className={cn(
-        'w-full pb-28 max-w-md mx-auto bg-background', // Increased bottom padding from pb-24 to pb-28 for more space
+        'w-full pb-36 max-w-md mx-auto bg-background', // Increased bottom padding from pb-28 to pb-36 for more space
         fullHeight ? 'min-h-screen' : '',
         className
       )}

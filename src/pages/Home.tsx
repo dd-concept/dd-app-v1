@@ -1,3 +1,4 @@
+
 import React from 'react';
 import PageLayout from '@/components/PageLayout';
 import EmojiAvatar from '@/components/EmojiAvatar';
@@ -67,7 +68,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      <section>
+      <section className="mb-10"> {/* Increased bottom margin from mb-8 to mb-10 */}
         <h2 className="text-xl font-medium mb-4">Latest News</h2>
         <div className="space-y-4">
           <div className="bg-white dark:bg-sidebar-accent/50 p-4 rounded-lg shadow-sm animate-slide-up">
