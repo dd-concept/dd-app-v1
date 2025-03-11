@@ -86,7 +86,7 @@ const ProductDetails: React.FC = () => {
           <h2 className="text-lg font-medium text-red-600 mb-2">
             {isError ? "Error loading product" : "Product not found"}
           </h2>
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
             {isError ? "Please try again later" : "This product may no longer be available"}
           </p>
           <div className="flex justify-center gap-4">
@@ -99,7 +99,7 @@ const ProductDetails: React.FC = () => {
               </button>
             )}
             <button 
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg"
               onClick={() => navigate('/shop')}
             >
               Back to Shop
@@ -115,23 +115,23 @@ const ProductDetails: React.FC = () => {
       <div className="flex flex-col min-h-screen">
         {/* Back button */}
         <button
-          className="absolute top-4 left-4 z-10 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-md"
+          className="absolute top-4 left-4 z-10 w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md"
           onClick={() => navigate('/shop')}
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={24} className="text-gray-800 dark:text-gray-200" />
         </button>
         
         {/* Product image */}
-        <div className="w-full aspect-square bg-telegram-light flex items-center justify-center">
+        <div className="w-full aspect-square bg-telegram-light dark:bg-sidebar-accent/30 flex items-center justify-center">
           <span className="text-8xl animate-float">{productEmoji}</span>
         </div>
         
         {/* Product details */}
-        <div className="flex-1 p-6 bg-white">
+        <div className="flex-1 p-6 bg-white dark:bg-background">
           <div className="mb-6">
             <h1 className="text-2xl font-semibold mb-2">{product.item_name}</h1>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">{product.color_code}</span>
+              <span className="text-gray-600 dark:text-gray-400">{product.color_code}</span>
               <span className="text-xl font-medium text-telegram-blue">
                 {/* Placeholder price since API doesn't provide it */}
                 ₽1,999
@@ -159,14 +159,14 @@ const ProductDetails: React.FC = () => {
           {/* Product description */}
           <div className="mt-8 pb-10">
             <h2 className="text-lg font-medium mb-2">Product Details</h2>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               This premium {product.item_name.toLowerCase()} in {product.color_code.toLowerCase()} offers exceptional comfort and style. 
               Perfect for any occasion, it features high-quality materials and expert craftsmanship.
             </p>
             
             <div className="mt-4">
               <h3 className="font-medium">Features:</h3>
-              <ul className="list-disc pl-5 mt-2 text-gray-600 space-y-1">
+              <ul className="list-disc pl-5 mt-2 text-gray-600 dark:text-gray-400 space-y-1">
                 <li>Premium quality material</li>
                 <li>Comfortable fit</li>
                 <li>Stylish design</li>
