@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Telegram bot folder (local only)
+/telegram_bot/

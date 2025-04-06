@@ -1,106 +1,175 @@
-
 import { toast } from 'sonner';
-import { API_BASE_URL, TIMEOUTS, handleApiError } from './config';
-import { StockItem } from './types';
-import { MOCK_STOCK } from './mockData';
+import { API_BASE_URL, TIMEOUTS, handleApiError, cache, CACHE_CONFIG, createFetchOptions } from './config';
+import { StockItem, StockResponse, SizeAvailability, ItemPhoto, CategoryResponse, Category } from './types';
+import { MOCK_PRODUCTS } from './mockData';
 
-// Fetch stock items with improved error handling
+// Cache keys
+const CACHE_KEYS = {
+  PRODUCTS: 'products',
+  CATEGORIES: 'categories'
+};
+
+// Fetch all available products with fallback to mock data and caching
 export const fetchProducts = async (): Promise<StockItem[]> => {
+  console.log('Fetching products...');
+  
   try {
-    console.log('Fetching products from API...');
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.PRODUCTS);
-    
-    const response = await fetch(`${API_BASE_URL}/stock`, {
-      signal: controller.signal,
-      mode: 'cors',
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      let errorDetail;
-      try {
-        const errorJson = JSON.parse(errorText);
-        errorDetail = errorJson.detail || errorText;
-      } catch (e) {
-        errorDetail = errorText || `HTTP error ${response.status}`;
-      }
-      throw new Error(errorDetail);
+    // Check cache first
+    const cachedProducts = cache.get<StockItem[]>(CACHE_KEYS.PRODUCTS, CACHE_CONFIG.PRODUCTS_TTL);
+    if (cachedProducts) {
+      console.log('Using cached products data');
+      return cachedProducts;
     }
     
-    // Get the response text first
-    const responseText = await response.text();
-    console.log('Raw API response:', responseText);
+    console.log('No cached products, fetching from API...');
     
-    let data;
+    // Make the API call with improved fetch options
+    const { options, clearTimeout } = createFetchOptions('GET', undefined, TIMEOUTS.PRODUCTS);
+    
     try {
-      // Check if the response is already a JSON string enclosed in quotes
-      if (responseText.startsWith('"[') && responseText.endsWith(']"')) {
-        // This is a JSON string that's been double-stringified
-        // First remove the outer quotes and unescape
-        const unescaped = responseText.slice(1, -1).replace(/\\"/g, '"');
-        data = JSON.parse(unescaped);
-        console.log('Parsed from double-stringified JSON:', data);
-      } else {
-        // Normal JSON parsing
-        data = JSON.parse(responseText);
-        console.log('Parsed from regular JSON:', data);
+      const response = await fetch(`${API_BASE_URL}/stock/in-stock`, options);
+      clearTimeout();
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorDetail;
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorDetail = errorJson.detail || errorText;
+        } catch (e) {
+          errorDetail = errorText || `HTTP error ${response.status}`;
+        }
+        throw new Error(errorDetail);
       }
       
-      // Validate that we have an array
-      if (!Array.isArray(data)) {
-        console.error('API returned non-array data:', data);
-        toast.error('Invalid data format received from API');
-        return MOCK_STOCK;
+      // Get the response text first
+      const responseText = await response.text();
+      
+      // Parse response
+      const stockResponse: StockResponse = JSON.parse(responseText);
+      console.log('Products fetched successfully, count:', stockResponse.items?.length || 0);
+      
+      if (!stockResponse.items || !Array.isArray(stockResponse.items)) {
+        console.error('API returned invalid products data');
+        toast.error('Invalid products data received from API');
+        return MOCK_PRODUCTS;
       }
       
-      return data;
-    } catch (parseError: any) {
-      console.error('Error parsing JSON:', parseError);
-      toast.error(`Error parsing API response: ${parseError.message}`);
-      return MOCK_STOCK;
+      // Process the items to ensure consistent data format
+      const normalizedItems = stockResponse.items.map(item => {
+        // Ensure price_rub is a number
+        const price = typeof item.price_rub === 'string' 
+          ? parseFloat(item.price_rub.replace(/[^\d.-]/g, '')) 
+          : Number(item.price_rub);
+          
+        // Ensure photos array exists
+        const photos = Array.isArray(item.photos) ? item.photos : [];
+        
+        // Ensure sizes array exists and has quantity as number
+        const sizes = Array.isArray(item.sizes) 
+          ? item.sizes.map(size => ({
+              ...size,
+              quantity: typeof size.quantity === 'string' ? parseInt(size.quantity, 10) : size.quantity
+            }))
+          : [];
+        
+        return {
+          ...item,
+          price_rub: isNaN(price) ? 0 : price,
+          photos: photos,
+          sizes: sizes
+        };
+      });
+      
+      // Cache the products
+      cache.set(CACHE_KEYS.PRODUCTS, normalizedItems);
+      
+      return normalizedItems;
+    } catch (error: any) {
+      console.error('Error fetching products:', error);
+      toast.error(`Error loading products: ${error.message}`);
+      return MOCK_PRODUCTS;
     }
   } catch (error: any) {
-    console.error('Error fetching products:', error);
-    
-    // If it's a network error or timeout, use mock data
-    if (error.name === 'AbortError') {
-      console.log('Request timeout, using mock product data');
-      toast.error('API request timed out. Using demo data.');
-      return MOCK_STOCK;
-    }
-    
-    if (error.message === 'Failed to fetch' || error.message.includes('NetworkError')) {
-      console.log('Network error, using mock product data');
-      toast.error('Network error. Using demo data.');
-      return MOCK_STOCK;
-    }
-    
-    // Show the exact error message
-    toast.error(`Error fetching products: ${error.message}`);
-    console.log('Using mock product data after error');
-    return MOCK_STOCK;
+    console.error('Error in fetchProducts:', error);
+    toast.error(`Error: ${error.message}`);
+    return MOCK_PRODUCTS;
   }
 };
 
-// Add product to cart (placeholder - to be implemented with actual API)
-export const addToCart = async (sku: string, size: string): Promise<void> => {
+// Add a product to the user's cart
+export const addProductToCart = async (productId: string, size: string): Promise<boolean> => {
   try {
-    // Since there's no cart API yet, we're just simulating a successful addition
-    console.log('Adding to cart:', sku, size);
+    // This is just a placeholder/mock since we don't have a real cart API
+    // In a real app, you'd call an API endpoint here
+    console.log(`[MOCK] Added product to cart: ${productId}, size: ${size}`);
+    return true;
+  } catch (error) {
+    console.error('Error adding product to cart:', error);
+    return false;
+  }
+};
+
+/**
+ * Fetch all available categories
+ * @returns A promise that resolves to an array of categories
+ */
+export const fetchCategories = async (): Promise<Category[]> => {
+  console.log('Fetching categories...');
+  
+  try {
+    // Check cache first
+    const cachedCategories = cache.get<Category[]>(CACHE_KEYS.CATEGORIES, CACHE_CONFIG.PRODUCTS_TTL);
+    if (cachedCategories) {
+      console.log('Using cached categories data');
+      return cachedCategories;
+    }
     
-    // Fake success response
-    await new Promise(resolve => setTimeout(resolve, 500));
+    console.log('No cached categories, fetching from API...');
     
-    toast.success('Added to cart');
-    return;
+    // Make the API call with improved fetch options
+    const { options, clearTimeout } = createFetchOptions('GET', undefined, TIMEOUTS.PRODUCTS);
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/stock/get-categories`, options);
+      clearTimeout();
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorDetail;
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorDetail = errorJson.detail || errorText;
+        } catch (e) {
+          errorDetail = errorText || `HTTP error ${response.status}`;
+        }
+        throw new Error(errorDetail);
+      }
+      
+      // Get the response text first
+      const responseText = await response.text();
+      
+      // Parse response
+      const categoryResponse: CategoryResponse = JSON.parse(responseText);
+      console.log('Categories fetched successfully, count:', categoryResponse.categories?.length || 0);
+      
+      if (!categoryResponse.categories || !Array.isArray(categoryResponse.categories)) {
+        console.error('API returned invalid categories data');
+        toast.error('Invalid categories data received from API');
+        return [];
+      }
+      
+      // Cache the categories
+      cache.set(CACHE_KEYS.CATEGORIES, categoryResponse.categories);
+      
+      return categoryResponse.categories;
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      throw error;
+    }
   } catch (error: any) {
-    toast.error(`Error adding to cart: ${error.message}`);
-    return Promise.reject(error);
+    console.error('Failed to fetch categories:', error);
+    handleApiError('Failed to fetch categories');
+    return [];
   }
 };

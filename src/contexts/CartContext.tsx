@@ -1,14 +1,14 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
 
 // This matches more closely what our API structure needs
-interface CartItem {
+export interface CartItem {
   productId: string; // SKU from the API
   name: string;
   color: string;
   size: string;
-  price: number; // Will be updated when we have real prices
+  price: number;
+  sale_price?: number;
   quantity: number;
 }
 
@@ -29,6 +29,8 @@ interface CartContextType {
   clearCart: () => void;
   itemCount: number;
   totalPrice: number;
+  updateQuantity: (productId: string, size: string, quantity: number) => void;
+  getItemQuantity: (productId: string, size: string) => number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -68,11 +70,11 @@ export const CartProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         // If already in cart, increase quantity
         const updatedItems = [...currentItems];
         updatedItems[existingItemIndex].quantity += 1;
-        toast.success(`Added another ${product.name} (${size}) to cart`);
+        // Removed toast notification as requested
         return updatedItems;
       } else {
         // Otherwise add new item
-        toast.success(`Added ${product.name} (${size}) to cart`);
+        // Removed toast notification as requested
         return [...currentItems, {
           productId: product.id,
           name: product.name,
@@ -106,6 +108,35 @@ export const CartProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     });
   };
 
+  const updateQuantity = (productId: string, size: string, quantity: number) => {
+    setItems(currentItems => {
+      const existingItemIndex = currentItems.findIndex(
+        item => item.productId === productId && item.size === size
+      );
+
+      if (existingItemIndex >= 0) {
+        const updatedItems = [...currentItems];
+        if (quantity <= 0) {
+          // Remove item if quantity is 0 or less
+          updatedItems.splice(existingItemIndex, 1);
+        } else {
+          // Update quantity
+          updatedItems[existingItemIndex].quantity = quantity;
+        }
+        return updatedItems;
+      } else if (quantity > 0) {
+        // If item doesn't exist but quantity > 0, we can't add it without product details
+        console.warn('Attempted to update quantity for non-existent item');
+      }
+      return currentItems;
+    });
+  };
+
+  const getItemQuantity = (productId: string, size: string): number => {
+    const item = items.find(item => item.productId === productId && item.size === size);
+    return item ? item.quantity : 0;
+  };
+
   const clearCart = () => {
     setItems([]);
     toast.info('Cart cleared');
@@ -118,7 +149,9 @@ export const CartProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       removeFromCart,
       clearCart,
       itemCount,
-      totalPrice
+      totalPrice,
+      updateQuantity,
+      getItemQuantity
     }}>
       {children}
     </CartContext.Provider>

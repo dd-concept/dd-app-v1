@@ -1,13 +1,60 @@
 import { toast } from 'sonner';
 
 // API configuration
-export const API_BASE_URL = 'https://www.ddconcept.ru/api';
+export const API_BASE_URL = 'https://v2786182.hosted-by-vdsina.ru/api/v1';
 
-// Timeout configuration for different API calls
+// Increased timeout configuration for different API calls
 export const TIMEOUTS = {
-  PRODUCTS: 10000, // 10 seconds
-  ORDERS: 8000,    // 8 seconds
-  PROFILE: 8000     // 8 seconds
+  PRODUCTS: 15000, // 15 seconds (increased from 10)
+  ORDERS: 12000,   // 12 seconds (increased from 8)
+  PROFILE: 12000   // 12 seconds (increased from 8)
+};
+
+// Cache configuration
+export const CACHE_CONFIG = {
+  PRODUCTS_TTL: 5 * 60 * 1000, // 5 minutes
+  PROFILE_TTL: 10 * 60 * 1000, // 10 minutes
+  ORDERS_TTL: 3 * 60 * 1000,   // 3 minutes
+};
+
+// Cache storage
+interface CacheItem<T> {
+  data: T;
+  timestamp: number;
+}
+
+// Cache management
+export const cache = {
+  _store: new Map<string, CacheItem<any>>(),
+  
+  get<T>(key: string, ttl: number): T | null {
+    const item = this._store.get(key);
+    if (!item) return null;
+    
+    const now = Date.now();
+    if (now - item.timestamp > ttl) {
+      // Cache expired
+      this._store.delete(key);
+      return null;
+    }
+    
+    return item.data as T;
+  },
+  
+  set<T>(key: string, data: T): void {
+    this._store.set(key, {
+      data,
+      timestamp: Date.now()
+    });
+  },
+  
+  invalidate(key: string): void {
+    this._store.delete(key);
+  },
+  
+  clear(): void {
+    this._store.clear();
+  }
 };
 
 // Helper function to handle API errors with detailed error messages
@@ -45,4 +92,35 @@ export const handleApiError = (error: any) => {
   }
   
   return Promise.reject(new Error(message));
+};
+
+// Helper function to create fetch options with proper headers and timeout
+export const createFetchOptions = (
+  method: string = 'GET', 
+  body?: any, 
+  timeout: number = TIMEOUTS.PRODUCTS
+): { 
+  signal: AbortSignal, 
+  options: RequestInit,
+  clearTimeout: () => void 
+} => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  const options: RequestInit = {
+    method,
+    signal: controller.signal,
+    mode: 'cors',
+    headers: {
+      'Accept': 'application/json',
+      ...(body ? { 'Content-Type': 'application/json' } : {})
+    },
+    ...(body ? { body: JSON.stringify(body) } : {})
+  };
+  
+  return {
+    signal: controller.signal,
+    options,
+    clearTimeout: () => clearTimeout(timeoutId)
+  };
 };

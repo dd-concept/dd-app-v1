@@ -1,4 +1,3 @@
-
 import React, { ReactNode } from 'react';
 import BottomNavigation from './BottomNavigation';
 import { cn } from '@/lib/utils';
@@ -17,10 +16,11 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   return (
     <div
       className={cn(
-        'w-full pb-36 max-w-md mx-auto bg-background', // Increased bottom padding from pb-28 to pb-36 for more space
+        'w-full pb-20 max-w-md mx-auto', // Adjusted bottom padding to account for the navigation bar
         fullHeight ? 'min-h-screen' : '',
         className
       )}
+      style={{ backgroundColor: 'transparent' }}
     >
       <div className="animate-fade-in">
         {children}

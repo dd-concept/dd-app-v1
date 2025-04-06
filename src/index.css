@@ -1,11 +1,11 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    /* Telegram light theme colors - exact values from Telegram docs */
+    --background: 0 0% 100%; /* #ffffff */
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -43,16 +43,27 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Telegram-specific colors with fallbacks */
+    --telegram-bg: var(--tg-theme-secondary-bg-color, #f7f7f7);
+    --telegram-text: var(--tg-theme-text-color, #000000);
+    --telegram-hint: var(--tg-theme-hint-color, #999999);
+    --telegram-link: var(--tg-theme-link-color, #2481cc);
+    --telegram-button: var(--tg-theme-button-color, #3390ec);
+    --telegram-button-text: var(--tg-theme-button-text-color, #ffffff);
+    --telegram-secondary-bg: var(--tg-theme-bg-color, #ffffff);
+    --telegram-blue: 210 100% 50%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    /* Telegram dark theme colors - updated to match Telegram's mini app header gray */
+    --background: 220 10% 17%; /* #232730 - gray color matching Telegram's mini app header */
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 220 10% 17%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 220 10% 17%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 210 100% 50%;
@@ -74,14 +85,24 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
     
-    --sidebar-background: 240 5.9% 10%;
+    --sidebar-background: 220 10% 17%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent: 220 10% 20%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-border: 220 10% 20%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Telegram-specific colors with fallbacks */
+    --telegram-bg: var(--tg-theme-secondary-bg-color, #382639);
+    --telegram-text: var(--tg-theme-text-color, #ffffff);
+    --telegram-hint: var(--tg-theme-hint-color, #7d7d7d);
+    --telegram-link: var(--tg-theme-link-color, #64baff);
+    --telegram-button: var(--tg-theme-button-color, #3390ec);
+    --telegram-button-text: var(--tg-theme-button-text-color, #ffffff);
+    --telegram-secondary-bg: var(--tg-theme-bg-color, #271a28);
+    --telegram-blue: 210 100% 50%;
   }
 }
 
@@ -91,7 +112,51 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    color-scheme: var(--tg-color-scheme, light dark);
+    margin: 0;
+    padding: 0;
+    width: 1px;
+    min-width: 100%;
+    color: var(--telegram-text, #000000);
+    background-color: var(--telegram-bg, #382639) !important;
+  }
+  
+  /* Apply Telegram-specific styles */
+  html.telegram-webview {
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--telegram-bg, #382639) !important;
+  }
+  
+  html.telegram-webview body {
+    height: 100%;
+    overflow: auto;
+    background-color: var(--telegram-bg, #382639) !important;
+  }
+  
+  /* Root element styles */
+  #root {
+    min-height: 100vh;
+    background-color: var(--telegram-bg, #382639) !important;
+  }
+  
+  /* Dark mode overrides */
+  .dark body {
+    color: var(--telegram-text, #ffffff);
+    background-color: var(--telegram-bg, #382639) !important;
+  }
+  
+  .dark html.telegram-webview {
+    background-color: var(--telegram-bg, #382639) !important;
+  }
+  
+  .dark html.telegram-webview body {
+    background-color: var(--telegram-bg, #382639) !important;
+  }
+  
+  .dark #root {
+    background-color: var(--telegram-bg, #382639) !important;
   }
 }
 
@@ -113,16 +178,18 @@
   }
   
   .nav-link.active {
-    @apply text-telegram-blue dark:text-telegram-blue;
+    color: var(--telegram-button);
   }
   
   .nav-link.active::after {
     content: '';
-    @apply absolute bottom-0 left-1/2 w-1 h-1 rounded-full bg-telegram-blue transform -translate-x-1/2;
+    @apply absolute bottom-0 left-1/2 w-1 h-1 rounded-full transform -translate-x-1/2;
+    background-color: var(--telegram-button);
   }
   
   .emoji-avatar {
-    @apply flex items-center justify-center w-12 h-12 rounded-full bg-telegram-light dark:bg-sidebar-accent text-2xl;
+    @apply flex items-center justify-center w-12 h-12 rounded-full text-2xl;
+    background-color: var(--telegram-secondary-bg);
   }
   
   .page-transition-enter {
@@ -156,5 +223,174 @@
   
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     @apply bg-gray-400 dark:bg-gray-600;
+  }
+  
+  /* Animation for loading */
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-in-out;
+  }
+  
+  /* Animation for floating emoji */
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+}
+
+/* Telegram theme-specific overrides */
+.bg-background {
+  background-color: var(--telegram-bg, #ffffff) !important;
+}
+
+.text-foreground {
+  color: var(--telegram-text, #000000) !important;
+}
+
+.text-telegram-blue {
+  color: var(--telegram-button, #3390ec) !important;
+}
+
+.bg-telegram-blue {
+  background-color: var(--telegram-button, #3390ec) !important;
+}
+
+.border-gray-200 {
+  border-color: var(--telegram-secondary-bg, #f0f0f0) !important;
+}
+
+.border-gray-800 {
+  border-color: var(--telegram-secondary-bg, #131e29) !important;
+}
+
+/* Improved contrast for better readability */
+.bg-white {
+  background-color: var(--telegram-bg, #382639) !important;
+}
+
+.bg-sidebar-accent {
+  background-color: var(--telegram-secondary-bg, #271a28) !important;
+}
+
+.dark .bg-sidebar-accent {
+  background-color: var(--telegram-secondary-bg, #271a28) !important;
+}
+
+.text-gray-600 {
+  color: rgba(0, 0, 0, 0.8) !important;
+}
+
+.dark .text-gray-600 {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.text-gray-400 {
+  color: rgba(0, 0, 0, 0.6) !important;
+}
+
+.dark .text-gray-400 {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Improved card and container styles */
+.rounded-lg {
+  border-radius: 0.75rem !important;
+}
+
+.card-container {
+  background-color: var(--telegram-secondary-bg, #271a28) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.dark .card-container {
+  background-color: var(--telegram-secondary-bg, #271a28) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.light .card-container {
+  background-color: var(--telegram-secondary-bg, #ffffff) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Bottom Navigation Bar */
+.bottom-nav-bar {
+  background-color: var(--telegram-secondary-bg, #271a28);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  height: 60px;
+  transition: all 0.3s ease;
+  /* Remove border and shadow */
+  border-top: none;
+  box-shadow: none;
+}
+
+.bottom-nav-bar a {
+  color: var(--telegram-hint, #7d7d7d);
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+  padding: 8px 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Remove first-child, nth-child, and last-child specific positioning */
+/* This allows the flex layout to handle positioning */
+
+.bottom-nav-bar a svg {
+  transition: color 0.3s ease;
+}
+
+.bottom-nav-bar a.active {
+  color: var(--telegram-button, #3390ec);
+}
+
+.bottom-nav-bar a.active svg {
+  color: var(--telegram-button, #3390ec);
+}
+
+.dark .bottom-nav-bar {
+  background-color: var(--telegram-secondary-bg, #271a28);
+  /* Remove border */
+  border-top: none;
+}
+
+.light .bottom-nav-bar {
+  background-color: var(--telegram-secondary-bg, #ffffff);
+  /* Remove border */
+  border-top: none;
+}
+
+/* Media query for desktop view */
+@media (min-width: 768px) {
+  .bottom-nav-bar {
+    padding: 0 5%;
+  }
+  
+  /* Force the background color on desktop */
+  body, html, #root, .telegram-webview, .dark body, .dark html, .dark #root {
+    background-color: #382639 !important;
+  }
+  
+  /* Force the bottom nav background on desktop */
+  .bottom-nav-bar, .dark .bottom-nav-bar {
+    background-color: #271a28 !important;
   }
 }

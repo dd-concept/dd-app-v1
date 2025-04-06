@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -57,6 +56,13 @@ export default {
 					blue: '#1DA1F2',
 					light: '#EFF9FF',
 					dark: '#0A66C2',
+					bg: 'var(--telegram-bg)',
+					'secondary-bg': 'var(--telegram-secondary-bg)',
+					text: 'var(--telegram-text)',
+					hint: 'var(--telegram-hint)',
+					link: 'var(--telegram-link)',
+					button: 'var(--telegram-button)',
+					'button-text': 'var(--telegram-button-text)',
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',

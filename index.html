@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark telegram-webview">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,10 +7,46 @@
     <meta name="description" content="DD App - Telegram Shopping Experience" />
     <meta name="author" content="DD App Team" />
     <meta property="og:image" content="/og-image.png" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+      :root {
+        --tg-theme-bg-color: #232730;
+        --tg-theme-secondary-bg-color: #2c313c;
+        --tg-theme-text-color: #ffffff;
+        --tg-theme-hint-color: #7d7d7d;
+        --tg-theme-link-color: #64baff;
+        --tg-theme-button-color: #3390ec;
+        --tg-theme-button-text-color: #ffffff;
+        --tg-color-scheme: dark;
+      }
+      
+      body, html {
+        background-color: #232730 !important;
+        color: #ffffff;
+      }
+      
+      #root {
+        background-color: #232730 !important;
+      }
+    </style>
+    <script>
+      // Force dark gray theme immediately
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add('telegram-webview');
+      document.documentElement.style.backgroundColor = '#232730';
+      
+      // Apply theme when DOM is loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        document.body.style.backgroundColor = '#232730';
+        if (document.getElementById('root')) {
+          document.getElementById('root').style.backgroundColor = '#232730';
+        }
+      });
+    </script>
   </head>
 
-  <body>
-    <div id="root"></div>
+  <body style="background-color: #232730;">
+    <div id="root" style="background-color: #232730;"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
