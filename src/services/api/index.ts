@@ -20,7 +20,17 @@ export {
 export * from './productService';
 
 // Export order service
-export * from './orderService';
+export { 
+  fetchOrders,
+  createOrder,
+  addProductToCart,
+  handleOrderPlaced,
+  createStockOrder,
+  createPreorder,
+  calculateShipping,
+  createUnifiedOrder,
+  fetchDeliveryTypes
+} from './orderService';
 
 // Export client service
 export * from './clientService';

@@ -1,5 +1,5 @@
 import { toast } from 'sonner';
-import { API_BASE_URL, TIMEOUTS, handleApiError, cache, CACHE_CONFIG, createFetchOptions } from './config';
+import { API_BASE_URL, TIMEOUTS, handleApiError, cache, CACHE_CONFIG, createFetchOptions, getApiUrl } from './config';
 import { Order, CartItem, OrdersRequest, OrdersResponse, OrderStockRequest, OrderStockResponse, PreorderRequest, PreorderResponse, StockOrderItem } from './types';
 import { MOCK_ORDERS } from './mockData';
 import { getTelegramUser } from './userService';
@@ -40,7 +40,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
     const { options, clearTimeout } = createFetchOptions('POST', requestBody, TIMEOUTS.ORDERS);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/users/orders`, options);
+      const response = await fetch(getApiUrl('users/orders'), options);
       clearTimeout();
       
       // If user not found or no orders yet, return empty array
@@ -337,14 +337,14 @@ const getColorName = (colorCode: string): string => {
 };
 
 // Add a product to the user's cart
-export const addToCart = async (productId: string, size: string): Promise<boolean> => {
+export const addProductToCart = async (productId: string, size: string): Promise<boolean> => {
   try {
     // This is just a placeholder/mock since we don't have a real cart API
     // In a real app, you'd call an API endpoint here
-    console.log(`[MOCK] Added to cart: ${productId}, size: ${size}`);
+    console.log(`[MOCK API] Added product to cart - Product ID: ${productId}, Size: ${size}`);
     return true;
   } catch (error) {
-    console.error('Error adding to cart:', error);
+    console.error('Error adding product to cart:', error);
     return false;
   }
 };
@@ -419,7 +419,7 @@ export const createStockOrder = async (orderData: CreateStockOrderData): Promise
 
     const { options, clearTimeout } = createFetchOptions('POST', cleanOrderData);
 
-    const response = await fetch(`${API_BASE_URL}/orders/stock`, options);
+    const response = await fetch(getApiUrl('orders/stock'), options);
     clearTimeout();
 
     if (!response.ok) {
@@ -444,38 +444,72 @@ export const createStockOrder = async (orderData: CreateStockOrderData): Promise
 
 export const createPreorder = async (orderData: {
   telegram_user_id: number;
-  delivery_type?: string;
-  delivery_method?: string;
+  delivery_method: string;
   delivery_address?: string;
   promocode_text?: string;
   dd_coins_amount?: number;
+  final_price?: number;
   preorder_item: {
     dewu_url: string;
     size: string;
     price_cny: number;
-    category_type: string;
-    delivery_type: string;
-    sale_price: number;
+    category_type: string;  // Must be one of: "shoes", "clothes", "accessories"
+    delivery_type: string;  // Must be one of: "cargo" or "aero"
   };
 }): Promise<CreateStockOrderResponse> => {
   try {
-    // Use delivery_method if provided, otherwise use delivery_type
-    const deliveryType = orderData.delivery_method || orderData.delivery_type;
+    // Validate required fields
+    if (!orderData.telegram_user_id) {
+      throw new Error('Telegram user ID is required');
+    }
+    
+    if (!orderData.preorder_item) {
+      throw new Error('Preorder item details are required');
+    }
+    
+    if (!orderData.preorder_item.dewu_url) {
+      throw new Error('Preorder item URL is required');
+    }
+    
+    if (!orderData.preorder_item.category_type) {
+      throw new Error('Preorder item category type is required');
+    }
+    
+    if (!orderData.preorder_item.delivery_type) {
+      throw new Error('Preorder item delivery type is required');
+    }
+    
+    // Validate category_type
+    const validCategoryTypes = ['shoes', 'clothes', 'accessories'];
+    if (!validCategoryTypes.includes(orderData.preorder_item.category_type)) {
+      throw new Error(`Invalid category type. Must be one of: ${validCategoryTypes.join(', ')}`);
+    }
+    
+    // Validate delivery_type
+    const validDeliveryTypes = ['cargo', 'aero'];
+    if (!validDeliveryTypes.includes(orderData.preorder_item.delivery_type)) {
+      throw new Error(`Invalid delivery type. Must be one of: ${validDeliveryTypes.join(', ')}`);
+    }
     
     // Validate delivery_address if needed
-    if ((deliveryType === 'courier' || deliveryType === 'shipping') && !orderData.delivery_address) {
+    if ((orderData.delivery_method === 'courier' || orderData.delivery_method === 'shipping') && !orderData.delivery_address) {
       throw new Error('Delivery address is required for courier or shipping delivery method');
     }
     
-    // Create a clean order data object with standardized field names
-    const cleanOrderData = {
-      ...orderData,
-      delivery_type: deliveryType
+    // Create a clean request structure as expected by the API
+    const requestData = {
+      telegram_user_id: orderData.telegram_user_id,
+      preorder_item: orderData.preorder_item,
+      delivery_method: orderData.delivery_method,
+      delivery_address: orderData.delivery_address || '',
+      promocode_text: orderData.promocode_text,
+      dd_coins_amount: orderData.dd_coins_amount,
+      final_price: orderData.final_price
     };
     
-    const { options, clearTimeout } = createFetchOptions('POST', cleanOrderData);
+    const { options, clearTimeout } = createFetchOptions('POST', requestData);
 
-    const response = await fetch(`${API_BASE_URL}/orders/preorder`, options);
+    const response = await fetch(getApiUrl('orders/preorder'), options);
     clearTimeout();
 
     if (!response.ok) {
@@ -492,34 +526,34 @@ export const createPreorder = async (orderData: {
 };
 
 /**
- * Calculate delivery cost using the API
+ * Calculate shipping cost using the API
  * @param priceCny The price in CNY
- * @param deliveryType The delivery type ('cargo' for car, 'aero' for plane)
+ * @param shippingType The shipping type ('cargo' for car, 'aero' for plane)
  * @param category The item category (e.g., 'sneakers', 'hoodie')
- * @returns A promise that resolves to the delivery cost
+ * @returns A promise that resolves to the shipping cost
  */
-export const calculateDelivery = async (
+export const calculateShipping = async (
   priceCny: number,
-  deliveryType: string,
+  shippingType: string,
   category: string
 ): Promise<number> => {
   try {
-    // Convert delivery type to API format
-    const apiDeliveryType = deliveryType === 'car' ? 'cargo' : 'aero';
+    // Convert shipping type to API format if needed
+    const apiShippingType = shippingType === 'car' ? 'cargo' : shippingType === 'plane' ? 'aero' : shippingType;
     
     // Prepare the request body
     const requestBody = {
       price_cny: priceCny,
-      delivery_type: apiDeliveryType,
+      shipping_type: apiShippingType,
       category
     };
     
-    console.log('Delivery calculation request:', requestBody);
+    console.log('Shipping calculation request:', requestBody);
     
     // Make the API call
     const { options, clearTimeout } = createFetchOptions('POST', requestBody, TIMEOUTS.PRODUCTS);
     
-    const response = await fetch(`${API_BASE_URL}/orders/calculate-delivery`, options);
+    const response = await fetch(getApiUrl('orders/calculate-shipping'), options);
     clearTimeout();
     
     console.log(`Response status: ${response.status} ${response.statusText}`);
@@ -528,17 +562,176 @@ export const calculateDelivery = async (
       const errorData = await response.json().catch(() => null);
       console.error('API response not OK:', response.status, response.statusText);
       console.error('Error data:', errorData);
-      throw new Error(`Failed to calculate delivery: ${errorData?.message || response.statusText}`);
+      throw new Error(`Failed to calculate shipping: ${errorData?.message || response.statusText}`);
     }
     
     // Get the response
     const responseData = await response.json();
-    console.log('Delivery calculation response:', responseData);
+    console.log('Shipping calculation response:', responseData);
     
-    // Return the delivery cost
-    return responseData.delivery_cost;
+    // Return the shipping cost
+    return responseData.shipping_cost;
   } catch (error: any) {
-    console.error('Error calculating delivery:', error);
-    throw new Error(`Error calculating delivery: ${error.message}`);
+    console.error('Error calculating shipping:', error);
+    throw new Error(`Error calculating shipping: ${error.message}`);
+  }
+};
+
+// Add a new function for creating unified orders (both stock and preorder items)
+export const createUnifiedOrder = async (orderData: {
+  telegram_user_id: number;
+  delivery_method: string;
+  delivery_address?: string;
+  promocode_text?: string;
+  dd_coins_amount?: number;
+  items: {
+    item_type: 'stock' | 'preorder';
+    // For stock items
+    stock_id?: number;
+    sku?: string;
+    size?: string;
+    quantity?: number;
+    // For preorder items
+    dewu_url?: string;
+    category_type?: string;
+    shipping_type?: string;
+    price_cny?: number;
+  }[];
+  final_price?: number;
+}): Promise<CreateStockOrderResponse> => {
+  try {
+    // Validate required fields
+    if (!orderData.items?.length) {
+      throw new Error('Order must contain at least one item');
+    }
+
+    // Prepare the items array in the format expected by the API
+    const items = orderData.items.map(item => {
+      if (item.item_type === 'preorder') {
+        // Validate preorder item fields
+        if (!item.dewu_url) {
+          throw new Error('Preorder item must have a URL');
+        }
+        if (!item.category_type) {
+          throw new Error('Preorder item must have a category type');
+        }
+        if (!item.shipping_type) {
+          throw new Error('Preorder item must have a shipping type');
+        }
+        if (!item.price_cny) {
+          throw new Error('Preorder item must have a price in CNY');
+        }
+        
+        // Validate category_type
+        const validCategoryTypes = ['shoes', 'clothes', 'accessories', 'sneakers'];
+        if (!validCategoryTypes.includes(item.category_type)) {
+          throw new Error(`Invalid category type for preorder. Must be one of: ${validCategoryTypes.join(', ')}`);
+        }
+        
+        // Validate shipping_type
+        const validShippingTypes = ['cargo', 'aero'];
+        if (!validShippingTypes.includes(item.shipping_type)) {
+          throw new Error(`Invalid shipping type for preorder. Must be one of: ${validShippingTypes.join(', ')}`);
+        }
+
+        // Return preorder item in the format expected by the API
+        return {
+          item_type: 'preorder',
+          dewu_url: item.dewu_url,
+          size: item.size || '',
+          price_cny: item.price_cny,
+          category_type: item.category_type,
+          shipping_type: item.shipping_type
+        };
+      } else {
+        // Stock item
+        // If stock_id is provided, use that
+        if (item.stock_id) {
+          return {
+            item_type: 'stock',
+            stock_id: item.stock_id
+          };
+        }
+        
+        // Otherwise require sku and size
+        if (!item.sku) {
+          throw new Error('Stock item must have a SKU');
+        }
+        
+        return {
+          item_type: 'stock',
+          sku: item.sku,
+          size: item.size || '',
+          quantity: item.quantity || 1
+        };
+      }
+    });
+
+    // Validate delivery_address if needed
+    if ((orderData.delivery_method === 'courier' || orderData.delivery_method === 'shipping') && !orderData.delivery_address) {
+      throw new Error('Delivery address is required for courier or shipping delivery method');
+    }
+
+    // Prepare the request data
+    const requestData = {
+      telegram_user_id: orderData.telegram_user_id,
+      items: items,
+      delivery_method: orderData.delivery_method,
+      delivery_address: orderData.delivery_address || '',
+      promocode_text: orderData.promocode_text,
+      dd_coins_amount: orderData.dd_coins_amount,
+      final_price: orderData.final_price
+    };
+
+    console.log("Sending unified order request:", JSON.stringify(requestData, null, 2));
+
+    const { options, clearTimeout } = createFetchOptions('POST', requestData);
+
+    const response = await fetch(getApiUrl('orders/create-order'), options);
+    clearTimeout();
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorDetail;
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorDetail = errorJson.detail || errorText;
+      } catch (e) {
+        errorDetail = errorText;
+      }
+      throw new Error(errorDetail);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error creating unified order:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch available delivery types
+ * @returns A promise that resolves to an array of delivery types
+ */
+export const fetchDeliveryTypes = async () => {
+  try {
+    const { options, clearTimeout } = createFetchOptions('GET', undefined, TIMEOUTS.PRODUCTS);
+    
+    const response = await fetch(getApiUrl('orders/delivery-types'), options);
+    clearTimeout();
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      console.error('API response not OK:', response.status, response.statusText);
+      console.error('Error data:', errorData);
+      throw new Error(`Failed to fetch delivery types: ${errorData?.message || response.statusText}`);
+    }
+    
+    const data = await response.json();
+    return data.delivery_types || [];
+  } catch (error) {
+    console.error('Error fetching delivery types:', error);
+    throw error;
   }
 };

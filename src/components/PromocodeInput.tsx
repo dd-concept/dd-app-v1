@@ -24,7 +24,7 @@ const PromocodeInput: React.FC<PromocodeInputProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim()) {
-      toast.error('Please enter a promocode');
+      toast.error('Пожалуйста, введите промокод');
       return;
     }
 
@@ -34,13 +34,13 @@ const PromocodeInput: React.FC<PromocodeInputProps> = ({
       if (response.success && response.promocode) {
         const finalPrice = calculateDiscountedPrice(originalPrice, response.promocode);
         onPromocodeApplied(response.promocode, finalPrice);
-        toast.success('Promocode applied successfully!');
+        toast.success('Промокод успешно применен!');
       } else {
-        toast.error(response.message || 'Invalid promocode');
+        toast.error(response.message || 'Недействительный промокод');
       }
     } catch (error) {
       console.error('Error validating promocode:', error);
-      toast.error('Failed to validate promocode');
+      toast.error('Не удалось проверить промокод');
     } finally {
       setIsValidating(false);
     }
@@ -55,13 +55,18 @@ const PromocodeInput: React.FC<PromocodeInputProps> = ({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            -{currentPromocode.discount_fixed}₽
+            {currentPromocode.discount_fixed ? 
+              `-${currentPromocode.discount_fixed}₽` : 
+              currentPromocode.discount_percent && currentPromocode.discount_percent !== 'null' ? 
+                `-${currentPromocode.discount_percent}%` : 
+                ''
+            }
           </span>
           <button
             onClick={onPromocodeRemoved}
             className="text-sm text-red-500 hover:text-red-600"
           >
-            Remove
+            Удалить
           </button>
         </div>
       </div>
@@ -74,7 +79,7 @@ const PromocodeInput: React.FC<PromocodeInputProps> = ({
         type="text"
         value={code}
         onChange={(e) => setCode(e.target.value)}
-        placeholder="Enter promocode"
+        placeholder="Введите промокод"
         className="flex-1 p-2 text-sm bg-white dark:bg-sidebar-primary/30 border border-gray-300 dark:border-gray-700 rounded-md"
         disabled={isValidating}
       />
@@ -86,10 +91,10 @@ const PromocodeInput: React.FC<PromocodeInputProps> = ({
         {isValidating ? (
           <>
             <Loader2 size={16} className="animate-spin mr-2" />
-            Validating...
+            Проверка...
           </>
         ) : (
-          'Apply'
+          'Применить'
         )}
       </button>
     </form>

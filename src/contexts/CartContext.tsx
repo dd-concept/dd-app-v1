@@ -10,6 +10,15 @@ export interface CartItem {
   price: number;
   sale_price?: number;
   quantity: number;
+  item_type?: 'stock' | 'preorder';
+  // For preorder items
+  dewu_url?: string;
+  category_type?: string;
+  delivery_type?: string; // For backward compatibility
+  shipping_type?: string; // New API expects shipping_type
+  price_cny?: number; // Price in Chinese Yuan for preorder items
+  // Image URL for the item
+  photo_url?: string;
 }
 
 // For compatibility with existing code
@@ -20,11 +29,26 @@ interface Product {
   sizes: string[];
   price: number;
   quantity: number;
+  photo_url?: string;
+}
+
+// Preorder item interface
+interface PreorderItem {
+  dewu_url: string;
+  size: string;
+  category_type: string;
+  delivery_type?: string; // For backward compatibility
+  shipping_type?: string; // New API expects shipping_type
+  price: number;
+  price_cny?: number;
+  name: string;
+  photo_url?: string;
 }
 
 interface CartContextType {
   items: CartItem[];
   addToCart: (product: Product, size: string) => void;
+  addPreorderToCart: (preorderItem: PreorderItem) => void;
   removeFromCart: (productId: string, size: string) => void;
   clearCart: () => void;
   itemCount: number;
@@ -81,7 +105,45 @@ export const CartProvider: React.FC<{children: ReactNode}> = ({ children }) => {
           color: product.color,
           size,
           price: product.price,
-          quantity: 1
+          quantity: 1,
+          item_type: 'stock',
+          photo_url: product.photo_url
+        }];
+      }
+    });
+  };
+
+  const addPreorderToCart = (preorderItem: PreorderItem) => {
+    // Generate a unique ID for preorder items using the URL and size
+    const preorderId = `preorder-${btoa(preorderItem.dewu_url)}-${preorderItem.size}`;
+    
+    setItems(currentItems => {
+      // Check if this preorder item is already in the cart
+      const existingItemIndex = currentItems.findIndex(
+        item => item.productId === preorderId
+      );
+
+      if (existingItemIndex >= 0) {
+        // If already in cart, increase quantity
+        const updatedItems = [...currentItems];
+        updatedItems[existingItemIndex].quantity += 1;
+        return updatedItems;
+      } else {
+        // Otherwise add new preorder item
+        return [...currentItems, {
+          productId: preorderId,
+          name: preorderItem.name,
+          color: '',
+          size: preorderItem.size,
+          price: preorderItem.price,
+          quantity: 1,
+          item_type: 'preorder',
+          dewu_url: preorderItem.dewu_url,
+          category_type: preorderItem.category_type,
+          delivery_type: preorderItem.delivery_type, // Keep for backward compatibility
+          shipping_type: preorderItem.shipping_type, // New API field
+          price_cny: preorderItem.price_cny,
+          photo_url: preorderItem.photo_url
         }];
       }
     });
@@ -146,6 +208,7 @@ export const CartProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     <CartContext.Provider value={{
       items,
       addToCart,
+      addPreorderToCart,
       removeFromCart,
       clearCart,
       itemCount,

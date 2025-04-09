@@ -17,7 +17,6 @@ const ProductDetails: React.FC = () => {
   const navigate = useNavigate();
   const { addToCart: addItemToCart, updateQuantity, getItemQuantity } = useCart();
   const [selectedSize, setSelectedSize] = useState<string>('');
-  const [addedToCart, setAddedToCart] = useState(false);
   
   // Fetch all products with retry and longer staleTime
   const { data: products, isLoading, error, isError, refetch } = useQuery({
@@ -64,13 +63,6 @@ const ProductDetails: React.FC = () => {
     return getItemQuantity(product.sku, selectedSize);
   }, [product, selectedSize, getItemQuantity]);
   
-  // Check if item is already in cart
-  useEffect(() => {
-    if (currentQuantity > 0) {
-      setAddedToCart(true);
-    }
-  }, [currentQuantity]);
-  
   // Get processed photo URLs
   const photoUrls = useMemo(() => {
     if (!product || !product.photos) return [];
@@ -96,7 +88,7 @@ const ProductDetails: React.FC = () => {
     
     // Check if adding one more would exceed available stock
     if (currentQuantity >= getMaxAvailableQuantity) {
-      toast.error(`Sorry, only ${getMaxAvailableQuantity} items available in size ${selectedSize}`);
+      toast.error(`Извините, доступно только ${getMaxAvailableQuantity} шт. размера ${selectedSize}`);
       return;
     }
     
@@ -121,7 +113,6 @@ const ProductDetails: React.FC = () => {
     };
     
     addItemToCart(tempProduct, selectedSize);
-    setAddedToCart(true);
     
     // Also call the API method (which is just a placeholder for now)
     addProductToCart(product.sku, selectedSize);
@@ -132,7 +123,7 @@ const ProductDetails: React.FC = () => {
     
     // Check if adding one more would exceed available stock
     if (currentQuantity >= getMaxAvailableQuantity) {
-      toast.error(`Sorry, only ${getMaxAvailableQuantity} items available in size ${selectedSize}`);
+      toast.error(`Извините, доступно только ${getMaxAvailableQuantity} шт. размера ${selectedSize}`);
       return;
     }
     
@@ -144,9 +135,6 @@ const ProductDetails: React.FC = () => {
     if (!product || !selectedSize || currentQuantity <= 0) return;
     hapticSelection();
     updateQuantity(product.sku, selectedSize, currentQuantity - 1);
-    if (currentQuantity === 1) {
-      setAddedToCart(false);
-    }
   };
   
   const handleViewCart = () => {
@@ -169,10 +157,10 @@ const ProductDetails: React.FC = () => {
       <PageLayout>
         <div className="p-4 text-center">
           <h2 className="text-lg font-medium text-red-600 mb-2">
-            {isError ? "Error loading product" : "Product not found"}
+            {isError ? "Ошибка загрузки товара" : "Товар не найден"}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            {isError ? "Please try again later" : "This product may no longer be available"}
+            {isError ? "Пожалуйста, попробуйте позже" : "Этот товар может быть больше не доступен"}
           </p>
           <div className="flex justify-center gap-4">
             {isError && (
@@ -180,14 +168,14 @@ const ProductDetails: React.FC = () => {
                 className="px-4 py-2 bg-telegram-blue text-white rounded-lg"
                 onClick={() => refetch()}
               >
-                Retry
+                Повторить
               </button>
             )}
             <button 
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg"
               onClick={() => navigate('/shop')}
             >
-              Back to Shop
+              В магазин
             </button>
           </div>
         </div>
@@ -214,9 +202,10 @@ const ProductDetails: React.FC = () => {
               aria-label="View Cart"
             >
               <ShoppingCart size={20} className="text-white" />
-              {currentQuantity > 0 && (
+              {/* Show total quantity of this product in cart across all sizes */}
+              {availableSizes.reduce((total, size) => total + getItemQuantity(product.sku, size), 0) > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                  {currentQuantity}
+                  {availableSizes.reduce((total, size) => total + getItemQuantity(product.sku, size), 0)}
                 </span>
               )}
             </Link>
@@ -241,7 +230,7 @@ const ProductDetails: React.FC = () => {
           </div>
           
           <div className="mb-6">
-            <h2 className="font-medium mb-2">Select Size</h2>
+            <h2 className="font-medium mb-2">Выберите размер</h2>
             <SizeSelector
               availableSizes={availableSizes}
               selectedSize={selectedSize}
@@ -252,7 +241,7 @@ const ProductDetails: React.FC = () => {
           <div className="mb-6">
             {product.description && (
               <>
-                <h2 className="font-medium mb-2">Description</h2>
+                <h2 className="font-medium mb-2">Описание</h2>
                 <p className="text-gray-700 dark:text-gray-300 text-sm">
                   {product.description}
                 </p>
@@ -261,41 +250,53 @@ const ProductDetails: React.FC = () => {
           </div>
           
           <div className="sticky bottom-0 pt-4 pb-2 bg-white dark:bg-sidebar-primary">
-            {!addedToCart ? (
-              <button
-                onClick={handleAddToCart}
-                disabled={!selectedSize || availableSizes.length === 0}
-                className="w-full py-3 px-4 bg-telegram-blue text-white rounded-lg flex items-center justify-center gap-2 hover:bg-telegram-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ShoppingBag size={20} />
-                <span>Add to Cart</span>
-              </button>
-            ) : (
-              <div className="flex gap-2">
-                <div className="flex-1 flex items-center justify-between border border-gray-200 dark:border-gray-700 rounded-lg p-1">
-                  <button 
-                    onClick={handleDecreaseQuantity}
-                    className="w-10 h-10 flex items-center justify-center text-telegram-text bg-gray-100 dark:bg-gray-800 rounded-md"
-                  >
-                    <Minus size={18} />
-                  </button>
-                  <span className="font-medium">{currentQuantity}</span>
-                  <button 
-                    onClick={handleIncreaseQuantity}
-                    className="w-10 h-10 flex items-center justify-center text-telegram-text bg-gray-100 dark:bg-gray-800 rounded-md"
-                  >
-                    <Plus size={18} />
-                  </button>
+            {selectedSize && (
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium">Размер: {selectedSize}</span>
+                  {getItemQuantity(product.sku, selectedSize) > 0 && (
+                    <span className="text-sm text-gray-500">
+                      В корзине: {getItemQuantity(product.sku, selectedSize)} шт.
+                    </span>
+                  )}
                 </div>
-                <button
-                  onClick={handleViewCart}
-                  className="py-3 px-4 bg-telegram-blue text-white rounded-lg flex items-center justify-center gap-2 hover:bg-telegram-dark transition-colors"
-                >
-                  <ShoppingCart size={20} />
-                  <span>View Cart</span>
-                </button>
+                
+                {getItemQuantity(product.sku, selectedSize) === 0 ? (
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={!selectedSize || availableSizes.length === 0}
+                    className="w-full py-3 px-4 bg-telegram-blue text-white rounded-lg flex items-center justify-center gap-2 hover:bg-telegram-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ShoppingBag size={20} />
+                    <span>Добавить в корзину</span>
+                  </button>
+                ) : (
+                  <div className="flex items-center justify-between border border-gray-200 dark:border-gray-700 rounded-lg p-1">
+                    <button 
+                      onClick={handleDecreaseQuantity}
+                      className="w-10 h-10 flex items-center justify-center text-telegram-text bg-gray-100 dark:bg-gray-800 rounded-md"
+                    >
+                      <Minus size={18} />
+                    </button>
+                    <span className="font-medium">{getItemQuantity(product.sku, selectedSize)}</span>
+                    <button 
+                      onClick={handleIncreaseQuantity}
+                      className="w-10 h-10 flex items-center justify-center text-telegram-text bg-gray-100 dark:bg-gray-800 rounded-md"
+                    >
+                      <Plus size={18} />
+                    </button>
+                  </div>
+                )}
               </div>
             )}
+            
+            <button
+              onClick={handleViewCart}
+              className="w-full py-3 px-4 bg-telegram-blue text-white rounded-lg flex items-center justify-center gap-2 hover:bg-telegram-dark transition-colors"
+            >
+              <ShoppingCart size={20} />
+              <span>Перейти в корзину</span>
+            </button>
           </div>
         </div>
       </div>

@@ -1,10 +1,10 @@
 import { toast } from 'sonner';
-import { API_BASE_URL, createFetchOptions } from './config';
+import { API_BASE_URL, createFetchOptions, getApiUrl } from './config';
 import { ReferralInfo, CreateReferralResponse, ReferralStats } from './types';
 import { getTelegramUser } from './userService';
 
-// Use direct base URL for referrals to ensure correct endpoint
-const REFERRALS_BASE_URL = 'https://v2786182.hosted-by-vdsina.ru';
+// Define referral service API base
+const REFERRAL_API_PATH = 'referrals';
 
 /**
  * Get or create referral code for current user
@@ -25,7 +25,7 @@ export const getUserReferralInfo = async (retryAttempt = 0): Promise<ReferralInf
     // Make the API call
     const { options, clearTimeout } = createFetchOptions('GET');
     
-    const response = await fetch(`${REFERRALS_BASE_URL}/api/v1/referrals/info/${user.id}`, options);
+    const response = await fetch(getApiUrl(`${REFERRAL_API_PATH}/info/${user.id}`), options);
     clearTimeout();
     
     if (!response.ok) {
@@ -88,7 +88,7 @@ export const createReferralCode = async (): Promise<ReferralInfo | null> => {
     // Make the API call
     const { options, clearTimeout } = createFetchOptions('POST', { telegram_id: user.id });
     
-    const response = await fetch(`${REFERRALS_BASE_URL}/api/v1/referrals/create`, options);
+    const response = await fetch(getApiUrl(`${REFERRAL_API_PATH}/create`), options);
     clearTimeout();
     
     if (!response.ok) {
@@ -130,7 +130,7 @@ export const getReferralStats = async (): Promise<ReferralStats | null> => {
     // Make the API call
     const { options, clearTimeout } = createFetchOptions('GET');
     
-    const response = await fetch(`${REFERRALS_BASE_URL}/api/v1/referrals/stats/${user.id}`, options);
+    const response = await fetch(getApiUrl(`${REFERRAL_API_PATH}/stats/${user.id}`), options);
     clearTimeout();
     
     if (!response.ok) {
@@ -213,7 +213,7 @@ export const registerReferral = async (referralCode: string): Promise<boolean> =
       referral_code: referralCode
     });
     
-    const response = await fetch(`${REFERRALS_BASE_URL}/api/v1/referrals/register`, options);
+    const response = await fetch(getApiUrl(`${REFERRAL_API_PATH}/register`), options);
     clearTimeout();
     
     if (!response.ok) {
@@ -252,7 +252,7 @@ export const checkIfUserWasReferred = async (): Promise<boolean> => {
     // Make the API call
     const { options, clearTimeout } = createFetchOptions('GET');
     
-    const response = await fetch(`${REFERRALS_BASE_URL}/api/v1/referrals/was-referred/${user.id}`, options);
+    const response = await fetch(getApiUrl(`${REFERRAL_API_PATH}/was-referred/${user.id}`), options);
     clearTimeout();
     
     if (!response.ok) {

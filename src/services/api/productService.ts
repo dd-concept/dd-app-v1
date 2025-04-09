@@ -97,19 +97,6 @@ export const fetchProducts = async (): Promise<StockItem[]> => {
   }
 };
 
-// Add a product to the user's cart
-export const addProductToCart = async (productId: string, size: string): Promise<boolean> => {
-  try {
-    // This is just a placeholder/mock since we don't have a real cart API
-    // In a real app, you'd call an API endpoint here
-    console.log(`[MOCK] Added product to cart: ${productId}, size: ${size}`);
-    return true;
-  } catch (error) {
-    console.error('Error adding product to cart:', error);
-    return false;
-  }
-};
-
 /**
  * Fetch all available categories
  * @returns A promise that resolves to an array of categories

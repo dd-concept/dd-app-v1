@@ -13,15 +13,34 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
   const getStatusColor = (status: string): string => {
     switch (status.toLowerCase()) {
       case 'delivered':
+      case 'доставлен':
         return 'bg-green-500';
       case 'awaiting manager':
+      case 'ожидает менеджера':
         return 'bg-yellow-500';
       case 'awaiting purchase':
+      case 'ожидает покупки':
         return 'bg-blue-500';
       case 'cancelled':
+      case 'отменён':
         return 'bg-red-500';
       default:
         return 'bg-gray-500';
+    }
+  };
+
+  const translateStatus = (status: string): string => {
+    switch (status.toLowerCase()) {
+      case 'delivered':
+        return 'Доставлен';
+      case 'awaiting manager':
+        return 'Ожидает менеджера';
+      case 'awaiting purchase':
+        return 'Ожидает покупки';
+      case 'cancelled':
+        return 'Отменён';
+      default:
+        return status;
     }
   };
 
@@ -52,16 +71,16 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-medium">Order #{order.order_id}</h3>
+              <h3 className="text-lg font-medium">Заказ #{order.order_id}</h3>
               <Badge className={`${getStatusColor(order.status)} text-white`}>
-                {order.status}
+                {translateStatus(order.status)}
               </Badge>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               {formatDate(order.created_at)}
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
+              {order.items.length} {getItemsCountText(order.items.length)}
             </p>
           </div>
           <div className="text-right">
@@ -73,7 +92,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
             )}
             <button 
               className="mt-2 text-telegram-blue hover:text-telegram-dark transition-colors"
-              aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
+              aria-label={isExpanded ? 'Свернуть детали' : 'Развернуть детали'}
             >
               {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
             </button>
@@ -95,16 +114,16 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
                   <div>
                     <p className="font-medium">{item.item_name}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Size: {item.size} {item.quantity > 1 && `× ${item.quantity}`}
+                      Размер: {item.size} {item.quantity > 1 && `× ${item.quantity}`}
                     </p>
                     {item.price_cny && (
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Price (CNY): ¥{formatPrice(item.price_cny)}
+                        Цена (юани): ¥{formatPrice(item.price_cny)}
                       </p>
                     )}
                     {item.sku && (
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        SKU: {item.sku}
+                        Артикул: {item.sku}
                       </p>
                     )}
                   </div>
@@ -118,14 +137,14 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
             {/* Order Summary */}
             <div className="pt-3 border-t dark:border-gray-700">
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
+                <span className="text-gray-600 dark:text-gray-400">Сумма товаров</span>
                 <span>₽{formatPrice(order.subtotal)}</span>
               </div>
 
               {order.promocode && (
                 <div className="flex justify-between text-sm text-telegram-blue mb-1">
                   <span>
-                    Promocode: {order.promocode.promocode_text}
+                    Промокод: {order.promocode.promocode_text}
                     {order.promocode.discount_percent && order.promocode.discount_percent !== 'null' && 
                       ` (-${order.promocode.discount_percent}%)`}
                     {order.promocode.discount_fixed && 
@@ -137,20 +156,20 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
 
               {order.dd_coins_used && order.dd_coins_used !== "0" && (
                 <div className="flex justify-between text-sm text-yellow-500 mb-1">
-                  <span>DD Coins used</span>
+                  <span>Использовано DD Коинов</span>
                   <span>-₽{formatPrice(order.dd_coins_used)}</span>
                 </div>
               )}
 
               {order.prepay_amount && order.prepay_amount !== "0" && (
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600 dark:text-gray-400">Prepayment</span>
+                  <span className="text-gray-600 dark:text-gray-400">Предоплата</span>
                   <span>₽{formatPrice(order.prepay_amount)}</span>
                 </div>
               )}
 
               <div className="flex justify-between font-medium text-base mt-2">
-                <span>Total</span>
+                <span>Итого</span>
                 <span>₽{formatPrice(order.final_price)}</span>
               </div>
             </div>
@@ -159,6 +178,18 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
       )}
     </div>
   );
+};
+
+// Helper function to correctly display item count in Russian
+const getItemsCountText = (count: number): string => {
+  // Rules for Russian pluralization
+  if (count % 10 === 1 && count % 100 !== 11) {
+    return 'товар';
+  } else if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) {
+    return 'товара';
+  } else {
+    return 'товаров';
+  }
 };
 
 export default OrderCard; 

@@ -16,7 +16,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   return (
     <div
       className={cn(
-        'w-full pb-20 max-w-md mx-auto', // Adjusted bottom padding to account for the navigation bar
+        'w-full pb-28 max-w-md mx-auto', // Increased bottom padding for better mobile spacing
         fullHeight ? 'min-h-screen' : '',
         className
       )}
