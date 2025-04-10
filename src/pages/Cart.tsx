@@ -191,7 +191,8 @@ const Cart: React.FC = () => {
             size: item.size,
             category_type: categoryType, // Use mapped category type
             shipping_type: item.shipping_type || (item.delivery_type === 'cargo' ? 'cargo' : 'aero'), // Use shipping_type or convert from delivery_type
-            price_cny: item.price_cny || Math.round(item.price / 12) // Use existing price_cny or estimate it
+            price_cny: item.price_cny || Math.round(item.price / 12), // Use existing price_cny or estimate it
+            quantity: item.quantity
           };
         } else {
           // For stock items, use stock_id which is the productId

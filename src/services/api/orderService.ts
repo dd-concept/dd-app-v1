@@ -455,6 +455,7 @@ export const createPreorder = async (orderData: {
     price_cny: number;
     category_type: string;  // Must be one of: "shoes", "clothes", "accessories"
     delivery_type: string;  // Must be one of: "cargo" or "aero"
+    quantity: number;
   };
 }): Promise<CreateStockOrderResponse> => {
   try {
@@ -504,7 +505,8 @@ export const createPreorder = async (orderData: {
       delivery_address: orderData.delivery_address || '',
       promocode_text: orderData.promocode_text,
       dd_coins_amount: orderData.dd_coins_amount,
-      final_price: orderData.final_price
+      final_price: orderData.final_price,
+      quantity: orderData.preorder_item.quantity
     };
     
     const { options, clearTimeout } = createFetchOptions('POST', requestData);
@@ -641,7 +643,8 @@ export const createUnifiedOrder = async (orderData: {
           size: item.size || '',
           price_cny: item.price_cny,
           category_type: item.category_type,
-          shipping_type: item.shipping_type
+          shipping_type: item.shipping_type,
+          quantity: item.quantity || 1
         };
       } else {
         // Stock item
