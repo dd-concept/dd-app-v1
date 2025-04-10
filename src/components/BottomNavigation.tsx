@@ -29,8 +29,8 @@ const BottomNavigation: React.FC = () => {
   };
   
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bottom-nav-bar">
-      <div className="grid grid-cols-3 w-full max-w-md mx-auto h-20">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bottom-nav-bar pb-4">
+      <div className="grid grid-cols-3 w-full max-w-md mx-auto h-24">
         <Link
           to="/"
           onClick={handleNavigation('/')}
