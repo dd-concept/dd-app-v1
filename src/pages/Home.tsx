@@ -135,23 +135,35 @@ const Home: React.FC = () => {
 
       <section className="mb-8">
         <h2 className="text-xl font-medium mb-4">Featured Categories</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-telegram-light dark:bg-sidebar-accent/50 rounded-lg p-6 text-center hover-lift">
-            <span className="text-3xl">👕</span>
-            <h3 className="mt-2 font-medium">Clothing</h3>
-          </div>
-          <div className="bg-telegram-light dark:bg-sidebar-accent/50 rounded-lg p-6 text-center hover-lift">
+        <div className="grid grid-cols-2 gap-4 mb-12">
+          <Link 
+            to="/shop?category=sneakers" 
+            className="bg-telegram-button dark:bg-telegram-dark rounded-lg p-6 text-center hover-lift"
+          >
             <span className="text-3xl">👟</span>
-            <h3 className="mt-2 font-medium">Footwear</h3>
-          </div>
-          <div className="bg-telegram-light dark:bg-sidebar-accent/50 rounded-lg p-6 text-center hover-lift">
+            <h3 className="mt-2 font-medium text-white">Кроссовки</h3>
+          </Link>
+          <Link 
+            to="/shop?category=tops" 
+            className="bg-telegram-blue dark:bg-telegram-blue/90 rounded-lg p-6 text-center hover-lift"
+          >
+            <span className="text-3xl">👕</span>
+            <h3 className="mt-2 font-medium text-white">Верх</h3>
+          </Link>
+          <Link 
+            to="/shop?category=bottoms" 
+            className="bg-telegram-blue/80 dark:bg-telegram-dark/80 rounded-lg p-6 text-center hover-lift"
+          >
+            <span className="text-3xl">👖</span>
+            <h3 className="mt-2 font-medium text-white">Низ</h3>
+          </Link>
+          <Link 
+            to="/shop?category=accessories" 
+            className="bg-telegram-button/90 dark:bg-telegram-button/80 rounded-lg p-6 text-center hover-lift"
+          >
             <span className="text-3xl">🧢</span>
-            <h3 className="mt-2 font-medium">Accessories</h3>
-          </div>
-          <div className="bg-telegram-light dark:bg-sidebar-accent/50 rounded-lg p-6 text-center hover-lift">
-            <span className="text-3xl">🎒</span>
-            <h3 className="mt-2 font-medium">Bags</h3>
-          </div>
+            <h3 className="mt-2 font-medium text-white">Аксессуары</h3>
+          </Link>
         </div>
       </section>
 
