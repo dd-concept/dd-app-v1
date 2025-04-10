@@ -1,18 +1,21 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Filter, Search, ShoppingCart, X, Tag } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
 import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { fetchProducts, StockItem } from '@/services/api';
+import { fetchProducts, fetchCategories, StockItem, Category } from '@/services/api';
 import { toast } from 'sonner';
 import { useCart } from '@/contexts/CartContext';
 
 const Shop: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const { itemCount } = useCart();
 
@@ -24,6 +27,65 @@ const Shop: React.FC = () => {
     retry: 1,
     retryDelay: 1000,
   });
+
+  // Fetch categories using React Query
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1,
+    retryDelay: 1000,
+  });
+  
+  // Parse URL parameters on initial load
+  useEffect(() => {
+    const brandParam = searchParams.get('brand');
+    const categoryParam = searchParams.get('category');
+    const sizeParam = searchParams.get('size');
+    const searchParam = searchParams.get('search');
+    
+    if (brandParam) {
+      setSelectedBrands(brandParam.split(','));
+    }
+    
+    if (categoryParam) {
+      setSelectedCategories(categoryParam.split(','));
+    }
+    
+    if (sizeParam) {
+      setSelectedSizes(sizeParam.split(','));
+    }
+    
+    if (searchParam) {
+      setSearchTerm(searchParam);
+    }
+  }, [searchParams]);
+
+  // Update URL parameters when filters change
+  useEffect(() => {
+    const newParams = new URLSearchParams();
+    
+    if (selectedBrands.length > 0) {
+      newParams.set('brand', selectedBrands.join(','));
+    }
+    
+    if (selectedCategories.length > 0) {
+      newParams.set('category', selectedCategories.join(','));
+    }
+    
+    if (selectedSizes.length > 0) {
+      newParams.set('size', selectedSizes.join(','));
+    }
+    
+    if (searchTerm) {
+      newParams.set('search', searchTerm);
+    }
+    
+    // Only update if params actually changed to avoid needless history entries
+    if (newParams.toString() !== searchParams.toString()) {
+      setSearchParams(newParams);
+    }
+  }, [selectedBrands, selectedCategories, selectedSizes, searchTerm, setSearchParams, searchParams]);
 
   useEffect(() => {
     if (isError && error instanceof Error) {
@@ -64,6 +126,21 @@ const Shop: React.FC = () => {
     
     return Array.from(brands).sort();
   }, [products]);
+  
+  // Extract all available categories from products
+  const availableCategories = useMemo(() => {
+    if (!products) return [];
+    
+    const categorySet = new Set<string>();
+    
+    products.forEach(product => {
+      if (product.category) {
+        categorySet.add(product.category);
+      }
+    });
+    
+    return Array.from(categorySet).sort();
+  }, [products]);
 
   // Toggle size selection
   const toggleSizeSelection = (size: string) => {
@@ -86,14 +163,26 @@ const Shop: React.FC = () => {
       }
     });
   };
+  
+  // Toggle category selection
+  const toggleCategorySelection = (category: string) => {
+    setSelectedCategories(prev => {
+      if (prev.includes(category)) {
+        return prev.filter(c => c !== category);
+      } else {
+        return [...prev, category];
+      }
+    });
+  };
 
-  // Filter products based on search term, selected sizes, and brands
+  // Filter products based on search term, selected sizes, brands, and categories
   const filteredProducts = useMemo(() => {
     if (!products) return [];
     
     return products.filter(product => {
       // Filter by search term
-      const matchesSearch = product.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch = searchTerm === '' || 
+                           product.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            product.color_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            (product.brand && product.brand.toLowerCase().includes(searchTerm.toLowerCase()));
       
@@ -106,14 +195,19 @@ const Shop: React.FC = () => {
       const matchesBrand = selectedBrands.length === 0 || 
                           (product.brand && selectedBrands.includes(product.brand));
       
-      return matchesSearch && matchesSize && matchesBrand;
+      // Filter by categories - if no categories selected, show all
+      const matchesCategory = selectedCategories.length === 0 ||
+                             (product.category && selectedCategories.includes(product.category));
+      
+      return matchesSearch && matchesSize && matchesBrand && matchesCategory;
     });
-  }, [products, searchTerm, selectedSizes, selectedBrands]);
+  }, [products, searchTerm, selectedSizes, selectedBrands, selectedCategories]);
   
   // Clear all filters
   const clearFilters = () => {
     setSelectedSizes([]);
     setSelectedBrands([]);
+    setSelectedCategories([]);
     setSearchTerm('');
   };
   
@@ -127,8 +221,13 @@ const Shop: React.FC = () => {
     setSelectedBrands(prev => prev.filter(b => b !== brand));
   };
   
+  // Remove a specific category filter
+  const removeCategoryFilter = (category: string) => {
+    setSelectedCategories(prev => prev.filter(c => c !== category));
+  };
+  
   // Check if any filters are active
-  const hasActiveFilters = selectedSizes.length > 0 || selectedBrands.length > 0 || searchTerm.length > 0;
+  const hasActiveFilters = selectedSizes.length > 0 || selectedBrands.length > 0 || selectedCategories.length > 0 || searchTerm.length > 0;
 
   return (
     <PageLayout>
@@ -214,6 +313,19 @@ const Shop: React.FC = () => {
                 </span>
               ))}
               
+              {selectedCategories.map(category => (
+                <span key={`filter-category-${category}`} className="inline-flex items-center gap-1 px-2 py-1 bg-telegram-light text-telegram-blue text-xs rounded-full">
+                  <Tag size={12} />
+                  Category: {category}
+                  <button 
+                    className="ml-1" 
+                    onClick={() => removeCategoryFilter(category)}
+                  >
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+              
               {searchTerm && (
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-telegram-light text-telegram-blue text-xs rounded-full">
                   <Search size={12} />
@@ -267,6 +379,28 @@ const Shop: React.FC = () => {
                         onClick={() => toggleBrandSelection(brand)}
                       >
                         {brand}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Category filter */}
+              {availableCategories.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium mb-2 text-telegram-text">Filter by Category (Select Multiple)</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {availableCategories.map(category => (
+                      <button
+                        key={category}
+                        className={`px-3 py-1 text-sm rounded-full border transition-colors ${
+                          selectedCategories.includes(category) 
+                            ? 'bg-telegram-button text-telegram-button-text border-telegram-button' 
+                            : 'bg-telegram-bg text-telegram-text border-telegram-hint/30 hover:border-telegram-hint/50'
+                        }`}
+                        onClick={() => toggleCategorySelection(category)}
+                      >
+                        {category}
                       </button>
                     ))}
                   </div>

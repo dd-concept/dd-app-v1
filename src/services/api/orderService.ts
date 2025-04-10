@@ -1,5 +1,5 @@
 import { toast } from 'sonner';
-import { API_BASE_URL, TIMEOUTS, handleApiError, cache, CACHE_CONFIG, createFetchOptions, getApiUrl } from './config';
+import { API_BASE_URL, TIMEOUTS, handleApiError, cache, CACHE_CONFIG, createFetchOptions } from './config';
 import { Order, CartItem, OrdersRequest, OrdersResponse, OrderStockRequest, OrderStockResponse, PreorderRequest, PreorderResponse, StockOrderItem } from './types';
 import { MOCK_ORDERS } from './mockData';
 import { getTelegramUser } from './userService';
@@ -40,7 +40,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
     const { options, clearTimeout } = createFetchOptions('POST', requestBody, TIMEOUTS.ORDERS);
     
     try {
-      const response = await fetch(getApiUrl('users/orders'), options);
+      const response = await fetch(`${API_BASE_URL}/users/orders`, options);
       clearTimeout();
       
       // If user not found or no orders yet, return empty array
@@ -419,7 +419,7 @@ export const createStockOrder = async (orderData: CreateStockOrderData): Promise
 
     const { options, clearTimeout } = createFetchOptions('POST', cleanOrderData);
 
-    const response = await fetch(getApiUrl('orders/stock'), options);
+    const response = await fetch(`${API_BASE_URL}/orders/stock`, options);
     clearTimeout();
 
     if (!response.ok) {
@@ -509,7 +509,7 @@ export const createPreorder = async (orderData: {
     
     const { options, clearTimeout } = createFetchOptions('POST', requestData);
 
-    const response = await fetch(getApiUrl('orders/preorder'), options);
+    const response = await fetch(`${API_BASE_URL}/orders/preorder`, options);
     clearTimeout();
 
     if (!response.ok) {
@@ -553,7 +553,7 @@ export const calculateShipping = async (
     // Make the API call
     const { options, clearTimeout } = createFetchOptions('POST', requestBody, TIMEOUTS.PRODUCTS);
     
-    const response = await fetch(getApiUrl('orders/calculate-shipping'), options);
+    const response = await fetch(`${API_BASE_URL}/orders/calculate-shipping`, options);
     clearTimeout();
     
     console.log(`Response status: ${response.status} ${response.statusText}`);
@@ -687,7 +687,7 @@ export const createUnifiedOrder = async (orderData: {
 
     const { options, clearTimeout } = createFetchOptions('POST', requestData);
 
-    const response = await fetch(getApiUrl('orders/create-order'), options);
+    const response = await fetch(`${API_BASE_URL}/orders/create-order`, options);
     clearTimeout();
 
     if (!response.ok) {
@@ -718,7 +718,7 @@ export const fetchDeliveryTypes = async () => {
   try {
     const { options, clearTimeout } = createFetchOptions('GET', undefined, TIMEOUTS.PRODUCTS);
     
-    const response = await fetch(getApiUrl('orders/delivery-types'), options);
+    const response = await fetch(`${API_BASE_URL}/orders/delivery-types`, options);
     clearTimeout();
     
     if (!response.ok) {

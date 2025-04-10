@@ -1,49 +1,43 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getRandomBannerEmoji } from '@/utils/emojiUtils';
+import { useNavigate } from 'react-router-dom';
 
 interface BannerProps {
-  title: string;
-  emoji?: string;
+  image: string;
+  link?: string;
   className?: string;
-  color?: string;
 }
 
 const Banner: React.FC<BannerProps> = ({ 
-  title, 
-  emoji, 
-  className,
-  color = 'bg-telegram-blue dark:bg-telegram-dark'
+  image, 
+  link,
+  className
 }) => {
-  const [displayEmoji, setDisplayEmoji] = useState(emoji || getRandomBannerEmoji());
-
-  useEffect(() => {
-    if (!emoji) {
-      setDisplayEmoji(getRandomBannerEmoji());
+  const navigate = useNavigate();
+  
+  const handleClick = () => {
+    if (link) {
+      navigate(link);
     }
-  }, [emoji]);
+  };
 
   return (
     <div 
       className={cn(
-        'rounded-lg px-6 py-8 text-white flex flex-col items-center justify-center w-full transition-all duration-300 animate-scale-in shadow-sm dark:shadow-none',
-        color,
+        'w-full h-48 bg-cover bg-center rounded-lg cursor-pointer shadow-sm hover:shadow-md transition-all',
         className
       )}
-    >
-      <div className="text-3xl mb-2 animate-float">{displayEmoji}</div>
-      <h3 className="text-xl font-medium tracking-wide">{title}</h3>
-    </div>
+      style={{ backgroundImage: `url(${image})` }}
+      onClick={handleClick}
+    />
   );
 };
 
 interface BannerSliderProps {
   banners: Array<{
-    title: string;
-    emoji?: string;
-    color?: string;
+    image: string;
+    link?: string;
   }>;
   className?: string;
   autoPlay?: boolean;
@@ -60,7 +54,7 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const nextBanner = () => {
-    if (isTransitioning) return;
+    if (isTransitioning || banners.length <= 1) return;
     
     setIsTransitioning(true);
     setCurrentIndex((prevIndex) => (prevIndex + 1) % banners.length);
@@ -72,7 +66,7 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
   };
 
   const prevBanner = () => {
-    if (isTransitioning) return;
+    if (isTransitioning || banners.length <= 1) return;
     
     setIsTransitioning(true);
     setCurrentIndex((prevIndex) => (prevIndex - 1 + banners.length) % banners.length);
@@ -85,14 +79,18 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
 
   // Auto-play functionality
   useEffect(() => {
-    if (!autoPlay) return;
+    if (!autoPlay || banners.length <= 1) return;
     
     const timer = setInterval(() => {
       nextBanner();
     }, interval);
     
     return () => clearInterval(timer);
-  }, [autoPlay, interval, currentIndex, isTransitioning]);
+  }, [autoPlay, interval, currentIndex, isTransitioning, banners.length]);
+
+  if (banners.length === 0) {
+    return null;
+  }
 
   return (
     <div className={cn('relative', className)}>
@@ -104,47 +102,52 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
           {banners.map((banner, index) => (
             <div key={index} className="min-w-full">
               <Banner
-                title={banner.title}
-                emoji={banner.emoji}
-                color={banner.color}
+                image={banner.image}
+                link={banner.link}
               />
             </div>
           ))}
         </div>
       </div>
       
-      {/* Navigation dots */}
-      <div className="flex justify-center mt-4 space-x-2">
-        {banners.map((_, index) => (
+      {/* Navigation dots - only show if multiple banners */}
+      {banners.length > 1 && (
+        <div className="flex justify-center mt-4 space-x-2">
+          {banners.map((_, index) => (
+            <button
+              key={index}
+              className={cn(
+                'w-2 h-2 rounded-full transition-all duration-300',
+                index === currentIndex 
+                  ? 'bg-telegram-blue dark:bg-telegram-dark w-4' 
+                  : 'bg-gray-300 dark:bg-gray-600'
+              )}
+              onClick={() => setCurrentIndex(index)}
+            />
+          ))}
+        </div>
+      )}
+      
+      {/* Arrow controls - only show if multiple banners */}
+      {banners.length > 1 && (
+        <>
           <button
-            key={index}
-            className={cn(
-              'w-2 h-2 rounded-full transition-all duration-300',
-              index === currentIndex 
-                ? 'bg-telegram-blue dark:bg-telegram-dark w-4' 
-                : 'bg-gray-300 dark:bg-gray-600'
-            )}
-            onClick={() => setCurrentIndex(index)}
-          />
-        ))}
-      </div>
-      
-      {/* Arrow controls */}
-      <button
-        onClick={prevBanner}
-        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 dark:bg-gray-800/80 flex items-center justify-center shadow-md hover:bg-white dark:hover:bg-gray-700 transition-colors"
-        aria-label="Previous banner"
-      >
-        <ChevronLeft size={20} className="text-gray-800 dark:text-gray-200" />
-      </button>
-      
-      <button
-        onClick={nextBanner}
-        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 dark:bg-gray-800/80 flex items-center justify-center shadow-md hover:bg-white dark:hover:bg-gray-700 transition-colors"
-        aria-label="Next banner"
-      >
-        <ChevronRight size={20} className="text-gray-800 dark:text-gray-200" />
-      </button>
+            onClick={prevBanner}
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 dark:bg-gray-800/80 flex items-center justify-center shadow-md hover:bg-white dark:hover:bg-gray-700 transition-colors"
+            aria-label="Previous banner"
+          >
+            <ChevronLeft size={20} className="text-gray-800 dark:text-gray-200" />
+          </button>
+          
+          <button
+            onClick={nextBanner}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 dark:bg-gray-800/80 flex items-center justify-center shadow-md hover:bg-white dark:hover:bg-gray-700 transition-colors"
+            aria-label="Next banner"
+          >
+            <ChevronRight size={20} className="text-gray-800 dark:text-gray-200" />
+          </button>
+        </>
+      )}
     </div>
   );
 };

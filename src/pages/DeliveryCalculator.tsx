@@ -109,39 +109,9 @@ const DeliveryCalculator: React.FC = () => {
     }
   };
   
-  // Map internal category name to API category_type (shoes, clothes, accessories)
-  const mapToCategoryType = (internalCategory: string): string | null => {
-    const lowercaseCategory = internalCategory.toLowerCase();
-    
-    // Map to one of the allowed categories: sneakers, clothes, accessories
-    if (lowercaseCategory.includes('shoe') || 
-        lowercaseCategory.includes('sneaker') || 
-        lowercaseCategory.includes('обувь') || 
-        lowercaseCategory.includes('кроссовк')) {
-      return 'sneakers';
-    }
-    
-    if (lowercaseCategory.includes('cloth') || 
-        lowercaseCategory.includes('jacket') || 
-        lowercaseCategory.includes('shirt') || 
-        lowercaseCategory.includes('jeans') || 
-        lowercaseCategory.includes('одежд') || 
-        lowercaseCategory.includes('куртк') || 
-        lowercaseCategory.includes('рубашк')) {
-      return 'clothes';
-    }
-    
-    if (lowercaseCategory.includes('access') || 
-        lowercaseCategory.includes('bag') || 
-        lowercaseCategory.includes('wallet') || 
-        lowercaseCategory.includes('аксессуар') || 
-        lowercaseCategory.includes('сумк') || 
-        lowercaseCategory.includes('кошел')) {
-      return 'accessories';
-    }
-    
-    // If no match, return the original type (API will validate)
-    return internalCategory;
+  // Simplified version that just lowercases the category
+  const mapToCategoryType = (internalCategory: string): string => {
+    return internalCategory.toLowerCase();
   };
   
   // Validate price input
