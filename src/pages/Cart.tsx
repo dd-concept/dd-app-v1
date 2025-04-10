@@ -154,13 +154,16 @@ const Cart: React.FC = () => {
   const handleClientInfoComplete = (deliveryRate?: DeliveryRate) => {
     setShowClientInfoForm(false);
     if (deliveryRate) {
+      // alert("Setting delivery type to " + deliveryRate.delivery_type);
       setSelectedDeliveryRate(deliveryRate);
+    } else {
+      alert("No delivery rate provided");
     }
-    createOrderWithInfo();
+    createOrderWithInfo(deliveryRate);
   };
 
   // Separate function to create order after client info is confirmed
-  const createOrderWithInfo = async () => {
+  const createOrderWithInfo = async (deliveryRate?: DeliveryRate) => {
     try {
       setIsCreatingOrder(true);
       
@@ -205,7 +208,7 @@ const Cart: React.FC = () => {
       // Create an order using the unified API endpoint
       const orderData = {
         telegram_user_id: telegramUser.id,
-        delivery_method: selectedDeliveryRate?.delivery_type || 'self_pickup', // Updated to match API requirement
+        delivery_method: deliveryRate?.delivery_type || 'self_pickup', // Updated to use what the API expects
         delivery_address: latestClientInfo?.address || '',
         promocode_text: currentPromocode?.promocode_text,
         dd_coins_amount: ddCoinsToUse,

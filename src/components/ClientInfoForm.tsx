@@ -141,6 +141,7 @@ const ClientInfoForm: React.FC<ClientInfoFormProps> = ({
       const success = await updateClientInfo(phone, email, addressToStore);
 
       if (success) {
+        // alert("Setting delivery type to " + selectedDeliveryRate?.delivery_type);
         onComplete(selectedDeliveryRate);
       } else {
         toast.error('Failed to update client information');
