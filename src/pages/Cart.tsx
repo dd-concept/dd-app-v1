@@ -205,7 +205,7 @@ const Cart: React.FC = () => {
       // Create an order using the unified API endpoint
       const orderData = {
         telegram_user_id: telegramUser.id,
-        delivery_method: selectedDeliveryRate?.delivery_type || 'self_pickup', // Updated to use what the API expects
+        delivery_method: selectedDeliveryRate?.delivery_type || 'self_pickup', // Updated to match API requirement
         delivery_address: latestClientInfo?.address || '',
         promocode_text: currentPromocode?.promocode_text,
         dd_coins_amount: ddCoinsToUse,

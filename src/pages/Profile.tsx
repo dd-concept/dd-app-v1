@@ -103,8 +103,7 @@ const Profile: React.FC = () => {
           
           // Check if user exists in the API
           const exists = await checkUserExists();
-          // Always set as registered regardless of API result
-          setIsRegistered(true);
+          setIsRegistered(typeof exists === 'boolean' ? exists : exists.exists || false);
           
           // Get user rank directly from the API
           await fetchUserRank(user.id);
@@ -123,7 +122,7 @@ const Profile: React.FC = () => {
               
               // Check if user exists in the API
               const exists = await checkUserExists();
-              setIsRegistered(exists);
+              setIsRegistered(typeof exists === 'boolean' ? exists : exists.exists || false);
               
               // Get user rank directly from the API
               await fetchUserRank(retryUser.id);

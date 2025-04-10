@@ -3,19 +3,6 @@ import { toast } from 'sonner';
 // API configuration
 export const API_BASE_URL = 'https://v2786182.hosted-by-vdsina.ru/api/v1';
 
-// Function to ensure proper API path formatting
-export const getApiUrl = (path: string): string => {
-  // Remove any leading slash from the path to avoid double slashes
-  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-  
-  // Remove api/v1 prefix from path if it exists since API_BASE_URL already includes it
-  const finalPath = cleanPath.startsWith('api/v1/') 
-    ? cleanPath.substring(7) // Remove 'api/v1/'
-    : cleanPath;
-    
-  return `${API_BASE_URL}/${finalPath}`;
-};
-
 // Increased timeout configuration for different API calls
 export const TIMEOUTS = {
   PRODUCTS: 15000, // 15 seconds (increased from 10)

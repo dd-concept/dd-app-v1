@@ -6,6 +6,11 @@ import { Banner, BannerSlider } from '@/components/Banner';
 import { useUser } from '@/contexts/UserContext';
 import { getRandomBannerEmoji } from '@/utils/emojiUtils';
 import { getTelegramUser, initTelegramWebApp, hapticSelection } from '@/utils/telegramUtils';
+import { ArrowRight } from 'lucide-react';
+// Import banner images
+import mainBanner from '@/assets/main_banner.png';
+import csBanner from '@/assets/cs_banner.png';
+import shopBanner from '@/assets/shop_banner.png';
 
 const Home: React.FC = () => {
   const { username, displayName, telegramUser, avatarEmoji, updateTelegramUser } = useUser();
@@ -36,19 +41,12 @@ const Home: React.FC = () => {
   // Banner data
   const banners = [
     {
-      title: 'SPRING SALE',
-      emoji: getRandomBannerEmoji(),
-      color: 'bg-telegram-blue dark:bg-telegram-dark'
+      image: mainBanner,
+      link: '/calculator'
     },
     {
-      title: 'NEW ARRIVALS',
-      emoji: getRandomBannerEmoji(),
-      color: 'bg-indigo-500 dark:bg-indigo-900/80'
-    },
-    {
-      title: 'EXCLUSIVE DEALS',
-      emoji: getRandomBannerEmoji(),
-      color: 'bg-violet-500 dark:bg-violet-900/80'
+      image: csBanner, 
+      link: '/shop?brand=Cat%26Sofa'
     }
   ];
 
@@ -92,6 +90,49 @@ const Home: React.FC = () => {
         <BannerSlider banners={banners} />
       </section>
 
+
+      {/* Three blocks with updated layout */}
+      <section className="grid grid-cols-2 gap-4 mb-8">
+        {/* Order Block - takes 1 column and full height */}
+        <Link 
+          to="/shop" 
+          className="bg-cover bg-center rounded-lg p-4 h-full col-span-1 shadow-sm hover-lift flex flex-col justify-end"
+          style={{ backgroundImage: `url(${shopBanner})` }}
+        >
+          <div className="flex justify-between items-center">
+            <h3 className="text-xl font-medium text-white">Заказать</h3>
+            <ArrowRight size={20} className="text-white" />
+          </div>
+        </Link>
+
+        {/* Right column blocks stacked vertically */}
+        <div className="col-span-1 space-y-4">
+          {/* DD Coins Block */}
+          <div className="bg-telegram-blue text-white dark:bg-telegram-blue rounded-lg p-4 shadow-sm hover-lift flex flex-col justify-between">
+            <h3 className="font-medium">DD coin's</h3>
+            <div className="text-4xl font-bold mb-1">5300</div>
+            <p className="text-xs text-white/80">Баланс и реферальная программа</p>
+            <div className="flex justify-end mt-1">
+              <ArrowRight size={20} className="text-white/70" />
+            </div>
+          </div>
+
+          {/* DD Manager Block */}
+          <div className="bg-white dark:bg-sidebar-accent/50 rounded-lg p-4 shadow-sm hover-lift">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-medium">DD manager</h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Поможет определиться с цветом и размером</p>
+              </div>
+              <div className="flex items-center justify-center">
+                <ArrowRight size={20} className="text-gray-500 dark:text-gray-400" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
       <section className="mb-8">
         <h2 className="text-xl font-medium mb-4">Featured Categories</h2>
         <div className="grid grid-cols-2 gap-4">
@@ -114,7 +155,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      <section className="mb-10">
+      {/* <section className="mb-10">
         <h2 className="text-xl font-medium mb-4">Latest News</h2>
         <div className="space-y-4">
           <div className="bg-white dark:bg-sidebar-accent/50 p-4 rounded-lg shadow-sm animate-slide-up">
@@ -134,7 +175,7 @@ const Home: React.FC = () => {
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Visit our new flagship store in Moscow starting June 1st</p>
           </div>
         </div>
-      </section>
+      </section> */}
     </PageLayout>
   );
 };
