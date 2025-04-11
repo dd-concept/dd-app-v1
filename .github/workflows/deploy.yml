@@ -12,15 +12,11 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Minimal checkout for script only
+      - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          sparse-checkout: |
-            direct-deploy.sh
-          sparse-checkout-cone-mode: false
-
-      - name: Make script executable
-        run: chmod +x ./direct-deploy.sh
+          fetch-depth: 1
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -28,6 +24,8 @@ jobs:
           node-version: 18
 
       - name: Deploy to GitHub Pages
-        run: ./direct-deploy.sh
+        run: |
+          chmod +x ./direct-deploy.sh
+          ./direct-deploy.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
