@@ -26,23 +26,80 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Fix paths in HTML
+      - name: Inspect built index.html
         run: |
-          # Ensure all paths in index.html point to the correct location
-          sed -i 's|src="/src/|src="/dd-app-v1/src/|g' dist/index.html
-          sed -i 's|href="/|href="/dd-app-v1/|g' dist/index.html
-          sed -i 's|src="/|src="/dd-app-v1/|g' dist/index.html
-          # Don't modify external URLs
-          sed -i 's|src="/dd-app-v1/https:|src="https:|g' dist/index.html
-          sed -i 's|href="/dd-app-v1/https:|href="https:|g' dist/index.html
-          sed -i 's|href="/dd-app-v1/http:|href="http:|g' dist/index.html
+          echo "Inspecting built index.html file:"
+          cat dist/index.html
+          
+          # Check if index.html has script and stylesheet
+          if ! grep -q '<script.*type="module"' dist/index.html; then
+            echo "WARNING: No module script found in index.html"
+            
+            # Grab the built assets and inject them
+            JS_FILE=$(find dist/assets -name "*.js" | head -n 1)
+            CSS_FILE=$(find dist/assets -name "*.css" | head -n 1)
+            
+            if [ -n "$JS_FILE" ]; then
+              echo "Found JS file: $JS_FILE"
+              JS_FILENAME=$(basename "$JS_FILE")
+              
+              # Update index.html with the JS file
+              sed -i 's|</body>|<script type="module" crossorigin src="/dd-app-v1/assets/'"$JS_FILENAME"'"></script></body>|' dist/index.html
+            fi
+            
+            if [ -n "$CSS_FILE" ]; then
+              echo "Found CSS file: $CSS_FILE"
+              CSS_FILENAME=$(basename "$CSS_FILE")
+              
+              # Update index.html with the CSS file
+              sed -i 's|</head>|<link rel="stylesheet" href="/dd-app-v1/assets/'"$CSS_FILENAME"'"></head>|' dist/index.html
+            fi
+          fi
+          
+          echo "Updated index.html:"
           cat dist/index.html
 
-      - name: Copy 404.html for SPA routing
+      - name: Copy additional HTML files
         run: |
+          # Copy 404.html if it exists
           if [ -f "public/404.html" ]; then
             cp public/404.html dist/
           fi
+          
+          # Ensure entry.html is properly copied
+          if [ -f "public/entry.html" ]; then
+            cp public/entry.html dist/
+          fi
+          
+          # Ensure test.html is properly copied
+          if [ -f "public/test.html" ]; then
+            cp public/test.html dist/
+          fi
+          
+          # Copy debug.js
+          if [ -f "public/debug.js" ]; then
+            cp public/debug.js dist/
+          fi
+          
+          # Create additional direct entry point
+          cp dist/index.html dist/app.html
+
+      - name: Fix paths in HTML files
+        run: |
+          # Fix paths in all HTML files
+          for html_file in dist/*.html; do
+            echo "Fixing paths in $html_file"
+            
+            # Fix resource paths
+            sed -i 's|src="/src/|src="/dd-app-v1/src/|g' "$html_file"
+            sed -i 's|href="/|href="/dd-app-v1/|g' "$html_file"
+            sed -i 's|src="/|src="/dd-app-v1/|g' "$html_file"
+            
+            # Don't modify external URLs
+            sed -i 's|src="/dd-app-v1/https:|src="https:|g' "$html_file"
+            sed -i 's|href="/dd-app-v1/https:|href="https:|g' "$html_file"
+            sed -i 's|href="/dd-app-v1/http:|href="http:|g' "$html_file"
+          done
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
