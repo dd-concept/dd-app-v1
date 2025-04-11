@@ -8,6 +8,12 @@ NC='\033[0m' # No Color
 
 echo -e "${YELLOW}Starting clean deployment process for GitHub Pages...${NC}"
 
+# Make sure .gitmodules exists and is empty to prevent Git from looking for missing submodules
+echo -e "${YELLOW}Ensuring .gitmodules file is properly set up...${NC}"
+echo "# This file intentionally left empty" > .gitmodules
+echo "# It is used to override any automatic submodule detection by Git" >> .gitmodules
+echo "# Deployment issues were previously caused by directories being mistakenly treated as submodules" >> .gitmodules
+
 # Remove problematic reference directories that are causing submodule errors
 echo -e "${YELLOW}Removing problematic reference directories...${NC}"
 rm -rf reference_repo reference_shop

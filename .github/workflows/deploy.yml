@@ -12,15 +12,16 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout main branch
         uses: actions/checkout@v3
         with:
-          submodules: false # Don't attempt to checkout submodules
+          fetch-depth: 0
+          persist-credentials: false
 
-      - name: Remove problematic directories
+      - name: Fix Submodule Issues
         run: |
-          rm -rf reference_repo reference_shop
-          echo "Removed problematic reference directories"
+          chmod +x ./fix-submodules.sh
+          ./fix-submodules.sh
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -40,4 +41,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist
-          branch: gh-pages 
+          branch: gh-pages
+          clean: true 
