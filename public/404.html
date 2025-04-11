@@ -6,8 +6,18 @@
   <title>Page Not Found</title>
   <script>
     // Redirect to the homepage with the current path as a hash
-    const path = window.location.pathname.replace('/dd-app-v1', '');
-    window.location.href = '/dd-app-v1/#' + path;
+    var pathSegmentsToKeep = 1;
+
+    var l = window.location;
+    var pathName = l.pathname.replace(/\/+$/, '');
+    var segments = pathName.split('/');
+    segments.splice(0, pathSegmentsToKeep + 1);
+    var redirectPath = segments.join('/');
+    
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      '/dd-app-v1/' + (redirectPath ? '#/' + redirectPath : '')
+    );
   </script>
 </head>
 <body>
