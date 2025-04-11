@@ -14,6 +14,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          submodules: false # Don't attempt to checkout submodules
+
+      - name: Remove problematic directories
+        run: |
+          rm -rf reference_repo reference_shop
+          echo "Removed problematic reference directories"
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -25,6 +32,9 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Copy 404.html
+        run: cp public/404.html dist/
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4

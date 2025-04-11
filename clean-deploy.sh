@@ -8,6 +8,10 @@ NC='\033[0m' # No Color
 
 echo -e "${YELLOW}Starting clean deployment process for GitHub Pages...${NC}"
 
+# Remove problematic reference directories that are causing submodule errors
+echo -e "${YELLOW}Removing problematic reference directories...${NC}"
+rm -rf reference_repo reference_shop
+
 # Step 1: Install dependencies
 echo -e "${YELLOW}Installing dependencies...${NC}"
 npm install

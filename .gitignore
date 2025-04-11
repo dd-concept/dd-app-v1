@@ -25,3 +25,7 @@ dist-ssr
 
 # Telegram bot folder (local only)
 /telegram_bot/
+
+# Reference directories causing submodule issues
+/reference_repo/
+/reference_shop/
