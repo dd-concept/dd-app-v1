@@ -9,8 +9,6 @@
     <meta name="author" content="DD App Team" />
     <meta property="og:image" content="og-image.png" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Debug script for deployment troubleshooting -->
-    <script src="debug.js"></script>
     <style>
       :root {
         --tg-theme-bg-color: #232730;
@@ -50,7 +48,6 @@
 
   <body style="background-color: #232730;">
     <div id="root" style="background-color: #232730;"></div>
-    <!-- This script source will be replaced by Vite during the build -->
-    <!-- Leave this empty or use a placeholder to be replaced by the bundler -->
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
