@@ -625,7 +625,7 @@ export const createUnifiedOrder = async (orderData: {
         }
         
         // Validate category_type
-        const validCategoryTypes = ['shoes', 'clothes', 'accessories', 'sneakers'];
+        const validCategoryTypes = ['shirt', 'clothes', 'accessories', 'sneakers'];
         if (!validCategoryTypes.includes(item.category_type)) {
           throw new Error(`Invalid category type for preorder. Must be one of: ${validCategoryTypes.join(', ')}`);
         }
