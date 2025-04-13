@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DD App Test Page</title>
+  <script src="/dd-app-v1/dd-app-v1/debug.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #232730;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+    .test-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #2c313c;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      margin-top: 0;
+      color: #64baff;
+    }
+    .test-item {
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: #374151;
+      border-radius: 4px;
+    }
+    .test-result {
+      font-weight: bold;
+    }
+    .success {
+      color: #10b981;
+    }
+    .failure {
+      color: #ef4444;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>DD App Deployment Test</h1>
+    
+    <div class="test-item">
+      <h3>Basic HTML Rendering</h3>
+      <div class="test-result success">✓ Success</div>
+    </div>
+    
+    <div class="test-item">
+      <h3>CSS Loading</h3>
+      <div class="test-result" id="css-test">Testing...</div>
+    </div>
+    
+    <div class="test-item">
+      <h3>JavaScript Execution</h3>
+      <div class="test-result" id="js-test">Testing...</div>
+    </div>
+    
+    <div class="test-item">
+      <h3>Asset Loading</h3>
+      <div class="test-result" id="asset-test">Testing...</div>
+      <div>
+        <img id="test-image" src="/dd-app-v1/dd-app-v1/og-image.png" alt="Test Image" style="max-width: 100px; display: none;">
+      </div>
+    </div>
+    
+    <div class="test-item">
+      <h3>Environment Info</h3>
+      <div id="env-info">Loading...</div>
+    </div>
+    
+    <div class="test-item">
+      <h3>React Test</h3>
+      <div id="react-root"></div>
+      <div class="test-result" id="react-test">Testing...</div>
+    </div>
+  </div>
+
+  <script>
+    // CSS Test
+    document.getElementById('css-test').className = 'test-result success';
+    document.getElementById('css-test').innerText = '✓ CSS is working';
+    
+    // JavaScript Test
+    document.getElementById('js-test').className = 'test-result success';
+    document.getElementById('js-test').innerText = '✓ JavaScript is working';
+    
+    // Asset Test
+    const img = document.getElementById('test-image');
+    img.onload = function() {
+      document.getElementById('asset-test').className = 'test-result success';
+      document.getElementById('asset-test').innerText = '✓ Assets can be loaded';
+      img.style.display = 'block';
+    };
+    img.onerror = function() {
+      document.getElementById('asset-test').className = 'test-result failure';
+      document.getElementById('asset-test').innerText = '✗ Failed to load test image';
+    };
+    
+    // Environment Info
+    const envInfo = document.getElementById('env-info');
+    envInfo.innerHTML = `
+      <div>URL: ${window.location.href}</div>
+      <div>Base Path: ${document.baseURI}</div>
+      <div>User Agent: ${navigator.userAgent}</div>
+    `;
+    
+    // Load React with standalone script tags
+    function loadScript(src, callback) {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = callback;
+      script.onerror = function() {
+        document.getElementById('react-test').className = 'test-result failure';
+        document.getElementById('react-test').innerText = `✗ Failed to load ${src}`;
+      };
+      document.body.appendChild(script);
+    }
+    
+    // Load React core
+    loadScript('https://unpkg.com/react@18/umd/react.production.min.js', function() {
+      // Load React DOM
+      loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js', function() {
+        const root = document.getElementById('react-root');
+        
+        // Simple React component test
+        try {
+          const element = React.createElement('div', null, 'Hello from React!');
+          ReactDOM.render(element, root);
+          document.getElementById('react-test').className = 'test-result success';
+          document.getElementById('react-test').innerText = '✓ React is working';
+        } catch (error) {
+          document.getElementById('react-test').className = 'test-result failure';
+          document.getElementById('react-test').innerText = `✗ React error: ${error.message}`;
+        }
+      });
+    });
+  </script>
+</body>
+</html> 
