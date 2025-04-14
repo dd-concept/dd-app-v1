@@ -6,26 +6,32 @@ import { useNavigate } from 'react-router-dom';
 interface BannerProps {
   image: string;
   link?: string;
+  external?: boolean;
   className?: string;
 }
 
 const Banner: React.FC<BannerProps> = ({ 
   image, 
   link,
+  external = false,
   className
 }) => {
   const navigate = useNavigate();
   
   const handleClick = () => {
     if (link) {
-      navigate(link);
+      if (external) {
+        window.open(link, '_blank', 'noopener,noreferrer');
+      } else {
+        navigate(link);
+      }
     }
   };
 
   return (
     <div 
       className={cn(
-        'w-full h-48 bg-cover bg-center rounded-lg cursor-pointer shadow-sm hover:shadow-md transition-all',
+        'w-full aspect-[2.5/1] bg-cover bg-center rounded-lg cursor-pointer shadow-sm hover:shadow-md transition-all',
         className
       )}
       style={{ backgroundImage: `url(${image})` }}
@@ -38,6 +44,7 @@ interface BannerSliderProps {
   banners: Array<{
     image: string;
     link?: string;
+    external?: boolean;
   }>;
   className?: string;
   autoPlay?: boolean;
@@ -96,7 +103,7 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
     <div className={cn('relative', className)}>
       <div className="overflow-hidden rounded-lg">
         <div 
-          className="flex transition-transform duration-500 ease-in-out"
+          className="flex transition-transform duration-500 ease-in-out w-full"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {banners.map((banner, index) => (
@@ -104,6 +111,7 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
               <Banner
                 image={banner.image}
                 link={banner.link}
+                external={banner.external}
               />
             </div>
           ))}
@@ -112,7 +120,7 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
       
       {/* Navigation dots - only show if multiple banners */}
       {banners.length > 1 && (
-        <div className="flex justify-center mt-4 space-x-2">
+        <div className="flex justify-center mt-2 space-x-2">
           {banners.map((_, index) => (
             <button
               key={index}

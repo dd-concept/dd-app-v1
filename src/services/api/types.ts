@@ -104,6 +104,14 @@ export interface OrderItem {
   price_rub: string | null;
   sale_price: string | null;
   quantity: number;
+  id?: number;
+  type?: 'stock' | 'preorder';
+  status?: string;
+  dewu_url?: string | null;
+  shipping_type?: string | null;
+  category_type?: string | null;
+  weight_category?: string | null;
+  color_code?: string | null;
 }
 
 export interface OrderPromocode {
@@ -123,6 +131,11 @@ export interface Order {
   final_price: string;
   discount_amount: string;
   dd_coins_used: string;
+  delivery_type?: string;
+  delivery_price?: string;
+  delivery_address?: string | null;
+  delivery_info?: string | null;
+  delivery_code?: string | null;
 }
 
 // Client information interfaces

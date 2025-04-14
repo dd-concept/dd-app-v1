@@ -6,7 +6,7 @@ import OrderCard from '@/components/OrderCard';
 import UserAvatar from '@/components/UserAvatar';
 import ReferralCard from '@/components/ReferralCard';
 import { useUser } from '@/contexts/UserContext';
-import { fetchOrders, getUserRank, checkUserExists, getDDCoinsBalance } from '@/services/api';
+import { fetchOrders, getUserRank, checkUserExists, getDDCoinsBalance, getTelegramUser } from '@/services/api';
 import { toast } from 'sonner';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { Settings as SettingsIcon, Coins } from 'lucide-react';
@@ -25,6 +25,27 @@ const Profile: React.FC = () => {
   // Use the Telegram context
   const { tg, initWebApp, getUserData } = useTelegram();
 
+  // Fetch DD coins balance when component mounts
+  useEffect(() => {
+    const fetchDDCoins = async () => {
+      const user = getTelegramUser();
+      if (!user) return;
+      
+      setIsLoadingDDCoins(true);
+      try {
+        const balance = await getDDCoinsBalance();
+        console.log('Profile page - DD coins direct API call:', balance);
+        setDDCoinsBalance(balance);
+      } catch (error) {
+        console.error('Error fetching DD coins balance:', error);
+      } finally {
+        setIsLoadingDDCoins(false);
+      }
+    };
+    
+    fetchDDCoins();
+  }, []);
+
   // Fetch DD coins balance
   const fetchDDCoinsBalance = async () => {
     if (!telegramUser) return;
@@ -32,6 +53,7 @@ const Profile: React.FC = () => {
     setIsLoadingDDCoins(true);
     try {
       const balance = await getDDCoinsBalance();
+      console.log('Profile page: DD coins balance received:', balance);
       setDDCoinsBalance(balance);
     } catch (error) {
       console.error('Error fetching DD coins balance:', error);
@@ -229,7 +251,7 @@ const Profile: React.FC = () => {
             {isLoadingDDCoins ? (
               <span className="text-sm text-gray-500">Loading...</span>
             ) : (
-              <span className="text-xl font-bold text-telegram-blue">{ddCoinsBalance}</span>
+              <span className="text-xl font-bold text-telegram-blue">{ddCoinsBalance || 0}</span>
             )}
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">

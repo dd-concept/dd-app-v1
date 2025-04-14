@@ -1,12 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
 import UserAvatar from '@/components/UserAvatar';
-import { Banner, BannerSlider } from '@/components/Banner';
+import { ArrowRight } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 import { getRandomBannerEmoji } from '@/utils/emojiUtils';
-import { getTelegramUser, initTelegramWebApp, hapticSelection } from '@/utils/telegramUtils';
-import { ArrowRight } from 'lucide-react';
+import { initTelegramWebApp, hapticSelection } from '@/utils/telegramUtils';
+import { getDDCoinsBalance, getTelegramUser } from '@/services/api';
+import { toast } from 'sonner';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import BannerSwiper from '@/components/BannerSwiper';
+import DDManagerCard from '@/components/DDManagerCard';
+
 // Import banner images
 import mainBanner from '@/assets/main_banner.png';
 import csBanner from '@/assets/cs_banner.png';
@@ -15,10 +20,12 @@ import shopBanner from '@/assets/shop_banner.png';
 const Home: React.FC = () => {
   const { username, displayName, telegramUser, avatarEmoji, updateTelegramUser } = useUser();
   const navigate = useNavigate();
+  const [ddCoinsBalance, setDDCoinsBalance] = useState<number>(0);
+  const [isLoadingDDCoins, setIsLoadingDDCoins] = useState<boolean>(false);
 
-  // Initialize Telegram WebApp and get user data
+  // Initialize Telegram WebApp, get user data, and fetch DD coins
   useEffect(() => {
-    const initTelegram = async () => {
+    const initApp = async () => {
       try {
         // Initialize Telegram WebApp
         initTelegramWebApp();
@@ -29,20 +36,42 @@ const Home: React.FC = () => {
           console.log('Telegram user found on Home page:', user);
           // Update the user context with Telegram user data
           updateTelegramUser(user);
+          
+          // Fetch DD coins balance
+          await fetchDDCoins(user.id);
         }
       } catch (error) {
         console.error('Error initializing Telegram on Home page:', error);
       }
     };
     
-    initTelegram();
+    initApp();
   }, [updateTelegramUser]);
+
+  // Fetch DD coins balance
+  const fetchDDCoins = async (userId: number) => {
+    if (!userId) return;
+    
+    setIsLoadingDDCoins(true);
+    try {
+      console.log(`Fetching DD coins for user ID: ${userId}`);
+      const balance = await getDDCoinsBalance();
+      console.log('Home page: DD coins balance received:', balance);
+      setDDCoinsBalance(balance);
+    } catch (error) {
+      console.error('Error fetching DD coins balance:', error);
+      toast.error('Failed to load DD coins balance');
+    } finally {
+      setIsLoadingDDCoins(false);
+    }
+  };
 
   // Banner data
   const banners = [
     {
       image: mainBanner,
-      link: '/calculator'
+      link: 'https://t.me/dd_concept',
+      external: true
     },
     {
       image: csBanner, 
@@ -87,7 +116,7 @@ const Home: React.FC = () => {
       </header>
 
       <section className="mb-8 animate-slide-up">
-        <BannerSlider banners={banners} />
+        <BannerSwiper banners={banners} />
       </section>
 
 
@@ -108,37 +137,37 @@ const Home: React.FC = () => {
         {/* Right column blocks stacked vertically */}
         <div className="col-span-1 space-y-4">
           {/* DD Coins Block */}
-          <div className="bg-telegram-blue text-white dark:bg-telegram-blue rounded-lg p-4 shadow-sm hover-lift flex flex-col justify-between">
-            <h3 className="font-medium">DD coin's</h3>
-            <div className="text-4xl font-bold mb-1">5300</div>
+          <Link 
+            to="/profile" 
+            className="bg-telegram-blue text-white dark:bg-telegram-blue rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between"
+          >
+            <h3 className="font-medium text-white">$DD COINS:</h3>
+            <div className="text-4xl font-bold mb-1 text-white">
+              {isLoadingDDCoins ? (
+                <div className="flex items-center justify-center h-10">
+                  <LoadingSpinner size="md" className="text-white" />
+                </div>
+              ) : (
+                ddCoinsBalance || 0
+              )}
+            </div>
             <p className="text-xs text-white/80">Баланс и реферальная программа</p>
             <div className="flex justify-end mt-1">
               <ArrowRight size={20} className="text-white/70" />
             </div>
-          </div>
+          </Link>
 
           {/* DD Manager Block */}
-          <div className="bg-white dark:bg-sidebar-accent/50 rounded-lg p-4 shadow-sm hover-lift">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">DD manager</h3>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Поможет определиться с цветом и размером</p>
-              </div>
-              <div className="flex items-center justify-center">
-                <ArrowRight size={20} className="text-gray-500 dark:text-gray-400" />
-              </div>
-            </div>
-          </div>
+          <DDManagerCard />
         </div>
       </section>
 
-
       <section className="mb-8">
-        <h2 className="text-xl font-medium mb-4">Featured Categories</h2>
+        <h2 className="text-xl font-medium mb-4">Что купить?</h2>
         <div className="grid grid-cols-2 gap-4 mb-12">
           <Link 
             to="/shop?category=sneakers" 
-            className="bg-telegram-button dark:bg-telegram-dark rounded-lg p-6 text-center hover-lift"
+            className="bg-telegram-blue dark:bg-telegram-blue rounded-lg p-6 text-center hover-lift"
           >
             <span className="text-3xl">👟</span>
             <h3 className="mt-2 font-medium text-white">Кроссовки</h3>
@@ -152,14 +181,14 @@ const Home: React.FC = () => {
           </Link>
           <Link 
             to="/shop?category=bottoms" 
-            className="bg-telegram-blue/80 dark:bg-telegram-dark/80 rounded-lg p-6 text-center hover-lift"
+            className="bg-telegram-blue dark:bg-telegram-blue rounded-lg p-6 text-center hover-lift"
           >
             <span className="text-3xl">👖</span>
             <h3 className="mt-2 font-medium text-white">Низ</h3>
           </Link>
           <Link 
             to="/shop?category=accessories" 
-            className="bg-telegram-button/90 dark:bg-telegram-button/80 rounded-lg p-6 text-center hover-lift"
+            className="bg-telegram-blue dark:bg-telegram-blue rounded-lg p-6 text-center hover-lift"
           >
             <span className="text-3xl">🧢</span>
             <h3 className="mt-2 font-medium text-white">Аксессуары</h3>

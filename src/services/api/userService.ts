@@ -261,22 +261,32 @@ export const getDDCoinsBalance = async (): Promise<number> => {
       return 0; // Default balance
     }
     
-    console.log(`Getting DD coins balance for user ID: ${user.id}`);
+    const userId = user.id;
+    console.log(`Getting DD coins balance for user ID: ${userId}`);
     
-    // Check cache first
-    const cacheKey = CACHE_KEYS.DD_COINS(user.id);
-    const cachedBalance = cache.get<number>(cacheKey, CACHE_CONFIG.PROFILE_TTL);
+    // Check cache first with shorter TTL during debugging
+    const cacheKey = CACHE_KEYS.DD_COINS(userId);
+    const cachedBalance = cache.get<number>(cacheKey, 10000); // 10 seconds during testing
     if (cachedBalance !== null) {
       console.log('Using cached DD coins balance:', cachedBalance);
       return cachedBalance;
     }
     
-    // Make the API call with improved fetch options
-    const { options, clearTimeout } = createFetchOptions('GET', null, TIMEOUTS.PROFILE);
-    
+    // For demo/debugging, we can call the API endpoint directly without fetch options
     try {
-      const response = await fetch(`${API_BASE_URL}/users/${user.id}/dd-coins`, options);
+      console.log(`Direct API call to: ${API_BASE_URL}/users/${userId}/dd-coins`);
+      
+      // Make the API call with improved fetch options
+      const { options, clearTimeout } = createFetchOptions('GET', null, TIMEOUTS.PROFILE);
+      
+      // Use explicit URL with user ID for better debugging
+      const apiUrl = `${API_BASE_URL}/users/${userId}/dd-coins`;
+      console.log('API URL for DD coins:', apiUrl);
+      
+      const response = await fetch(apiUrl, options);
       clearTimeout();
+      
+      console.log('DD coins API response status:', response.status);
       
       // If user not found, just return 0 as the default balance
       if (response.status === 404) {
@@ -288,6 +298,7 @@ export const getDDCoinsBalance = async (): Promise<number> => {
       
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('DD coins API non-OK response:', errorText);
         let errorDetail;
         try {
           const errorJson = JSON.parse(errorText);
@@ -302,19 +313,43 @@ export const getDDCoinsBalance = async (): Promise<number> => {
       const responseText = await response.text();
       console.log('Raw DD coins response:', responseText);
       
-      // Parse response
-      const coinsResponse = JSON.parse(responseText);
-      console.log('DD coins response:', coinsResponse);
+      if (!responseText) {
+        console.error('Empty response from DD coins API');
+        return 0;
+      }
       
-      // Extract the balance - format will be like: { "telegram_user_id": 123456789, "dd_coins_balance": "500.00" }
-      const balance = coinsResponse.dd_coins_balance 
-        ? parseFloat(coinsResponse.dd_coins_balance) 
-        : 0;
-      
-      // Cache the balance
-      cache.set(cacheKey, balance);
-      
-      return balance;
+      // Try to parse the response
+      try {
+        // Parse response
+        const coinsResponse = JSON.parse(responseText);
+        console.log('DD coins response (parsed JSON):', coinsResponse);
+        console.log('DD coins balance value:', coinsResponse.dd_coins_balance);
+        console.log('Type of DD coins balance:', typeof coinsResponse.dd_coins_balance);
+        
+        // Extract the balance - The API returns { "telegram_user_id": 432530443, "dd_coins_balance": 1488 }
+        let balance = 0;
+        if (coinsResponse.dd_coins_balance !== undefined) {
+          // Handle both string and number types
+          balance = typeof coinsResponse.dd_coins_balance === 'string' 
+            ? parseFloat(coinsResponse.dd_coins_balance) 
+            : Number(coinsResponse.dd_coins_balance);
+            
+          console.log('Retrieved balance value:', balance);
+        } else {
+          console.error('DD coins balance field not found in response');
+        }
+        
+        console.log('Parsed DD coins balance:', balance);
+        console.log('Type of parsed balance:', typeof balance);
+        
+        // Cache the balance
+        cache.set(cacheKey, balance);
+        
+        return balance;
+      } catch (e) {
+        console.error('Error parsing DD coins response:', e);
+        return 0;
+      }
     } catch (error: any) {
       console.error('Error getting DD coins balance:', error);
       

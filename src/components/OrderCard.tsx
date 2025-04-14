@@ -1,41 +1,10 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { Order as ApiOrder, OrderItem as ApiOrderItem, OrderPromocode } from '@/services/api/types';
 
-interface OrderItem {
-  id: number;
-  type: 'stock' | 'preorder';
-  sku: string | null;
-  item_name: string | null;
-  size: string;
-  price_cny: string;
-  price_rub: string;
-  status: string;
-  dewu_url: string | null;
-  shipping_type: string | null;
-  category_type: string | null;
-  weight_category: string | null;
-  color_code: string | null;
-  quantity: number;
-}
-
-interface OrderPromocode {
-  promocode_text: string;
-  discount_fixed: number | null;
-  discount_percent: string | null;
-}
-
-interface Order {
-  order_id: number;
-  created_at: string;
-  items: OrderItem[];
-  prepay_amount: string;
-  status: string;
-  promocode: OrderPromocode | null;
-  subtotal: string;
-  final_price: string;
-  discount_amount: string;
-  dd_coins_used: string;
+// Extended Order interface that requires delivery properties
+interface Order extends ApiOrder {
   delivery_type: string;
   delivery_price: string;
   delivery_address: string | null;
@@ -43,12 +12,52 @@ interface Order {
   delivery_code: string | null;
 }
 
+// Extended OrderItem interface that requires additional properties
+interface OrderItem extends ApiOrderItem {
+  id: number;
+  type: 'stock' | 'preorder';
+  status: string;
+  dewu_url: string | null;
+  shipping_type: string | null;
+  category_type: string | null;
+  weight_category: string | null;
+  color_code: string | null;
+}
+
 interface OrderCardProps {
-  order: Order;
+  order: ApiOrder;
 }
 
 const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Handle potentially missing properties
+  const normalizedOrder: Order = {
+    ...order,
+    delivery_type: order.delivery_type || '',
+    delivery_price: order.delivery_price || '0',
+    delivery_address: order.delivery_address || null,
+    delivery_info: order.delivery_info || null,
+    delivery_code: order.delivery_code || null,
+    items: order.items.map(item => ({
+      ...item,
+      id: typeof item.id === 'number' ? item.id : 0,
+      type: (item.type as 'stock' | 'preorder') || 'stock',
+      status: item.status || order.status || '',
+      dewu_url: item.dewu_url || null,
+      shipping_type: item.shipping_type || null,
+      category_type: item.category_type || null,
+      weight_category: item.weight_category || null,
+      color_code: item.color_code || null,
+      sku: item.sku || null,
+      item_name: item.item_name || null,
+      size: item.size || '',
+      price_cny: item.price_cny || null,
+      price_rub: item.price_rub || null,
+      sale_price: item.sale_price || null,
+      quantity: item.quantity || 1
+    })) as OrderItem[]
+  };
 
   const getStatusColor = (status: string): string => {
     switch (status.toLowerCase()) {
@@ -122,23 +131,23 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-medium">Заказ #{order.order_id}</h3>
-              <Badge className={`${getStatusColor(order.status)} text-white`}>
-                {translateStatus(order.status)}
+              <h3 className="text-lg font-medium">Заказ #{normalizedOrder.order_id}</h3>
+              <Badge className={`${getStatusColor(normalizedOrder.status)} text-white`}>
+                {translateStatus(normalizedOrder.status)}
               </Badge>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {formatDate(order.created_at)}
+              {formatDate(normalizedOrder.created_at)}
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {order.items.length} {getItemsCountText(order.items.length)}
+              {normalizedOrder.items.length} {getItemsCountText(normalizedOrder.items.length)}
             </p>
           </div>
           <div className="text-right">
-            <p className="font-medium text-lg">₽{formatPrice(order.final_price)}</p>
-            {order.promocode && (
+            <p className="font-medium text-lg">₽{formatPrice(normalizedOrder.final_price)}</p>
+            {normalizedOrder.promocode && (
               <p className="text-sm text-telegram-blue">
-                {order.promocode.promocode_text}
+                {normalizedOrder.promocode.promocode_text}
               </p>
             )}
             <button 
@@ -156,7 +165,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
         <div className="border-t border-gray-100 dark:border-gray-800/50">
           <div className="p-4 space-y-4">
             {/* Order Items */}
-            {order.items.map((item, index) => (
+            {normalizedOrder.items.map((item, index) => (
               <div 
                 key={`item-${index}-${item.id}`} 
                 className="border-b dark:border-gray-700 pb-3 last:border-0"
@@ -192,7 +201,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
                       Размер: {item.size} {item.quantity > 1 && `× ${item.quantity}`}
                     </p>
                     
-                    {item.price_cny && (
+                    {item.type === 'preorder' && item.price_cny && (
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         Цена (юани): ¥{formatPrice(item.price_cny)}
                       </p>
@@ -244,59 +253,59 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
             <div className="pt-3 border-t dark:border-gray-700">
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-gray-600 dark:text-gray-400">Сумма товаров</span>
-                <span>₽{formatPrice(order.subtotal)}</span>
+                <span>₽{formatPrice(normalizedOrder.subtotal)}</span>
               </div>
 
-              {order.delivery_code && (
+              {normalizedOrder.delivery_code && (
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-gray-600 dark:text-gray-400">
-                    Доставка: {order.delivery_code}
+                    Доставка: {normalizedOrder.delivery_code}
                   </span>
                   <span>
-                    {order.delivery_price === "0" ? 
+                    {normalizedOrder.delivery_price === "0" ? 
                       "Бесплатно" : 
-                      `₽${formatPrice(order.delivery_price)}`}
+                      `₽${formatPrice(normalizedOrder.delivery_price)}`}
                   </span>
                 </div>
               )}
 
-              {order.promocode && (
+              {normalizedOrder.promocode && (
                 <div className="flex justify-between text-sm text-telegram-blue mb-1">
                   <span>
-                    Промокод: {order.promocode.promocode_text}
-                    {order.promocode.discount_percent && order.promocode.discount_percent !== 'null' && 
-                      ` (-${order.promocode.discount_percent}%)`}
-                    {order.promocode.discount_fixed && 
-                      ` (-${order.promocode.discount_fixed}₽)`}
+                    Промокод: {normalizedOrder.promocode.promocode_text}
+                    {normalizedOrder.promocode.discount_percent && normalizedOrder.promocode.discount_percent !== 'null' && 
+                      ` (-${normalizedOrder.promocode.discount_percent}%)`}
+                    {normalizedOrder.promocode.discount_fixed && 
+                      ` (-${normalizedOrder.promocode.discount_fixed}₽)`}
                   </span>
-                  <span>-₽{formatPrice(order.discount_amount)}</span>
+                  <span>-₽{formatPrice(normalizedOrder.discount_amount)}</span>
                 </div>
               )}
 
-              {order.discount_amount && order.discount_amount !== "0" && !order.promocode && (
+              {normalizedOrder.discount_amount && normalizedOrder.discount_amount !== "0" && !normalizedOrder.promocode && (
                 <div className="flex justify-between text-sm text-telegram-blue mb-1">
                   <span>Скидка</span>
-                  <span>-₽{formatPrice(order.discount_amount)}</span>
+                  <span>-₽{formatPrice(normalizedOrder.discount_amount)}</span>
                 </div>
               )}
 
-              {order.dd_coins_used && order.dd_coins_used !== "0" && (
+              {normalizedOrder.dd_coins_used && normalizedOrder.dd_coins_used !== "0" && (
                 <div className="flex justify-between text-sm text-yellow-500 mb-1">
                   <span>Использовано DD Коинов</span>
-                  <span>-₽{formatPrice(order.dd_coins_used)}</span>
+                  <span>-₽{formatPrice(normalizedOrder.dd_coins_used)}</span>
                 </div>
               )}
 
-              {order.prepay_amount && order.prepay_amount !== "0" && (
+              {normalizedOrder.prepay_amount && normalizedOrder.prepay_amount !== "0" && (
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-gray-600 dark:text-gray-400">Предоплата</span>
-                  <span>₽{formatPrice(order.prepay_amount)}</span>
+                  <span>₽{formatPrice(normalizedOrder.prepay_amount)}</span>
                 </div>
               )}
 
               <div className="flex justify-between font-medium text-base mt-2">
                 <span>Итого</span>
-                <span>₽{formatPrice(order.final_price)}</span>
+                <span>₽{formatPrice(normalizedOrder.final_price)}</span>
               </div>
             </div>
           </div>

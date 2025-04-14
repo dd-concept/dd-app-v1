@@ -1,0 +1,82 @@
+/* Custom styles for BannerSwiper component */
+
+.banner-swiper-container .swiper-button-next,
+.banner-swiper-container .swiper-button-prev {
+  width: 36px;
+  height: 36px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.banner-swiper-container .swiper-button-next:hover,
+.banner-swiper-container .swiper-button-prev:hover {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.banner-swiper-container .swiper-button-next:after,
+.banner-swiper-container .swiper-button-prev:after {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Make sure buttons are visible on mobile */
+@media (max-width: 768px) {
+  .banner-swiper-container .swiper-button-next,
+  .banner-swiper-container .swiper-button-prev {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .banner-swiper-container .swiper-button-next:after,
+  .banner-swiper-container .swiper-button-prev:after {
+    font-size: 12px;
+  }
+}
+
+/* Pagination bullets */
+.banner-swiper-container .swiper-pagination {
+  bottom: 8px !important;
+}
+
+.banner-swiper-container .swiper-pagination-bullet {
+  width: 6px;
+  height: 6px;
+  background-color: white;
+  opacity: 0.5;
+  margin: 0 4px !important;
+}
+
+.banner-swiper-container .swiper-pagination-bullet-active {
+  opacity: 1;
+  background-color: white;
+  width: 16px;
+  border-radius: 4px;
+}
+
+/* Better touch handling for mobile swipe */
+.banner-swiper-container .swiper {
+  touch-action: pan-y;
+}
+
+.banner-swiper-container .swiper-slide {
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Add slide animations */
+.banner-swiper-container .swiper-slide-active {
+  z-index: 1;
+}
+
+.banner-swiper-container .swiper-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.75rem;
+} 
