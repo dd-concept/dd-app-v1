@@ -1,7 +1,47 @@
 import React, { useState } from 'react';
-import { Order } from '@/services/api/types';
 import { Badge } from '@/components/ui/badge';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+
+interface OrderItem {
+  id: number;
+  type: 'stock' | 'preorder';
+  sku: string | null;
+  item_name: string | null;
+  size: string;
+  price_cny: string;
+  price_rub: string;
+  status: string;
+  dewu_url: string | null;
+  shipping_type: string | null;
+  category_type: string | null;
+  weight_category: string | null;
+  color_code: string | null;
+  quantity: number;
+}
+
+interface OrderPromocode {
+  promocode_text: string;
+  discount_fixed: number | null;
+  discount_percent: string | null;
+}
+
+interface Order {
+  order_id: number;
+  created_at: string;
+  items: OrderItem[];
+  prepay_amount: string;
+  status: string;
+  promocode: OrderPromocode | null;
+  subtotal: string;
+  final_price: string;
+  discount_amount: string;
+  dd_coins_used: string;
+  delivery_type: string;
+  delivery_price: string;
+  delivery_address: string | null;
+  delivery_info: string | null;
+  delivery_code: string | null;
+}
 
 interface OrderCardProps {
   order: Order;
@@ -61,6 +101,17 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
     });
   };
 
+  const getItemsCountText = (count: number): string => {
+    // Rules for Russian pluralization
+    if (count % 10 === 1 && count % 100 !== 11) {
+      return 'товар';
+    } else if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) {
+      return 'товара';
+    } else {
+      return 'товаров';
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-sidebar-accent rounded-lg shadow-sm overflow-hidden">
       {/* Order Summary - Always Visible */}
@@ -107,28 +158,83 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
             {/* Order Items */}
             {order.items.map((item, index) => (
               <div 
-                key={`${item.sku || 'item'}-${index}`} 
+                key={`item-${index}-${item.id}`} 
                 className="border-b dark:border-gray-700 pb-3 last:border-0"
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-medium">{item.item_name}</p>
+                    <div className="flex flex-wrap gap-2 mb-1">
+                      <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        {item.type === 'stock' ? 'Сток' : 'Предзаказ'}
+                      </Badge>
+                      {item.status && (
+                        <Badge className={`${getStatusColor(item.status)} text-white`}>
+                          {translateStatus(item.status)}
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <p className="font-medium">
+                      {item.item_name || (item.dewu_url ? (
+                        <a 
+                          href={item.dewu_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-telegram-blue hover:underline flex items-center"
+                        >
+                          {item.dewu_url.substring(0, 30)}{item.dewu_url.length > 30 ? '...' : ''}
+                          <ExternalLink size={14} className="ml-1" />
+                        </a>
+                      ) : 'Товар')}
+                    </p>
+                    
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       Размер: {item.size} {item.quantity > 1 && `× ${item.quantity}`}
                     </p>
+                    
                     {item.price_cny && (
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         Цена (юани): ¥{formatPrice(item.price_cny)}
                       </p>
                     )}
+                    
                     {item.sku && (
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         Артикул: {item.sku}
                       </p>
                     )}
+                    
+                    {item.shipping_type && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Тип доставки: {item.shipping_type}
+                      </p>
+                    )}
+                    
+                    {item.category_type && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Категория: {item.category_type}
+                      </p>
+                    )}
+                    
+                    {item.weight_category && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Вес: {item.weight_category}
+                      </p>
+                    )}
+                    
+                    {item.color_code && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <span>Цвет:</span>
+                        <div 
+                          className="w-4 h-4 rounded-full border border-gray-300" 
+                          style={{ backgroundColor: item.color_code }}
+                        ></div>
+                      </div>
+                    )}
                   </div>
+                  
                   <div className="text-right">
-                    <p className="font-medium">₽{formatPrice(item.sale_price)}</p>
+                    <p className="font-medium">₽{formatPrice(item.price_rub)}</p>
                   </div>
                 </div>
               </div>
@@ -141,6 +247,19 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
                 <span>₽{formatPrice(order.subtotal)}</span>
               </div>
 
+              {order.delivery_code && (
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Доставка: {order.delivery_code}
+                  </span>
+                  <span>
+                    {order.delivery_price === "0" ? 
+                      "Бесплатно" : 
+                      `₽${formatPrice(order.delivery_price)}`}
+                  </span>
+                </div>
+              )}
+
               {order.promocode && (
                 <div className="flex justify-between text-sm text-telegram-blue mb-1">
                   <span>
@@ -150,6 +269,13 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
                     {order.promocode.discount_fixed && 
                       ` (-${order.promocode.discount_fixed}₽)`}
                   </span>
+                  <span>-₽{formatPrice(order.discount_amount)}</span>
+                </div>
+              )}
+
+              {order.discount_amount && order.discount_amount !== "0" && !order.promocode && (
+                <div className="flex justify-between text-sm text-telegram-blue mb-1">
+                  <span>Скидка</span>
                   <span>-₽{formatPrice(order.discount_amount)}</span>
                 </div>
               )}
@@ -178,18 +304,6 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
       )}
     </div>
   );
-};
-
-// Helper function to correctly display item count in Russian
-const getItemsCountText = (count: number): string => {
-  // Rules for Russian pluralization
-  if (count % 10 === 1 && count % 100 !== 11) {
-    return 'товар';
-  } else if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) {
-    return 'товара';
-  } else {
-    return 'товаров';
-  }
 };
 
 export default OrderCard; 
