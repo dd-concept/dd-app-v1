@@ -1,3 +1,6 @@
+// This file has been deprecated as we're now using the sonner library directly.
+// Import toast and Toaster directly from 'sonner'.
+
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva, type VariantProps } from "class-variance-authority"

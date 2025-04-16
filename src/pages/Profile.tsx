@@ -6,7 +6,7 @@ import OrderCard from '@/components/OrderCard';
 import UserAvatar from '@/components/UserAvatar';
 import ReferralCard from '@/components/ReferralCard';
 import { useUser } from '@/contexts/UserContext';
-import { fetchOrders, getUserRank, checkUserExists, getDDCoinsBalance, getTelegramUser } from '@/services/api';
+import { fetchOrders, /* getUserRank, */ checkUserExists, getDDCoinsBalance, getTelegramUser } from '@/services/api';
 import { toast } from 'sonner';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { Settings as SettingsIcon, Coins } from 'lucide-react';
@@ -16,8 +16,8 @@ import { API_BASE_URL, createFetchOptions } from '@/services/api/config';
 const Profile: React.FC = () => {
   const { username, displayName, telegramUser, profile, avatarEmoji, updateTelegramUser } = useUser();
   const [isRegistered, setIsRegistered] = useState<boolean>(true);
-  const [userRank, setUserRank] = useState<number>(0);
-  const [isLoadingRank, setIsLoadingRank] = useState<boolean>(false);
+  // const [userRank, setUserRank] = useState<number>(0);
+  // const [isLoadingRank, setIsLoadingRank] = useState<boolean>(false);
   const [ddCoinsBalance, setDDCoinsBalance] = useState<number>(0);
   const [isLoadingDDCoins, setIsLoadingDDCoins] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -63,6 +63,7 @@ const Profile: React.FC = () => {
   };
 
   // Fetch user rank directly from the API
+  /* 
   const fetchUserRank = async (userId: number) => {
     setIsLoadingRank(true);
     try {
@@ -105,6 +106,7 @@ const Profile: React.FC = () => {
       setIsLoadingRank(false);
     }
   };
+  */
 
   // Initialize Telegram WebApp and get user data
   useEffect(() => {
@@ -128,7 +130,7 @@ const Profile: React.FC = () => {
           setIsRegistered(typeof exists === 'boolean' ? exists : exists.exists || false);
           
           // Get user rank directly from the API
-          await fetchUserRank(user.id);
+          // await fetchUserRank(user.id);
           
           // Get DD coins balance
           await fetchDDCoinsBalance();
@@ -147,7 +149,7 @@ const Profile: React.FC = () => {
               setIsRegistered(typeof exists === 'boolean' ? exists : exists.exists || false);
               
               // Get user rank directly from the API
-              await fetchUserRank(retryUser.id);
+              // await fetchUserRank(retryUser.id);
               
               // Get DD coins balance
               await fetchDDCoinsBalance();
@@ -225,11 +227,11 @@ const Profile: React.FC = () => {
                   {telegramUser.first_name} {telegramUser.last_name || ''}
                 </p>
               )}
-              <div className="mt-2 flex items-center">
+              {/* <div className="mt-2 flex items-center">
                 <span className="text-sm bg-telegram-light dark:bg-telegram-dark/20 text-telegram-blue dark:text-telegram-blue px-2 py-1 rounded-full">
                   {isLoadingRank ? 'Loading...' : `Rank ${userRank}`}
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
           <button 

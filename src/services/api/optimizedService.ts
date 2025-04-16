@@ -1,5 +1,5 @@
 import { API_BASE_URL, TIMEOUTS, cache, CACHE_CONFIG, createFetchOptions } from './config';
-import { checkUserProfile, getUserRank } from './userService';
+import { checkUserProfile /*, getUserRank*/ } from './userService';
 import { fetchOrders } from './orderService';
 import { fetchProducts } from './productService';
 import { TelegramUser, UserProfile, StockItem, Order } from './types';
@@ -92,11 +92,11 @@ export const refreshUserData = async (userId: number): Promise<void> => {
     // Clear relevant caches
     const profileCacheKey = `profile_${userId}`;
     const ordersCacheKey = `orders_${userId}`;
-    const rankCacheKey = `rank_${userId}`;
+    // const rankCacheKey = `rank_${userId}`;
     
     cache.invalidate(profileCacheKey);
     cache.invalidate(ordersCacheKey);
-    cache.invalidate(rankCacheKey);
+    // cache.invalidate(rankCacheKey);
     cache.invalidate('products');
     
     // Fetch fresh data

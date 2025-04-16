@@ -11,11 +11,16 @@ import { toast } from 'sonner';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import BannerSwiper from '@/components/BannerSwiper';
 import DDManagerCard from '@/components/DDManagerCard';
+import ProductCard from '@/components/ProductCard';
 
 // Import banner images
 import mainBanner from '@/assets/jointgbanner.webp';
 import csBanner from '@/assets/buycatsofabanner.webp';
 import shopBanner from '@/assets/gotoshopbanner.webp';
+import sneakersBanner from '@/assets/sneakers_category_banner.webp';
+import clothesBanner from '@/assets/clothes_category_banner.webp';
+import jeansBanner from '@/assets/jeans_category_banner.webp';
+import beltBanner from '@/assets/belt_category_banner.webp';
 
 const Home: React.FC = () => {
   const { username, displayName, telegramUser, avatarEmoji, updateTelegramUser } = useUser();
@@ -153,7 +158,7 @@ const Home: React.FC = () => {
             </div>
             <p className="text-xs text-white/80">Баланс и реферальная программа</p>
             <div className="flex justify-end mt-1">
-              <ArrowRight size={20} className="text-white/70" />
+              <ArrowRight size={20} className="text-white" />
             </div>
           </Link>
 
@@ -167,31 +172,63 @@ const Home: React.FC = () => {
         <div className="grid grid-cols-2 gap-4 mb-12">
           <Link 
             to="/shop?category=sneakers" 
-            className="bg-telegram-blue dark:bg-telegram-blue rounded-lg p-6 text-center hover-lift"
+            className="rounded-lg overflow-hidden h-36 relative hover-lift"
+            style={{ 
+              backgroundImage: `url(${sneakersBanner})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
           >
-            <span className="text-3xl">👟</span>
-            <h3 className="mt-2 font-medium text-white">Кроссовки</h3>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <div className="absolute bottom-0 w-full p-4 flex justify-between items-center">
+              <h3 className="font-medium text-white">Кроссовки</h3>
+              <ArrowRight className="text-white" size={20} />
+            </div>
           </Link>
           <Link 
             to="/shop?category=tops" 
-            className="bg-telegram-blue dark:bg-telegram-blue/90 rounded-lg p-6 text-center hover-lift"
+            className="rounded-lg overflow-hidden h-36 relative hover-lift"
+            style={{ 
+              backgroundImage: `url(${clothesBanner})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
           >
-            <span className="text-3xl">👕</span>
-            <h3 className="mt-2 font-medium text-white">Верх</h3>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <div className="absolute bottom-0 w-full p-4 flex justify-between items-center">
+              <h3 className="font-medium text-white">Верх</h3>
+              <ArrowRight className="text-white" size={20} />
+            </div>
           </Link>
           <Link 
             to="/shop?category=bottoms" 
-            className="bg-telegram-blue dark:bg-telegram-blue rounded-lg p-6 text-center hover-lift"
+            className="rounded-lg overflow-hidden h-36 relative hover-lift"
+            style={{ 
+              backgroundImage: `url(${jeansBanner})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
           >
-            <span className="text-3xl">👖</span>
-            <h3 className="mt-2 font-medium text-white">Низ</h3>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <div className="absolute bottom-0 w-full p-4 flex justify-between items-center">
+              <h3 className="font-medium text-white">Низ</h3>
+              <ArrowRight className="text-white" size={20} />
+            </div>
           </Link>
           <Link 
             to="/shop?category=accessories" 
-            className="bg-telegram-blue dark:bg-telegram-blue rounded-lg p-6 text-center hover-lift"
+            className="rounded-lg overflow-hidden h-36 relative hover-lift"
+            style={{ 
+              backgroundImage: `url(${beltBanner})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
           >
-            <span className="text-3xl">🧢</span>
-            <h3 className="mt-2 font-medium text-white">Аксессуары</h3>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <div className="absolute bottom-0 w-full p-4 flex justify-between items-center">
+              <h3 className="font-medium text-white">Аксессуары</h3>
+              <ArrowRight className="text-white" size={20} />
+            </div>
           </Link>
         </div>
       </section>

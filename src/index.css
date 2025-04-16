@@ -331,7 +331,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0;
-  height: 60px;
+  height: 75px;
   transition: all 0.3s ease;
   /* Remove border and shadow */
   border-top: none;

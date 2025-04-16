@@ -10,7 +10,7 @@ export * from './config';
 export { 
   getTelegramUser, 
   checkUserExists, 
-  getUserRank, 
+  // getUserRank, 
   checkUserProfile,
   getDDCoinsBalance,
   getDeliveryRates

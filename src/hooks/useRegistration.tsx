@@ -118,9 +118,9 @@ export const useRegistration = (options?: UseRegistrationOptions) => {
             // Add welcome bonus for new users
             const bonusAdded = await addDDCoinsWelcomeBonus(user.id);
             if (bonusAdded) {
-              toast.success('Welcome! 500 DD coins have been added to your account as a welcome bonus!', {
+              toast.success('Добро пожаловать! 500 DD coins добавлены на ваш счет в качестве бонуса!', {
                 duration: 6000,
-                position: 'top-center',
+                id: 'welcome-bonus'
               });
               showWelcomeBonusNotification();
             }
@@ -132,9 +132,9 @@ export const useRegistration = (options?: UseRegistrationOptions) => {
             // Add welcome bonus for updated users too
             const bonusAdded = await addDDCoinsWelcomeBonus(user.id);
             if (bonusAdded) {
-              toast.success('Welcome back! 500 DD coins have been added to your account!', {
+              toast.success('С возвращением! 500 DD coins добавлены на ваш счет!', {
                 duration: 6000,
-                position: 'top-center',
+                id: 'welcome-back-bonus'
               });
               showWelcomeBonusNotification();
             }
@@ -154,9 +154,9 @@ export const useRegistration = (options?: UseRegistrationOptions) => {
           // Add welcome bonus for new users
           const bonusAdded = await addDDCoinsWelcomeBonus(user.id);
           if (bonusAdded) {
-            toast.success('Welcome! 500 DD coins have been added to your account as a welcome bonus!', {
+            toast.success('Добро пожаловать! 500 DD coins добавлены на ваш счет в качестве бонуса!', {
               duration: 6000,
-              position: 'top-center',
+              id: 'welcome-bonus'
             });
             showWelcomeBonusNotification();
           }

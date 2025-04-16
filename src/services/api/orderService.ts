@@ -52,6 +52,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
       }
       
       if (!response.ok) {
+        // Remove debug toasts
         const errorText = await response.text();
         let errorDetail;
         try {
@@ -84,7 +85,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
       
       // Don't show error toast for user not found
       if (!error.message.includes('User not found')) {
-        toast.error(`Error fetching orders: ${error.message}`);
+        toast.error('Данные пользователя недоступны. Попробуйте еще раз.');
       }
       
       return [];
@@ -94,7 +95,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
     
     // Don't show error toast for user not found
     if (!error.message.includes('User not found')) {
-      toast.error(`Error: ${error.message}`);
+      toast.error('Данные пользователя недоступны. Попробуйте еще раз.');
     }
     
     return [];
@@ -113,7 +114,7 @@ export const createOrder = async (cartItems: CartItem[], shippingCost: number = 
     const user = getTelegramUser();
     if (!user) {
       console.error('No user data available when creating order');
-      toast.error('User data not available. Please try again.');
+      toast.error('Данные пользователя недоступны. Попробуйте еще раз.');
       return false;
     }
     
@@ -190,12 +191,12 @@ ${orderItems}
     cache.invalidate(CACHE_KEYS.ORDERS(user.id));
     
     // Show success message
-    toast.success('Order created successfully! Check your Telegram chat for details.');
+    toast.success('Заказ успешно создан! Проверьте чат в Telegram для получения деталей.');
     
     return true;
   } catch (error: any) {
     console.error('Error creating order:', error);
-    toast.error(`Error creating order: ${error.message}`);
+    toast.error('Ошибка при создании заказа. Пожалуйста, попробуйте еще раз.');
     return false;
   }
 };
@@ -285,7 +286,7 @@ Please check your orders in the app.
 `;
         
         // Show a warning to the user
-        toast.warning('Order created, but notification could not be sent to Telegram. Check your console for details.');
+        toast.warning('Заказ создан, но уведомление не может быть отправлено в Telegram.');
         console.error('Could not send notification to Telegram due to CORS or network issues. The bot server might not be running or accessible.');
         
         // Log the fallback message
@@ -363,7 +364,7 @@ export const handleOrderPlaced = (orderId: number, items: CartItem[]): void => {
     cache.invalidate(CACHE_KEYS.ORDERS(user.id));
     
     // Show success message
-    toast.success('Order placed successfully!');
+    toast.success('Заказ успешно оформлен!');
   } catch (error) {
     console.error('Error in handleOrderPlaced:', error);
   }

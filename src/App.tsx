@@ -1,5 +1,4 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
@@ -20,7 +19,7 @@ import {
   requestTelegramTheme,
   setupThemeChangeListener
 } from "./utils/telegramUtils";
-import { checkUserExists, getUserRank } from "./services/api";
+import { checkUserExists /*, getUserRank*/ } from "./services/api";
 import { toast } from "sonner";
 import useReferral from "./hooks/useReferral";
 import useRegistration from "./hooks/useRegistration";
@@ -96,7 +95,7 @@ const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
     onNewUser: (isNew) => {
       if (isNew && referralCode) {
         console.log(`New user registered with referral code: ${referralCode}`);
-        toast.success('Welcome! You were invited by a friend.');
+        toast.success('Добро пожаловать! Вас пригласил друг.');
       }
     }
   });
@@ -120,8 +119,8 @@ const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
       
       if (userExists) {
         // If user exists, also get their rank
-        const rank = await getUserRank();
-        console.log("User rank:", rank);
+        // const rank = await getUserRank();
+        // console.log("User rank:", rank);
       } else {
         console.log("User does not exist in the system yet");
       }
@@ -359,8 +358,7 @@ const App = () => {
         <TooltipProvider>
           <UserProvider>
             <CartProvider>
-              <Toaster />
-              <Sonner position="top-center" />
+              <Toaster richColors closeButton position="top-center" />
               <HashRouter>
                 <TelegramInitializer>
                   <Routes>

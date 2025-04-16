@@ -1,5 +1,7 @@
 /* Custom styles for BannerSwiper component */
 
+/* We can remove these since we're not using navigation buttons anymore */
+/*
 .banner-swiper-container .swiper-button-next,
 .banner-swiper-container .swiper-button-prev {
   width: 36px;
@@ -24,7 +26,6 @@
   font-weight: bold;
 }
 
-/* Make sure buttons are visible on mobile */
 @media (max-width: 768px) {
   .banner-swiper-container .swiper-button-next,
   .banner-swiper-container .swiper-button-prev {
@@ -37,23 +38,32 @@
     font-size: 12px;
   }
 }
+*/
 
-/* Pagination bullets */
-.banner-swiper-container .swiper-pagination {
-  bottom: 8px !important;
+/* External pagination bullets styles */
+.banner-swiper-container .banner-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 8px;
+  height: 16px; /* Fixed height to prevent layout shift */
 }
 
 .banner-swiper-container .swiper-pagination-bullet {
   width: 6px;
   height: 6px;
-  background-color: white;
+  background-color: white; /* Darker color for external bullets */
   opacity: 0.5;
   margin: 0 4px !important;
+  display: inline-block;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .banner-swiper-container .swiper-pagination-bullet-active {
   opacity: 1;
-  background-color: white;
+  background-color:white; /* Telegram blue color */
   width: 16px;
   border-radius: 4px;
 }

@@ -1,29 +1,40 @@
-import { createRoot } from 'react-dom/client'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { TelegramProvider } from './contexts/TelegramContext'
 import { setTelegramColors, requestTelegramTheme } from './utils/telegramUtils'
+import { toast } from 'sonner'
+
+// Declare global toast property
+declare global {
+  interface Window {
+    toast: typeof toast;
+  }
+}
 
 // Apply theme immediately before rendering
-const applyInitialTheme = () => {
-  // Request the theme from Telegram
-  requestTelegramTheme();
+requestTelegramTheme();
+setTelegramColors();
+
+// Listen for Telegram events after page loads
+window.addEventListener('load', () => {
+  // Sync colors with Telegram theme
+  setTelegramColors();
   
-  // Apply Telegram colors based on user's theme
-  setTelegramColors();
-};
-
-// Apply theme immediately
-applyInitialTheme();
-
-// Listen for theme changes and reapply our colors
-window.addEventListener('themechange', () => {
-  console.log('Theme change detected, adapting to user theme');
-  setTelegramColors();
+  // Request current theme from Telegram
+  setTimeout(() => {
+    requestTelegramTheme();
+  }, 1000);
 });
 
-createRoot(document.getElementById("root")!).render(
+// Make toast globally available
+window.toast = toast;
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <TelegramProvider>
-    <App />
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
   </TelegramProvider>
 );

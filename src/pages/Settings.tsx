@@ -44,21 +44,23 @@ const Settings: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      // Validate inputs
-      if (!email) {
-        toast.error('Please enter your email address');
+      // Email validation
+      if (!email.trim()) {
+        toast.error('Пожалуйста, введите ваш email');
         setIsSubmitting(false);
         return;
       }
       
-      if (!phone) {
-        toast.error('Please enter your phone number');
+      // Phone validation
+      if (!phone.trim()) {
+        toast.error('Пожалуйста, введите ваш номер телефона');
         setIsSubmitting(false);
         return;
       }
       
-      if (!address) {
-        toast.error('Please enter your address');
+      // Address validation
+      if (!address.trim()) {
+        toast.error('Пожалуйста, введите ваш адрес');
         setIsSubmitting(false);
         return;
       }
@@ -72,7 +74,7 @@ const Settings: React.FC = () => {
       }
     } catch (error) {
       console.error('Error saving settings:', error);
-      toast.error('Error saving settings');
+      toast.error('Ошибка сохранения настроек. Пожалуйста, попробуйте позже.');
     } finally {
       setIsSubmitting(false);
     }

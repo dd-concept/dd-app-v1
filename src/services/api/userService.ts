@@ -114,6 +114,7 @@ export const checkUserExists = async (returnFullResponse: boolean = false): Prom
 };
 
 // Get user rank with caching
+/*
 export const getUserRank = async (): Promise<number> => {
   try {
     const user = getTelegramUser();
@@ -213,6 +214,7 @@ export const getUserRank = async (): Promise<number> => {
     return 0; // Default rank
   }
 };
+*/
 
 // Legacy function for backward compatibility
 export const checkUserProfile = async (userId: number): Promise<UserProfile> => {
@@ -228,13 +230,13 @@ export const checkUserProfile = async (userId: number): Promise<UserProfile> => 
     }
     
     // Get user rank via the new API
-    const loyaltyRank = await getUserRank();
-    console.log(`Retrieved loyalty rank for user ${safeUserId}: ${loyaltyRank}`);
+    // const loyaltyRank = await getUserRank();
+    // console.log(`Retrieved loyalty rank for user ${safeUserId}: ${loyaltyRank}`);
     
     // Return a compatible profile object
     return {
       telegram_username: username,
-      rank: loyaltyRank,
+      rank: 0, // Default to 0 since rank is not used
       total_orders: 0 // We don't have this information in the new API
     };
   } catch (error) {

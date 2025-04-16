@@ -30,12 +30,12 @@ const BottomNavigation: React.FC = () => {
   
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bottom-nav-bar pb-4">
-      <div className="grid grid-cols-3 w-full max-w-md mx-auto h-24">
+      <div className="grid grid-cols-3 w-full max-w-md mx-auto h-28">
         <Link
           to="/"
           onClick={handleNavigation('/')}
           className={cn(
-            'flex items-center justify-center transition-all duration-200',
+            'flex items-start justify-center pt-4 transition-all duration-200',
             isActive('/') ? 'text-telegram-button active' : 'text-telegram-hint'
           )}
           aria-current={isActive('/') ? 'page' : undefined}
@@ -47,7 +47,7 @@ const BottomNavigation: React.FC = () => {
           to="/shop"
           onClick={handleNavigation('/shop')}
           className={cn(
-            'flex items-center justify-center relative transition-all duration-200',
+            'flex items-start justify-center pt-4 relative transition-all duration-200',
             isActive('/shop') ? 'text-telegram-button active' : 'text-telegram-hint'
           )}
           aria-current={isActive('/shop') ? 'page' : undefined}
@@ -66,7 +66,7 @@ const BottomNavigation: React.FC = () => {
           to="/calculator"
           onClick={handleNavigation('/calculator')}
           className={cn(
-            'flex items-center justify-center transition-all duration-200',
+            'flex items-start justify-center pt-4 transition-all duration-200',
             isActive('/calculator') ? 'text-telegram-button active' : 'text-telegram-hint'
           )}
           aria-current={isActive('/calculator') ? 'page' : undefined}

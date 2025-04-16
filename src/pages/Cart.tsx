@@ -140,7 +140,7 @@ const Cart: React.FC = () => {
         setIsCreatingOrder(false);
       } catch (error) {
         console.error('Error getting client information:', error);
-        toast.error('Не удалось получить информацию о клиенте');
+        toast.error('Ошибка загрузки данных. Пожалуйста, попробуйте позже.');
         setIsCreatingOrder(false);
       }
     } catch (error: any) {
@@ -225,12 +225,11 @@ const Cart: React.FC = () => {
         clearCart();
         toast.success('Заказ создан успешно');
       } else {
-        toast.error(response.message || 'Не удалось создать заказ');
+        toast.error(response.message || 'Не удалось создать заказ. Пожалуйста, попробуйте позже.');
       }
     } catch (error: any) {
       console.error('Error creating order:', error);
-      toast.error(`Error creating order: ${error.message}`);
-    } finally {
+      toast.error('Ошибка при создании заказа. Пожалуйста, попробуйте позже.');
       setIsCreatingOrder(false);
     }
   };
