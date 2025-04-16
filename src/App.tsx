@@ -285,15 +285,15 @@ const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
 
   // Handle back button functionality
   useEffect(() => {
-    // Only show back button if not on home page or shop page
-    if (location.pathname !== '/' && location.pathname !== '/shop') {
+    // Only show back button if not on home page
+    if (location.pathname !== '/') {
       console.log("Showing back button for path:", location.pathname);
       showBackButton(() => {
         console.log("Back button pressed, navigating back");
         navigate(-1); // Go back to previous page
       });
     } else {
-      console.log("Hiding back button for home or shop page");
+      console.log("Hiding back button for home page");
       hideBackButton();
     }
     
