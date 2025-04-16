@@ -453,7 +453,7 @@ export const createPreorder = async (orderData: {
     dewu_url: string;
     size: string;
     price_cny: number;
-    category_type: string;  // Must be one of: "shoes", "clothes", "accessories"
+    category_type: string;  // Must be one of: "обувь", "одежда", "аксессуары"
     delivery_type: string;  // Must be one of: "cargo" or "aero"
     quantity: number;
   };
@@ -481,7 +481,7 @@ export const createPreorder = async (orderData: {
     }
     
     // Validate category_type
-    const validCategoryTypes = ['shoes', 'clothes', 'accessories'];
+    const validCategoryTypes = ['обувь', 'одежда', 'аксессуары'];
     if (!validCategoryTypes.includes(orderData.preorder_item.category_type)) {
       throw new Error(`Invalid category type. Must be one of: ${validCategoryTypes.join(', ')}`);
     }
@@ -625,7 +625,7 @@ export const createUnifiedOrder = async (orderData: {
         }
         
         // Validate category_type
-        const validCategoryTypes = ['shirt', 'clothes', 'accessories', 'sneakers'];
+        const validCategoryTypes = ['обувь', 'одежда', 'аксессуары'];
         if (!validCategoryTypes.includes(item.category_type)) {
           throw new Error(`Invalid category type for preorder. Must be one of: ${validCategoryTypes.join(', ')}`);
         }
