@@ -46,6 +46,7 @@ interface TelegramWebApp {
   // Optional method that might be available in some Telegram clients
   setHeaderColor?: (color: string) => void;
   setBackgroundColor?: (color: string) => void;
+  openLink: (url: string, options?: { try_instant_view?: boolean }) => void;
 }
 
 /**
@@ -1216,5 +1217,48 @@ function applyTelegramThemeCSS(
     console.log(`${isThemeDark ? 'Dark' : 'Light'} theme CSS applied with Telegram colors`);
   } catch (error) {
     console.error("Error applying theme CSS:", error);
+  }
+}
+
+/**
+ * Open URL directly in Telegram WebApp
+ * This bypasses the confirmation dialog and opens the URL within Telegram
+ * @param url URL to open
+ */
+export function openTelegramUrl(url: string): void {
+  try {
+    console.log("Opening URL in Telegram:", url);
+    
+    // Get the WebApp instance
+    const webApp = getTelegramWebApp();
+    
+    if (webApp) {
+      // Use Telegram's openLink method if available (newer versions)
+      if (typeof webApp.openLink === 'function') {
+        webApp.openLink(url, { try_instant_view: true });
+        console.log("URL opened using WebApp.openLink");
+        return;
+      }
+    }
+    
+    // Fallback to global Telegram.WebApp
+    if (window.Telegram?.WebApp) {
+      const globalWebApp = window.Telegram.WebApp;
+      // @ts-ignore - Some versions might have this method
+      if (typeof globalWebApp.openLink === 'function') {
+        // @ts-ignore
+        globalWebApp.openLink(url, { try_instant_view: true });
+        console.log("URL opened using global Telegram.WebApp.openLink");
+        return;
+      }
+    }
+    
+    // If all else fails, just open in a new tab
+    console.warn("No Telegram-specific method available to open URL, falling back to window.open");
+    window.open(url, '_blank');
+  } catch (error) {
+    console.error("Error opening URL in Telegram:", error);
+    // Fallback to regular open
+    window.open(url, '_blank');
   }
 }

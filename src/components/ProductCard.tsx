@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getConsistentEmoji } from '@/utils/emojiUtils';
+import { sortSizes } from '@/utils/sizeUtils';
 import { cn } from '@/lib/utils';
 import { StockItem } from '@/services/api';
 import { hapticImpact } from '@/utils/telegramUtils';
@@ -18,7 +19,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
   
   // Get available sizes from the new format (array of SizeAvailability)
   const availableSizes = Array.isArray(product.sizes) 
-    ? product.sizes.filter(size => size.quantity > 0).map(size => size.size) 
+    ? sortSizes(product.sizes.filter(size => size.quantity > 0).map(size => size.size))
     : [];
 
   // Check if product has photos

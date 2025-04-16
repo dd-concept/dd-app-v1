@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calculator, ExternalLink, Truck, Plane, Loader2, ShoppingBag } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
-import { hapticSelection } from '@/utils/telegramUtils';
+import { hapticSelection, openTelegramUrl } from '@/utils/telegramUtils';
 import { calculateShipping } from '@/services/api/orderService';
 import { fetchCategories } from '@/services/api/productService';
 import { Category } from '@/services/api/types';
@@ -242,9 +242,9 @@ const DeliveryCalculator: React.FC = () => {
         shipping_type: apiShippingType,
         price: totalPrice,
         price_cny: priceInCNY, // Include the price in CNY
-        name: `Предзаказ - ${apiCategoryType === 'sneakers' ? 'Обувь' : 
-              apiCategoryType === 'clothes' ? 'Одежда' : 
-              apiCategoryType === 'accessories' ? 'Аксессуары' : 
+        name: `Предзаказ - ${apiCategoryType === 'обувь' ? 'Обувь' : 
+              apiCategoryType === 'одежда' ? 'Одежда' : 
+              apiCategoryType === 'аксессуары' ? 'Аксессуары' : 
               itemType} - ${size || 'Размер не указан'}`
       });
       
@@ -287,14 +287,12 @@ const DeliveryCalculator: React.FC = () => {
               <p className="text-red-500 text-sm">{priceError}</p>
             )}
             <div className="flex items-center text-xs text-telegram-hint">
-              <a 
-                href="https://teletype.in/@poizonshop/link" 
-                target="_blank" 
-                rel="noopener noreferrer"
+              <button 
+                onClick={() => openTelegramUrl("https://telegra.ph/Poisk-i-kartochka-tovara-ceny-razmernaya-setka-i-sroki-dostavki-04-11")}
                 className="flex items-center text-telegram-link"
               >
                 Как проверить цену? <ExternalLink size={12} className="ml-1" />
-              </a>
+              </button>
             </div>
           </div>
           

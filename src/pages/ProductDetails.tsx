@@ -9,6 +9,7 @@ import { fetchProducts, addProductToCart, StockItem } from '@/services/api';
 import { useCart } from '@/contexts/CartContext';
 import { getConsistentEmoji } from '@/utils/emojiUtils';
 import { hapticSelection, hapticImpact } from '@/utils/telegramUtils';
+import { sortSizes } from '@/utils/sizeUtils';
 import { toast } from 'sonner';
 import PhotoSwiper from '@/components/PhotoSwiper';
 
@@ -36,9 +37,12 @@ const ProductDetails: React.FC = () => {
     
     // Handle array of SizeAvailability
     if (Array.isArray(product.sizes)) {
-      return product.sizes
+      const sizes = product.sizes
         .filter(size => size.quantity > 0)
         .map(size => size.size);
+      
+      // Return sorted sizes
+      return sortSizes(sizes);
     }
     
     // Fallback for backward compatibility
