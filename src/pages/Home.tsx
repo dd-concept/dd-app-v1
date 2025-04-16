@@ -13,7 +13,7 @@ import BannerSwiper from '@/components/BannerSwiper';
 import DDManagerCard from '@/components/DDManagerCard';
 
 // Import banner images
-import mainBanner from '@/assets/main_banner.png';
+import mainBanner from '@/assets/bannerweb.webp';
 import csBanner from '@/assets/cs_banner.png';
 import shopBanner from '@/assets/shop_banner.png';
 
