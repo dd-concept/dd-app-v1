@@ -17,6 +17,7 @@ import ProductCard from '@/components/ProductCard';
 import mainBanner from '@/assets/jointgbanner.webp';
 import csBanner from '@/assets/buycatsofabanner.webp';
 import ddCoinsBanner from '@/assets/ddcoinsbanner.webp';
+import calculatorBanner from '@/assets/calcbanner.webp';
 import shopBanner from '@/assets/gotoshopbanner.webp';
 import sneakersBanner from '@/assets/sneakers_category_banner.webp';
 import clothesBanner from '@/assets/clothes_category_banner.webp';
@@ -174,7 +175,7 @@ const Home: React.FC = () => {
 
       <section className="mb-8">
         <h2 className="text-xl font-medium mb-4">Что купить?</h2>
-        <div className="grid grid-cols-2 gap-4 mb-12">
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <Link 
             to="/shop?category=sneakers" 
             className="rounded-lg overflow-hidden relative hover-lift aspect-[5/3]"
@@ -236,6 +237,23 @@ const Home: React.FC = () => {
             </div>
           </Link>
         </div>
+        
+        {/* Delivery Calculator Button - Full Width */}
+        <Link 
+          to="/calculator" 
+          className="w-full rounded-lg overflow-hidden relative hover-lift h-16 block mt-4 mb-8"
+          style={{ 
+            backgroundImage: `url(${calculatorBanner})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+          <div className="absolute inset-0 flex justify-between items-center p-4">
+            <h3 className="font-medium text-white text-lg">Рассчитать доставку</h3>
+            <ArrowRight className="text-white" size={20} />
+          </div>
+        </Link>
       </section>
 
       {/* <section className="mb-10">
