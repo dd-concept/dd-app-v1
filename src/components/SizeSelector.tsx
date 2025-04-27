@@ -20,7 +20,7 @@ const SizeSelector: React.FC<SizeSelectorProps> = ({
 
   return (
     <div className={cn('w-full', className)}>
-      <h3 className="text-sm font-medium text-telegram-text mb-2">Выберите размер</h3>
+      {/* <h3 className="text-sm font-medium text-telegram-text mb-2">Выберите размер</h3> */}
       
       <div className="flex flex-wrap gap-2">
         {availableSizes.map((size) => (

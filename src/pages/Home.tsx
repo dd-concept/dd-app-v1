@@ -16,6 +16,7 @@ import ProductCard from '@/components/ProductCard';
 // Import banner images
 import mainBanner from '@/assets/jointgbanner.webp';
 import csBanner from '@/assets/buycatsofabanner.webp';
+import ddCoinsBanner from '@/assets/ddcoinsbanner.webp';
 import shopBanner from '@/assets/gotoshopbanner.webp';
 import sneakersBanner from '@/assets/sneakers_category_banner.webp';
 import clothesBanner from '@/assets/clothes_category_banner.webp';
@@ -81,6 +82,10 @@ const Home: React.FC = () => {
     {
       image: csBanner, 
       link: '/shop?brand=Cat%26Sofa'
+    },
+    {
+      image: ddCoinsBanner,
+      link: '/profile'
     }
   ];
 
@@ -99,7 +104,7 @@ const Home: React.FC = () => {
   };
 
   return (
-    <PageLayout fullHeight className="p-4">
+    <PageLayout fullHeight className="p-4 pb-20">
       <header className="mb-6">
         {/* User profile section - clickable to navigate to profile */}
         <Link to="/profile" className="flex items-center gap-3 hover:opacity-90 transition-opacity" onClick={handleProfileClick}>
@@ -172,7 +177,7 @@ const Home: React.FC = () => {
         <div className="grid grid-cols-2 gap-4 mb-12">
           <Link 
             to="/shop?category=sneakers" 
-            className="rounded-lg overflow-hidden h-36 relative hover-lift"
+            className="rounded-lg overflow-hidden relative hover-lift aspect-[5/3]"
             style={{ 
               backgroundImage: `url(${sneakersBanner})`,
               backgroundSize: 'cover',
@@ -187,7 +192,7 @@ const Home: React.FC = () => {
           </Link>
           <Link 
             to="/shop?category=tops" 
-            className="rounded-lg overflow-hidden h-36 relative hover-lift"
+            className="rounded-lg overflow-hidden relative hover-lift aspect-[5/3]"
             style={{ 
               backgroundImage: `url(${clothesBanner})`,
               backgroundSize: 'cover',
@@ -202,7 +207,7 @@ const Home: React.FC = () => {
           </Link>
           <Link 
             to="/shop?category=bottoms" 
-            className="rounded-lg overflow-hidden h-36 relative hover-lift"
+            className="rounded-lg overflow-hidden relative hover-lift aspect-[5/3]"
             style={{ 
               backgroundImage: `url(${jeansBanner})`,
               backgroundSize: 'cover',
@@ -217,7 +222,7 @@ const Home: React.FC = () => {
           </Link>
           <Link 
             to="/shop?category=accessories" 
-            className="rounded-lg overflow-hidden h-36 relative hover-lift"
+            className="rounded-lg overflow-hidden relative hover-lift aspect-[5/3]"
             style={{ 
               backgroundImage: `url(${beltBanner})`,
               backgroundSize: 'cover',
