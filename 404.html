@@ -4,38 +4,45 @@
   <meta charset="utf-8">
   <title>DD App</title>
   <script type="text/javascript">
-    // GitHub Pages spa redirect - handles client-side routing
+    // GitHub Pages SPA redirect script
+    // Based on https://github.com/rafgraph/spa-github-pages
     (function() {
       // Single Page Apps for GitHub Pages
-      // MIT License
-      // https://github.com/rafgraph/spa-github-pages
       
       // This script takes the current URL and converts the path and query
       // string into just a query string, and then redirects the browser
       // to the new URL with only a query string and hash fragment
       
       // If you're creating a Project Pages site and NOT using a custom domain,
-      // then set pathSegmentsToKeep to 1 (enterprise users may need to set this to 2)
-      var pathSegmentsToKeep = 1;
+      // then set segmentsToKeep to 1 (enterprise users may need to set this to 2)
+      var segmentsToKeep = 1;
       
       var l = window.location;
       var origin = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '');
-      var basePathname = l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/');
+      var basePathname = l.pathname.split('/').slice(0, 1 + segmentsToKeep).join('/');
       
-      // This part adds the "dd-app-v1" part specifically for this repo
-      if (basePathname.indexOf('dd-app-v1') === -1) {
-        basePathname = basePathname + 'dd-app-v1/';
+      // Always ensure we have the dd-app-v1 directory in the path
+      if (!basePathname.endsWith('dd-app-v1/')) {
+        if (basePathname.endsWith('/')) {
+          basePathname = basePathname + 'dd-app-v1/';
+        } else {
+          basePathname = basePathname + '/dd-app-v1/';
+        }
       }
       
-      var path = l.pathname.slice(basePathname.length);
+      // Extract the path after the basename
+      var path = l.pathname.indexOf(basePathname) === 0 
+        ? l.pathname.slice(basePathname.length) 
+        : l.pathname;
       
-      // Redirect with the path as a _path parameter
-      l.replace(
-        origin + basePathname + '?' +
-        (path ? '_path=' + path + '&' : '') +
-        (l.search ? l.search.slice(1) : '') +
-        l.hash
-      );
+      // Build the redirect URL
+      var redirectUrl = origin + basePathname + 
+                      (path ? '?' + 'path=' + path : '') +
+                      (l.search ? (path ? '&' : '?') + l.search.slice(1) : '') +
+                      l.hash;
+                      
+      console.log("404 redirect to:", redirectUrl);
+      l.replace(redirectUrl);
     })();
   </script>
 </head>

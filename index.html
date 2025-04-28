@@ -43,30 +43,11 @@
           document.getElementById('root').style.backgroundColor = '#232730';
         }
       });
-      
-      // Ensure we always start at the home page if no hash is present
-      // Use a small delay to ensure it runs after Telegram WebApp initialization
-      setTimeout(function() {
-        if (window.location.hash === '' || window.location.hash === '#') {
-          console.log('Setting initial hash to #/');
-          window.location.hash = '#/';
-        }
-      }, 100);
-      
-      // Backup approach: If we're still not on home page after app loads
-      window.addEventListener('load', function() {
-        setTimeout(function() {
-          if (window.location.hash === '' || window.location.hash === '#') {
-            console.log('Setting hash to #/ after page load');
-            window.location.hash = '#/';
-          }
-        }, 300);
-      });
     </script>
-    <script type="module" crossorigin src="/dd-app-v1/assets/main-BpGczCSd.js"></script>
-    <link rel="modulepreload" crossorigin href="/dd-app-v1/assets/components-BZjhdzXR.js">
-    <link rel="modulepreload" crossorigin href="/dd-app-v1/assets/main-BpGczCSd.js">
-    <link rel="modulepreload" crossorigin href="/dd-app-v1/assets/vendor-BNb3FFyw.js">
+    <script type="module" crossorigin src="/dd-app-v1/assets/main-zcB6OMfN.js"></script>
+    <link rel="modulepreload" crossorigin href="/dd-app-v1/assets/components-CofqJ79j.js">
+    <link rel="modulepreload" crossorigin href="/dd-app-v1/assets/main-zcB6OMfN.js">
+    <link rel="modulepreload" crossorigin href="/dd-app-v1/assets/vendor-CHs_TtfJ.js">
     <link rel="stylesheet" crossorigin href="/dd-app-v1/assets/main-DCZIzQyH.css">
     <link rel="stylesheet" crossorigin href="/dd-app-v1/assets/vendor-R9Y6aq4i.css">
     <link rel="stylesheet" crossorigin href="/dd-app-v1/assets/components-cP8yO4su.css">

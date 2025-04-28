@@ -16,21 +16,36 @@
     return params;
   };
   
-  // If we have a _path parameter from our 404.html redirect
+  // If we have a path parameter from our 404.html redirect
   // convert it back to normal browser URL
   const params = getQueryParams();
   
-  if (params._path) {
-    const newPath = params._path.replace(/^\/+/, '');
+  if (params.path) {
+    // Get the proper path from the parameter
+    const path = params.path.replace(/^\/+/, '');
     
-    // Create a new URL without the _path parameter
+    // Create the URL for the history API
     const url = new URL(window.location.href);
-    url.search = '';
-    url.pathname = url.pathname.split('/').slice(0, 2).join('/') + '/' + newPath;
     
-    // Replace current URL with the new one
-    window.history.replaceState({}, document.title, url.toString());
+    // Keep all query parameters except 'path'
+    const newSearch = Array.from(url.searchParams.entries())
+      .filter(([key]) => key !== 'path')
+      .map(([key, value]) => `${key}=${value}`)
+      .join('&');
     
-    console.log('Redirect handler: Transformed path', newPath);
+    // Construct the proper pathname with the base and the path
+    let pathname = url.pathname;
+    if (!pathname.endsWith('/')) {
+      pathname += '/';
+    }
+    pathname += path;
+    
+    // Create new history state with proper path
+    const newUrl = `${window.location.origin}${pathname}${newSearch ? '?' + newSearch : ''}${window.location.hash}`;
+    
+    console.log('Redirect handler: Transforming to', newUrl);
+    
+    // Update history to show the proper URL
+    window.history.replaceState(null, document.title, newUrl);
   }
 })(); 
