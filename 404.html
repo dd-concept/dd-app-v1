@@ -21,7 +21,7 @@
       var origin = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '');
       var basePathname = l.pathname.split('/').slice(0, 1 + segmentsToKeep).join('/');
       
-      // Always ensure we have the dd-app-v1 directory in the path
+      // Always ensure we have the dd-app-v1 directory in the path - but only once
       if (!basePathname.endsWith('dd-app-v1/')) {
         if (basePathname.endsWith('/')) {
           basePathname = basePathname + 'dd-app-v1/';
@@ -30,10 +30,35 @@
         }
       }
       
-      // Extract the path after the basename
-      var path = l.pathname.indexOf(basePathname) === 0 
-        ? l.pathname.slice(basePathname.length) 
-        : l.pathname;
+      // Extract the path after the base pathname, avoiding any duplicates
+      var path = '';
+      if (l.pathname.indexOf(basePathname) === 0) {
+        // If the pathname starts with the basePathname, extract what comes after
+        path = l.pathname.slice(basePathname.length);
+      } else {
+        // Otherwise check if we have dd-app-v1 duplicated in the path
+        var pathParts = l.pathname.split('/');
+        var ddAppIndex = -1;
+        
+        // Find the first occurrence of dd-app-v1
+        for (var i = 0; i < pathParts.length; i++) {
+          if (pathParts[i] === 'dd-app-v1') {
+            ddAppIndex = i;
+            break;
+          }
+        }
+        
+        // If we found dd-app-v1, take everything after it
+        if (ddAppIndex >= 0 && ddAppIndex + 1 < pathParts.length) {
+          path = pathParts.slice(ddAppIndex + 1).join('/');
+        } else {
+          // Otherwise use the whole path except the first segment
+          path = pathParts.slice(segmentsToKeep).join('/');
+        }
+      }
+      
+      // Remove any leading slashes from the path
+      path = path.replace(/^\/+/, '');
       
       // Build the redirect URL
       var redirectUrl = origin + basePathname + 

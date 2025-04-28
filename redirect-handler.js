@@ -24,24 +24,29 @@
     // Get the proper path from the parameter
     const path = params.path.replace(/^\/+/, '');
     
-    // Create the URL for the history API
-    const url = new URL(window.location.href);
+    // Get the basename (should be /dd-app-v1/)
+    const pathname = window.location.pathname;
+    const basename = '/dd-app-v1/';
     
     // Keep all query parameters except 'path'
-    const newSearch = Array.from(url.searchParams.entries())
+    const newSearch = Array.from(new URL(window.location.href).searchParams.entries())
       .filter(([key]) => key !== 'path')
       .map(([key, value]) => `${key}=${value}`)
       .join('&');
     
-    // Construct the proper pathname with the base and the path
-    let pathname = url.pathname;
-    if (!pathname.endsWith('/')) {
-      pathname += '/';
-    }
-    pathname += path;
+    // Create new URL making sure we don't duplicate the path
+    let newUrl = '';
     
-    // Create new history state with proper path
-    const newUrl = `${window.location.origin}${pathname}${newSearch ? '?' + newSearch : ''}${window.location.hash}`;
+    // Check if pathname already ends with dd-app-v1/
+    if (pathname.endsWith('dd-app-v1/')) {
+      newUrl = `${window.location.origin}${pathname}${path}`;
+    } else {
+      // Otherwise make sure we have the proper basename
+      newUrl = `${window.location.origin}${basename}${path}`;
+    }
+    
+    // Add any remaining query parameters and hash
+    newUrl += `${newSearch ? '?' + newSearch : ''}${window.location.hash}`;
     
     console.log('Redirect handler: Transforming to', newUrl);
     
