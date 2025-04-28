@@ -43,11 +43,16 @@
           document.getElementById('root').style.backgroundColor = '#232730';
         }
       });
+      
+      // Ensure we always start at the home page if no hash is present
+      if (window.location.hash === '' || window.location.hash === '#') {
+        window.location.hash = '#/';
+      }
     </script>
-    <script type="module" crossorigin src="/dd-app-v1/assets/main-BdXZ_DGd.js"></script>
-    <link rel="modulepreload" crossorigin href="/dd-app-v1/assets/components-C_Pct_J9.js">
-    <link rel="modulepreload" crossorigin href="/dd-app-v1/assets/main-BdXZ_DGd.js">
-    <link rel="modulepreload" crossorigin href="/dd-app-v1/assets/vendor-DDFm2cvz.js">
+    <script type="module" crossorigin src="/dd-app-v1/assets/main-BI1_Jsf7.js"></script>
+    <link rel="modulepreload" crossorigin href="/dd-app-v1/assets/components-CfERhKKI.js">
+    <link rel="modulepreload" crossorigin href="/dd-app-v1/assets/main-BI1_Jsf7.js">
+    <link rel="modulepreload" crossorigin href="/dd-app-v1/assets/vendor-CIMduBvw.js">
     <link rel="stylesheet" crossorigin href="/dd-app-v1/assets/main-DCZIzQyH.css">
     <link rel="stylesheet" crossorigin href="/dd-app-v1/assets/vendor-R9Y6aq4i.css">
     <link rel="stylesheet" crossorigin href="/dd-app-v1/assets/components-cP8yO4su.css">
