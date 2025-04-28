@@ -296,26 +296,26 @@ export function getTelegramUser(): TelegramUser | null {
     console.log("Attempting to get Telegram user data...");
     
     // APPROACH 1: Use the official SDK method to retrieve launch parameters
-    try {
-      const { initData, user } = retrieveLaunchParams();
+    // try {
+    //   const { initData, user } = retrieveLaunchParams();
       
-      if (user) {
-        console.log("User data found in launch parameters:", user);
+    //   if (user) {
+    //     console.log("User data found in launch parameters:", user);
         
-        // Store in localStorage for future use
-        try {
-          localStorage.setItem('telegramUser', JSON.stringify(user));
-        } catch (e) {
-          console.error("Error storing user data in localStorage:", e);
-        }
+    //     // Store in localStorage for future use
+    //     try {
+    //       localStorage.setItem('telegramUser', JSON.stringify(user));
+    //     } catch (e) {
+    //       console.error("Error storing user data in localStorage:", e);
+    //     }
         
-        return user as TelegramUser;
-      } else {
-        console.log("No user data in launch parameters");
-      }
-    } catch (e) {
-      console.error("Error retrieving launch parameters:", e);
-    }
+    //     return user as TelegramUser;
+    //   } else {
+    //     console.log("No user data in launch parameters");
+    //   }
+    // } catch (e) {
+    //   console.error("Error retrieving launch parameters:", e);
+    // }
     
     // APPROACH 2: Directly access window.Telegram.WebApp.initDataUnsafe
     if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
@@ -333,46 +333,46 @@ export function getTelegramUser(): TelegramUser | null {
     }
     
     // APPROACH 3: Try to parse initData directly if it exists
-    if (window.Telegram?.WebApp?.initData) {
-      try {
-        const params = new URLSearchParams(window.Telegram.WebApp.initData);
-        console.log('Parsed initData params:', Array.from(params.entries()));
+    // if (window.Telegram?.WebApp?.initData) {
+    //   try {
+    //     const params = new URLSearchParams(window.Telegram.WebApp.initData);
+    //     console.log('Parsed initData params:', Array.from(params.entries()));
         
-        if (params.has('user')) {
-          try {
-            const userData = JSON.parse(decodeURIComponent(params.get('user') || '{}'));
-            console.log('User data parsed from initData:', userData);
+    //     if (params.has('user')) {
+    //       try {
+    //         const userData = JSON.parse(decodeURIComponent(params.get('user') || '{}'));
+    //         console.log('User data parsed from initData:', userData);
             
-            // Store in localStorage for future use
-            try {
-              localStorage.setItem('telegramUser', JSON.stringify(userData));
-            } catch (e) {
-              console.error("Error storing user data in localStorage:", e);
-            }
+    //         // Store in localStorage for future use
+    //         try {
+    //           localStorage.setItem('telegramUser', JSON.stringify(userData));
+    //         } catch (e) {
+    //           console.error("Error storing user data in localStorage:", e);
+    //         }
             
-            return userData as TelegramUser;
-          } catch (e) {
-            console.error('Error parsing user data from initData:', e);
-          }
-        } else {
-          console.log('No user param in initData');
-        }
-      } catch (e) {
-        console.error('Error parsing initData:', e);
-      }
-    }
+    //         return userData as TelegramUser;
+    //       } catch (e) {
+    //         console.error('Error parsing user data from initData:', e);
+    //       }
+    //     } else {
+    //       console.log('No user param in initData');
+    //     }
+    //   } catch (e) {
+    //     console.error('Error parsing initData:', e);
+    //   }
+    // }
     
     // APPROACH 4: Fallback to localStorage as a last resort
-    try {
-      const storedUser = localStorage.getItem('telegramUser');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        console.log("Using stored user data from localStorage:", userData);
-        return userData as TelegramUser;
-      }
-    } catch (e) {
-      console.error("Error retrieving user data from localStorage:", e);
-    }
+    // try {
+    //   const storedUser = localStorage.getItem('telegramUser');
+    //   if (storedUser) {
+    //     const userData = JSON.parse(storedUser);
+    //     console.log("Using stored user data from localStorage:", userData);
+    //     return userData as TelegramUser;
+    //   }
+    // } catch (e) {
+    //   console.error("Error retrieving user data from localStorage:", e);
+    // }
     
     console.log("No Telegram user data available from any source");
     return null;
@@ -745,32 +745,44 @@ export function requestTelegramTheme(): void {
   try {
     console.log("Requesting current theme from Telegram");
     
-    // Use the official SDK if available
-    if (window.Telegram?.WebApp) {
-      try {
-        // Request the theme from Telegram
-        window.Telegram.WebApp.postEvent('web_app_request_theme', '');
-        console.log("Theme requested from Telegram using WebApp.postEvent");
-      } catch (e) {
-        console.error("Error requesting theme using WebApp.postEvent:", e);
-      }
+    // Try the SDK method first (avoiding update method that doesn't exist)
+    try {
+      // Read the current theme params - this will trigger a refresh in some SDK versions
+      const isDark = themeParams.isDark;
+      console.log("Using current theme params, isDark:", isDark);
+      return;
+    } catch (sdkError) {
+      console.warn("SDK theme params access failed, trying fallback method:", sdkError);
     }
     
-    // Also try using the @telegram-apps/sdk methods as a fallback
+    // Fallback to direct WebApp API
+    const webApp = getTelegramWebApp();
+    if (!webApp) {
+      console.warn("Telegram WebApp is not available, can't request theme");
+      return;
+    }
+    
+    // Check if postEvent is available and is a function
+    if (typeof webApp.postEvent !== 'function') {
+      console.warn("postEvent is not available in this Telegram client");
+      // Just use the current theme params instead of trying to update
+      setTelegramColors();
+      return;
+    }
+    
+    // Try to request theme using postEvent
     try {
-      // Import dynamically to avoid circular dependencies
-      import('@telegram-apps/sdk').then(({ postEvent }) => {
-        // Request theme
-        postEvent('web_app_request_theme');
-        console.log("Theme requested from Telegram using SDK postEvent");
-      }).catch(e => {
-        console.error("Error importing SDK for postEvent:", e);
-      });
-    } catch (e) {
-      console.error("Error requesting theme using SDK postEvent:", e);
+      webApp.postEvent("web_app_request_theme");
+      console.log("Theme request sent successfully");
+    } catch (postEventError) {
+      console.warn("Error requesting theme using postEvent:", postEventError);
+      // Just use the current theme params instead
+      setTelegramColors();
     }
   } catch (error) {
     console.error("Error requesting Telegram theme:", error);
+    // Ensure we at least have some colors set
+    setTelegramColors();
   }
 }
 

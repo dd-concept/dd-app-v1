@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { registerReferral } from '@/services/api';
-import { Loader2, Send } from 'lucide-react';
+import { registerReferral } from '@/services/api/referralService';
 import { toast } from 'sonner';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface ReferralCodeInputProps {
   className?: string;
@@ -61,14 +61,11 @@ const ReferralCodeInput: React.FC<ReferralCodeInputProps> = ({ className, onSucc
           >
             {isSubmitting ? (
               <>
-                <Loader2 size={18} className="animate-spin mr-2" />
-                Applying...
+                <LoadingSpinner size="xs" inline className="mr-2" />
+                Активация...
               </>
             ) : (
-              <>
-                <Send size={18} className="mr-2" />
-                Apply
-              </>
+              'Активировать'
             )}
           </button>
         </div>

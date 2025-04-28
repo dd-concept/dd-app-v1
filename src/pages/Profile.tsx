@@ -6,12 +6,13 @@ import OrderCard from '@/components/OrderCard';
 import UserAvatar from '@/components/UserAvatar';
 import ReferralCard from '@/components/ReferralCard';
 import { useUser } from '@/contexts/UserContext';
-import { fetchOrders, /* getUserRank, */ checkUserExists, getDDCoinsBalance, getTelegramUser } from '@/services/api';
+import { fetchOrders, /* getUserRank, */ checkUserExists, getTelegramUser } from '@/services/api';
 import { toast } from 'sonner';
 import { useTelegram } from '@/contexts/TelegramContext';
-import { Settings as SettingsIcon, Coins } from 'lucide-react';
+import { Settings as SettingsIcon, Coins, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL, createFetchOptions } from '@/services/api/config';
+import DDCoinsInfoModal from '@/components/DDCoinsInfoModal';
 
 const Profile: React.FC = () => {
   const { username, displayName, telegramUser, profile, avatarEmoji, updateTelegramUser } = useUser();
@@ -20,93 +21,11 @@ const Profile: React.FC = () => {
   // const [isLoadingRank, setIsLoadingRank] = useState<boolean>(false);
   const [ddCoinsBalance, setDDCoinsBalance] = useState<number>(0);
   const [isLoadingDDCoins, setIsLoadingDDCoins] = useState<boolean>(false);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState<boolean>(false);
   const navigate = useNavigate();
   
   // Use the Telegram context
   const { tg, initWebApp, getUserData } = useTelegram();
-
-  // Fetch DD coins balance when component mounts
-  useEffect(() => {
-    const fetchDDCoins = async () => {
-      const user = getTelegramUser();
-      if (!user) return;
-      
-      setIsLoadingDDCoins(true);
-      try {
-        const balance = await getDDCoinsBalance();
-        console.log('Profile page - DD coins direct API call:', balance);
-        setDDCoinsBalance(balance);
-      } catch (error) {
-        console.error('Error fetching DD coins balance:', error);
-      } finally {
-        setIsLoadingDDCoins(false);
-      }
-    };
-    
-    fetchDDCoins();
-  }, []);
-
-  // Fetch DD coins balance
-  const fetchDDCoinsBalance = async () => {
-    if (!telegramUser) return;
-    
-    setIsLoadingDDCoins(true);
-    try {
-      const balance = await getDDCoinsBalance();
-      console.log('Profile page: DD coins balance received:', balance);
-      setDDCoinsBalance(balance);
-    } catch (error) {
-      console.error('Error fetching DD coins balance:', error);
-    } finally {
-      setIsLoadingDDCoins(false);
-    }
-  };
-
-  // Fetch user rank directly from the API
-  /* 
-  const fetchUserRank = async (userId: number) => {
-    setIsLoadingRank(true);
-    try {
-      console.log(`Fetching rank for user ID: ${userId}`);
-      
-      const requestBody = {
-        telegram_user_id: userId
-      };
-      
-      const { options, clearTimeout } = createFetchOptions('POST', requestBody);
-      
-      const response = await fetch(`${API_BASE_URL}/users/rank`, options);
-      clearTimeout();
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch rank: ${response.status} ${response.statusText}`);
-      }
-      
-      const responseText = await response.text();
-      console.log('Raw rank response:', responseText);
-      
-      const data = JSON.parse(responseText);
-      console.log('Parsed rank response:', data);
-      
-      if (data && data.loyalty_rank !== undefined) {
-        const rankValue = typeof data.loyalty_rank === 'string' 
-          ? parseInt(data.loyalty_rank, 10) 
-          : Number(data.loyalty_rank);
-          
-        console.log('Setting user rank to:', rankValue);
-        setUserRank(rankValue);
-      } else {
-        console.error('loyalty_rank not found in response:', data);
-        setUserRank(0);
-      }
-    } catch (error) {
-      console.error('Error fetching user rank:', error);
-      setUserRank(0);
-    } finally {
-      setIsLoadingRank(false);
-    }
-  };
-  */
 
   // Initialize Telegram WebApp and get user data
   useEffect(() => {
@@ -125,15 +44,21 @@ const Profile: React.FC = () => {
           // Update the user context with Telegram user data
           updateTelegramUser(user);
           
-          // Check if user exists in the API
-          const exists = await checkUserExists();
-          setIsRegistered(typeof exists === 'boolean' ? exists : exists.exists || false);
+          // Check if user exists in the API and get DD coins balance
+          const userResponse = await checkUserExists(true);
+          if (userResponse && typeof userResponse !== 'boolean') {
+            setIsRegistered(true);
+            setDDCoinsBalance(userResponse.dd_coins_balance);
+            setIsLoadingDDCoins(false);
+          } else {
+            setIsRegistered(false);
+          }
           
           // Get user rank directly from the API
           // await fetchUserRank(user.id);
           
           // Get DD coins balance
-          await fetchDDCoinsBalance();
+          // await fetchDDCoinsBalance();
         } else {
           console.log('No Telegram user data found on Profile page');
           
@@ -144,15 +69,21 @@ const Profile: React.FC = () => {
               console.log('Telegram user found after delay:', retryUser);
               updateTelegramUser(retryUser);
               
-              // Check if user exists in the API
-              const exists = await checkUserExists();
-              setIsRegistered(typeof exists === 'boolean' ? exists : exists.exists || false);
+              // Check if user exists in the API and get DD coins balance
+              const userResponse = await checkUserExists(true);
+              if (userResponse && typeof userResponse !== 'boolean') {
+                setIsRegistered(true);
+                setDDCoinsBalance(userResponse.dd_coins_balance);
+                setIsLoadingDDCoins(false);
+              } else {
+                setIsRegistered(false);
+              }
               
               // Get user rank directly from the API
               // await fetchUserRank(retryUser.id);
               
               // Get DD coins balance
-              await fetchDDCoinsBalance();
+              // await fetchDDCoinsBalance();
             } else {
               console.log('Still no Telegram user data after retry');
             }
@@ -208,7 +139,7 @@ const Profile: React.FC = () => {
   const displayOrders = orders || [];
 
   return (
-    <PageLayout>
+    <PageLayout className="pb-32">
       <div className="p-4 relative">
         <div className="flex items-center justify-between mb-8 animate-fade-in">
           <div className="flex items-center gap-4">
@@ -244,56 +175,62 @@ const Profile: React.FC = () => {
         </div>
 
         {/* DD Coins Balance */}
-        <div className="mb-8 bg-white dark:bg-sidebar-accent rounded-lg p-4 shadow-sm animate-slide-up">
+        <div className="mb-8 bg-telegram-blue dark:bg-telegram-blue rounded-lg p-5 shadow-sm animate-slide-up text-white">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Coins size={24} className="text-yellow-500" />
-              <h2 className="text-lg font-semibold">DD Coins Balance</h2>
+            <div className="flex items-center gap-3">
+              <Coins size={28} className="text-yellow-400" />
+              <div className="flex items-baseline gap-3">
+                <h2 className="text-xl font-semibold text-white">$DD Баланс:</h2>
+                {isLoadingDDCoins ? (
+                  <LoadingSpinner size="sm" className="text-white ml-2" />
+                ) : (
+                  <span className="text-3xl font-bold text-white">{ddCoinsBalance || 0}</span>
+                )}
+              </div>
             </div>
-            {isLoadingDDCoins ? (
-              <span className="text-sm text-gray-500">Loading...</span>
-            ) : (
-              <span className="text-xl font-bold text-telegram-blue">{ddCoinsBalance || 0}</span>
-            )}
+            <button 
+              onClick={() => setIsInfoModalOpen(true)}
+              className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+              aria-label="DD Coins Information"
+            >
+              <Info size={22} />
+            </button>
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-            You can use your DD coins to get discounts on your orders (up to 50% of the order value).
-          </p>
+        </div>
+
+        <div className="mb-8">
+          <h2 className="text-xl font-medium mb-4">Пригласи друзей</h2>
+          <div className="bg-white dark:bg-sidebar-accent rounded-lg shadow-sm overflow-hidden">
+          <ReferralCard className="animate-fade-in" />
+            <div className="p-4 border-b border-gray-100 dark:border-gray-800/50">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                *Поделись своей реферальной ссылкой с друзьями и получай награду в $DD, когда они присоединятся и сделают покупки!
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-8 animate-slide-up">
           <div className="bg-white dark:bg-sidebar-accent rounded-lg p-4 text-center shadow-sm">
             <h2 className="text-xl font-semibold text-telegram-blue">{displayOrders.length}</h2>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">Orders</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">Всего заказов</p>
           </div>
           <div className="bg-white dark:bg-sidebar-accent rounded-lg p-4 text-center shadow-sm">
             <h2 className="text-xl font-semibold text-telegram-blue">
               {displayOrders.filter(o => o.status === 'delivered').length}
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">Completed</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">Завершенных</p>
           </div>
           <div className="bg-white dark:bg-sidebar-accent rounded-lg p-4 text-center shadow-sm">
             <h2 className="text-xl font-semibold text-telegram-blue">
               {displayOrders.filter(o => o.status !== 'delivered').length}
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">Pending</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">Активных</p>
           </div>
         </div>
 
         <div className="mb-8">
-          <h2 className="text-xl font-medium mb-4">Invite Friends</h2>
-          <div className="bg-white dark:bg-sidebar-accent rounded-lg shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-gray-100 dark:border-gray-800/50">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Share your referral link with friends and earn rewards when they join and make purchases!
-              </p>
-            </div>
-            <ReferralCard className="animate-fade-in" />
-          </div>
-        </div>
-
-        <div className="mb-8">
-          <h2 className="text-xl font-medium mb-4">Order History</h2>
+          <h2 className="text-xl font-medium mb-4">История заказов</h2>
           
           {orders && orders.length > 0 ? (
             <div className="space-y-4">
@@ -306,19 +243,28 @@ const Profile: React.FC = () => {
             </div>
           ) : (
             <div className="p-6 text-center bg-telegram-secondary-bg rounded-lg">
-              <h3 className="font-medium text-lg mb-2">No Orders Yet</h3>
+              <h3 className="font-medium text-lg mb-2">Еще нет заказов</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                You haven't placed any orders yet. Start shopping to see your orders here.
+                Вы еще не сделали ни одного заказа. Начните покупки, чтобы увидеть их здесь.
               </p>
               <button
                 onClick={() => navigate('/shop')}
                 className="px-4 py-2 bg-telegram-blue text-white rounded-lg"
               >
-                Browse Products
+                В магазин!
               </button>
             </div>
           )}
         </div>
+
+        {/* Extra space at the bottom to ensure all content is visible */}
+        <div className="h-16"></div>
+
+        {/* DD Coins Info Modal */}
+        <DDCoinsInfoModal 
+          isOpen={isInfoModalOpen} 
+          onClose={() => setIsInfoModalOpen(false)} 
+        />
       </div>
     </PageLayout>
   );

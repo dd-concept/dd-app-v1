@@ -4,13 +4,47 @@ import { fetchOrders } from './orderService';
 import { fetchProducts } from './productService';
 import { TelegramUser, UserProfile, StockItem, Order } from './types';
 import { toast } from 'sonner';
+import { getDDCoinsBalance } from './userService';
 
 // Interface for the result of fetchInitialData
 export interface InitialData {
   profile: UserProfile | null;
   orders: Order[];
   products: StockItem[];
+  ddCoinsBalance: number;
 }
+
+// Cache keys with extended TTL
+const EXTENDED_CACHE = {
+  DD_COINS: (userId: number) => `dd_coins_${userId}`,
+  DD_COINS_TTL: 5 * 60 * 1000, // 5 minutes
+};
+
+/**
+ * Get DD coins balance from cache or API
+ * @param userId User ID to get coins for
+ * @returns Cached balance or newly fetched balance
+ */
+export const getCachedDDCoinsBalance = async (userId: number): Promise<number> => {
+  // Check cache first
+  const cacheKey = EXTENDED_CACHE.DD_COINS(userId);
+  const cachedBalance = cache.get<number>(cacheKey, EXTENDED_CACHE.DD_COINS_TTL);
+  
+  if (cachedBalance !== null) {
+    console.log('Using cached DD coins balance from optimized service:', cachedBalance);
+    return cachedBalance;
+  }
+  
+  // Fetch and cache if not found
+  try {
+    const balance = await getDDCoinsBalance();
+    cache.set(cacheKey, balance);
+    return balance;
+  } catch (error) {
+    console.error('Error fetching DD coins in optimized service:', error);
+    return 0;
+  }
+};
 
 /**
  * Fetch multiple API resources in parallel
@@ -24,13 +58,15 @@ export const fetchInitialData = async (userId: number): Promise<InitialData> => 
     const results = await Promise.allSettled([
       checkUserProfile(userId),
       fetchOrders(),
-      fetchProducts()
+      fetchProducts(),
+      getCachedDDCoinsBalance(userId)
     ]);
     
     // Process results
     const profile = results[0].status === 'fulfilled' ? results[0].value : null;
     const orders = results[1].status === 'fulfilled' ? results[1].value : [];
     const products = results[2].status === 'fulfilled' ? results[2].value : [];
+    const ddCoinsBalance = results[3].status === 'fulfilled' ? results[3].value : 0;
     
     // Log success or failures
     if (results[0].status === 'rejected') {
@@ -42,8 +78,11 @@ export const fetchInitialData = async (userId: number): Promise<InitialData> => 
     if (results[2].status === 'rejected') {
       console.error('Failed to fetch products:', results[2].reason);
     }
+    if (results[3].status === 'rejected') {
+      console.error('Failed to fetch DD coins balance:', results[3].reason);
+    }
     
-    return { profile, orders, products };
+    return { profile, orders, products, ddCoinsBalance };
   } catch (error) {
     console.error('Error in parallel fetch:', error);
     toast.error('Error loading data. Some features may be limited.');
@@ -52,7 +91,8 @@ export const fetchInitialData = async (userId: number): Promise<InitialData> => 
     return {
       profile: null,
       orders: [],
-      products: []
+      products: [],
+      ddCoinsBalance: 0
     };
   }
 };
@@ -92,11 +132,11 @@ export const refreshUserData = async (userId: number): Promise<void> => {
     // Clear relevant caches
     const profileCacheKey = `profile_${userId}`;
     const ordersCacheKey = `orders_${userId}`;
-    // const rankCacheKey = `rank_${userId}`;
+    const ddCoinsCacheKey = EXTENDED_CACHE.DD_COINS(userId);
     
     cache.invalidate(profileCacheKey);
     cache.invalidate(ordersCacheKey);
-    // cache.invalidate(rankCacheKey);
+    cache.invalidate(ddCoinsCacheKey);
     cache.invalidate('products');
     
     // Fetch fresh data

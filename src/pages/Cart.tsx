@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ShoppingCart, ArrowLeft, Loader2, Coins } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ShoppingCart, ArrowLeft, Loader2, Coins, Trash2, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import PromocodeInput from '@/components/PromocodeInput';
 import { Promocode } from '@/services/api/promocodeService';
 import { DeliveryRate } from '@/services/api/types';
 import { getDDCoinsBalance } from '@/services/api/userService';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const Cart: React.FC = () => {
   const { items, removeFromCart, clearCart } = useCart();
@@ -366,7 +367,7 @@ const Cart: React.FC = () => {
               >
                 {isCreatingOrder || isCheckingClientInfo ? (
                   <>
-                    <Loader2 className="inline-block mr-2 h-4 w-4 animate-spin" />
+                    <LoadingSpinner size="xs" inline className="mr-2" />
                     {isCheckingClientInfo ? 'Проверка данных...' : 'Создание заказа...'}
                   </>
                 ) : (

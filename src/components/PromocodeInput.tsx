@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { validatePromocode, calculateDiscountedPrice, Promocode } from '@/services/api/promocodeService';
-import { Loader2, Tag } from 'lucide-react';
+import { Tag, TicketIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface PromocodeInputProps {
   className?: string;
@@ -20,6 +21,7 @@ const PromocodeInput: React.FC<PromocodeInputProps> = ({
 }) => {
   const [code, setCode] = useState('');
   const [isValidating, setIsValidating] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +30,7 @@ const PromocodeInput: React.FC<PromocodeInputProps> = ({
       return;
     }
 
-    setIsValidating(true);
+    setIsLoading(true);
     try {
       const response = await validatePromocode(code.trim());
       if (response.success && response.promocode) {
@@ -42,7 +44,7 @@ const PromocodeInput: React.FC<PromocodeInputProps> = ({
       console.error('Error validating promocode:', error);
       toast.error('Не удалось проверить промокод');
     } finally {
-      setIsValidating(false);
+      setIsLoading(false);
     }
   };
 
@@ -81,16 +83,16 @@ const PromocodeInput: React.FC<PromocodeInputProps> = ({
         onChange={(e) => setCode(e.target.value)}
         placeholder="Введите промокод"
         className="flex-1 p-2 text-sm bg-white dark:bg-sidebar-primary/30 border border-gray-300 dark:border-gray-700 rounded-md"
-        disabled={isValidating}
+        disabled={isLoading}
       />
       <button
         type="submit"
-        disabled={isValidating || !code.trim()}
+        disabled={isLoading || !code.trim()}
         className="px-4 py-2 bg-telegram-blue text-white rounded-md disabled:opacity-70 flex items-center"
       >
-        {isValidating ? (
+        {isLoading ? (
           <>
-            <Loader2 size={16} className="animate-spin mr-2" />
+            <LoadingSpinner size="xs" inline className="mr-2" />
             Проверка...
           </>
         ) : (

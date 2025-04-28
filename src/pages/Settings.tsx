@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Save, Loader2 } from 'lucide-react';
+import { ChevronLeft, Save, Sun, Check } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'sonner';
 import { getClientInfo, updateClientInfo } from '@/services/api/clientService';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +17,9 @@ const Settings: React.FC = () => {
   const [address, setAddress] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [currentTheme, setCurrentTheme] = useState<'light' | 'dark'>('light');
+  const [isResetting, setIsResetting] = useState<boolean>(false);
   
   // Load user data from API
   useEffect(() => {
@@ -80,6 +84,19 @@ const Settings: React.FC = () => {
     }
   };
   
+  const handleThemeChange = (theme: 'light' | 'dark') => {
+    setIsSaving(true);
+    setCurrentTheme(theme);
+    // Implement theme change logic here
+    setIsSaving(false);
+  };
+  
+  const handleResetSettings = () => {
+    setIsResetting(true);
+    // Implement reset settings logic here
+    setIsResetting(false);
+  };
+  
   return (
     <PageLayout>
       <div className="p-4">
@@ -95,7 +112,7 @@ const Settings: React.FC = () => {
         
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-8 h-8 animate-spin text-telegram-blue" />
+            <LoadingSpinner size="md" />
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -151,7 +168,7 @@ const Settings: React.FC = () => {
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <LoadingSpinner size="xs" inline className="mr-2" />
                   Saving...
                 </>
               ) : (
@@ -162,6 +179,48 @@ const Settings: React.FC = () => {
               )}
             </button>
           </form>
+        )}
+
+        {isSaving ? (
+          <div className="flex justify-center py-6">
+            <LoadingSpinner size="md" />
+          </div>
+        ) : (
+          <>
+            <h3 className="text-lg font-medium">Изменить тему</h3>
+            
+            <div className="space-y-4 mt-4">
+              {/* Light Theme */}
+              <button
+                onClick={() => handleThemeChange('light')}
+                className={`w-full p-4 border rounded-lg flex items-center justify-between ${
+                  currentTheme === 'light' 
+                    ? 'border-telegram-blue bg-telegram-bg/10' 
+                    : 'border-gray-300 dark:border-gray-700'
+                }`}
+              >
+                <div className="flex items-center">
+                  <Sun size={20} className="mr-3 text-yellow-500" />
+                  <span>Светлая</span>
+                </div>
+                {currentTheme === 'light' && (
+                  <Check className="h-5 w-5 text-telegram-blue" />
+                )}
+              </button>
+
+              <button 
+                className="px-4 py-2 text-white rounded"
+                disabled={isResetting}
+                onClick={handleResetSettings}
+              >
+                {isResetting ? (
+                  <LoadingSpinner size="xs" inline />
+                ) : (
+                  'Сбросить настройки'
+                )}
+              </button>
+            </div>
+          </>
         )}
       </div>
     </PageLayout>

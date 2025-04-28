@@ -234,7 +234,7 @@ const Shop: React.FC = () => {
       <div className="p-4">
         <header className="mb-6">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-semibold">Shop</h1>
+            <h1 className="text-2xl font-semibold">Магазин</h1>
             <Link 
               to="/cart" 
               className="relative flex items-center justify-center w-10 h-10 bg-telegram-button text-white rounded-full hover:bg-telegram-button/90 transition-colors"
@@ -256,7 +256,7 @@ const Shop: React.FC = () => {
             </div>
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder="Искать товары..."
               className="w-full p-3 pl-10 pr-4 border border-telegram-hint/30 rounded-lg bg-telegram-bg text-telegram-text focus:outline-none focus:ring-2 focus:ring-telegram-button focus:border-transparent"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -270,7 +270,7 @@ const Shop: React.FC = () => {
               onClick={() => setShowFilters(!showFilters)}
             >
               <Filter size={18} className="text-telegram-hint" />
-              <span>{showFilters ? 'Hide filters' : 'Show filters'}</span>
+              <span>{showFilters ? 'Скрыть фильтры' : 'Показать фильтры'}</span>
             </button>
             
             {hasActiveFilters && (
@@ -279,7 +279,7 @@ const Shop: React.FC = () => {
                 onClick={clearFilters}
               >
                 <X size={14} />
-                <span>Clear filters</span>
+                <span>Очистить фильтры</span>
               </button>
             )}
           </div>
@@ -290,7 +290,7 @@ const Shop: React.FC = () => {
               {selectedSizes.map(size => (
                 <span key={`filter-size-${size}`} className="inline-flex items-center gap-1 px-2 py-1 bg-telegram-light text-telegram-blue text-xs rounded-full">
                   <Tag size={12} />
-                  Size: {size}
+                  Размер: {size}
                   <button 
                     className="ml-1" 
                     onClick={() => removeSizeFilter(size)}
@@ -303,7 +303,7 @@ const Shop: React.FC = () => {
               {selectedBrands.map(brand => (
                 <span key={`filter-brand-${brand}`} className="inline-flex items-center gap-1 px-2 py-1 bg-telegram-light text-telegram-blue text-xs rounded-full">
                   <Tag size={12} />
-                  Brand: {brand}
+                  Бренд: {brand}
                   <button 
                     className="ml-1" 
                     onClick={() => removeBrandFilter(brand)}
@@ -316,7 +316,7 @@ const Shop: React.FC = () => {
               {selectedCategories.map(category => (
                 <span key={`filter-category-${category}`} className="inline-flex items-center gap-1 px-2 py-1 bg-telegram-light text-telegram-blue text-xs rounded-full">
                   <Tag size={12} />
-                  Category: {category}
+                  Категория: {category}
                   <button 
                     className="ml-1" 
                     onClick={() => removeCategoryFilter(category)}
@@ -345,7 +345,7 @@ const Shop: React.FC = () => {
             <div className="mb-4 p-4 bg-telegram-secondary-bg rounded-lg animate-slide-down space-y-4">
               {/* Size filter */}
               <div>
-                <h3 className="text-sm font-medium mb-2 text-telegram-text">Filter by Size (Select Multiple)</h3>
+                <h3 className="text-sm font-medium mb-2 text-telegram-text">Фильтр по размеру</h3>
                 <div className="flex flex-wrap gap-2">
                   {availableSizes.map(size => (
                     <button
@@ -366,7 +366,7 @@ const Shop: React.FC = () => {
               {/* Brand filter */}
               {availableBrands.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium mb-2 text-telegram-text">Filter by Brand (Select Multiple)</h3>
+                  <h3 className="text-sm font-medium mb-2 text-telegram-text">Фильтр по бренду</h3>
                   <div className="flex flex-wrap gap-2">
                     {availableBrands.map(brand => (
                       <button
@@ -388,7 +388,7 @@ const Shop: React.FC = () => {
               {/* Category filter */}
               {availableCategories.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium mb-2 text-telegram-text">Filter by Category (Select Multiple)</h3>
+                  <h3 className="text-sm font-medium mb-2 text-telegram-text">Фильтр по категории</h3>
                   <div className="flex flex-wrap gap-2">
                     {availableCategories.map(category => (
                       <button

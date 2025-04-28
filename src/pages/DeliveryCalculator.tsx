@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, ExternalLink, Truck, Plane, Loader2, ShoppingBag } from 'lucide-react';
+import { Calculator, ExternalLink, Truck, Plane, ShoppingBag } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { hapticSelection, openTelegramUrl } from '@/utils/telegramUtils';
 import { calculateShipping } from '@/services/api/orderService';
 import { fetchCategories } from '@/services/api/productService';
@@ -56,8 +57,16 @@ const DeliveryCalculator: React.FC = () => {
         const fetchedCategories = await fetchCategories();
         setCategories(fetchedCategories);
         
-        // Set default item type to the first category if available
-        if (fetchedCategories.length > 0) {
+        // Check if "обувь" category exists in the fetched categories
+        const shoesCategory = fetchedCategories.find(
+          category => category.name.toLowerCase() === 'обувь'
+        );
+        
+        if (shoesCategory) {
+          // Set "обувь" as default if it exists
+          setItemType(shoesCategory.name);
+        } else if (fetchedCategories.length > 0) {
+          // Fall back to first category if "обувь" doesn't exist
           setItemType(fetchedCategories[0].name);
         }
       } catch (error) {
@@ -366,7 +375,7 @@ const DeliveryCalculator: React.FC = () => {
           >
             {isCalculating ? (
               <>
-                <Loader2 className="inline-block mr-2 h-4 w-4 animate-spin" />
+                <LoadingSpinner size="xs" inline className="mr-2" />
                 Идет расчет...
               </>
             ) : (
@@ -440,7 +449,7 @@ const DeliveryCalculator: React.FC = () => {
             >
               {isAddingToCart ? (
                 <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <LoadingSpinner size="xs" inline className="mr-2" />
                   Добавление в корзину...
                 </>
               ) : (

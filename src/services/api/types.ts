@@ -25,9 +25,10 @@ export interface UserExistsRequest {
 }
 
 export interface UserExistsResponse {
-  exists: boolean;
-  status?: string;
-  message?: string;
+  status: string;
+  message: string;
+  is_new_client: boolean;
+  dd_coins_balance: number;
 }
 
 export interface UserRankRequest {

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Share2, Copy, Loader2, RefreshCw } from 'lucide-react';
+import { Share2, Copy, RefreshCw, Users as UsersIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { getUserReferralInfo, getReferralStats, shareReferralLink } from '@/services/api/referralService';
 import { ReferralInfo, ReferralStats } from '@/services/api/types';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface ReferralCardProps {
   className?: string;
@@ -77,8 +78,8 @@ const ReferralCard: React.FC<ReferralCardProps> = ({ className }) => {
   if (isLoading) {
     return (
       <div className={`p-4 text-center ${className}`}>
-        <Loader2 className="animate-spin mx-auto h-6 w-6 text-telegram-blue" />
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Loading referral information...</p>
+        <LoadingSpinner size="sm" className="mx-auto" />
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Загрузка информации о рефералах...</p>
       </div>
     );
   }
@@ -99,10 +100,10 @@ const ReferralCard: React.FC<ReferralCardProps> = ({ className }) => {
   }
 
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div className={`space-y-2 ${className}`}>
       {/* Referral Link Section */}
-      <div className="p-4 bg-telegram-secondary-bg rounded-lg">
-        <h3 className="text-sm font-medium mb-2">Your Referral Link</h3>
+      <div className="p-2 bg-telegram-secondary-bg rounded-lg">
+        <h3 className="text-sm font-medium mb-2">Ваша реферальная ссылка</h3>
         <div className="flex items-center gap-2">
           <input
             type="text"
@@ -128,8 +129,8 @@ const ReferralCard: React.FC<ReferralCardProps> = ({ className }) => {
       </div>
 
       {/* Referrals List Section */}
-      <div className="p-4 bg-telegram-secondary-bg rounded-lg">
-        <h3 className="text-sm font-medium mb-2">Your Referrals</h3>
+      <div className="p-2 bg-telegram-secondary-bg rounded-lg">
+        <h3 className="text-sm font-medium mb-2">Приглашенные друзья</h3>
         {referralStats?.referred_users && referralStats.referred_users.length > 0 ? (
           <div className="space-y-2">
             {referralStats.referred_users.map((user) => (
@@ -138,14 +139,14 @@ const ReferralCard: React.FC<ReferralCardProps> = ({ className }) => {
                   {user.username ? `@${user.username}` : `User ${user.id}`}
                 </span>
                 <span className="text-gray-500 dark:text-gray-400">
-                  Joined {new Date(user.joined_at).toLocaleDateString()}
+                  С нами с {new Date(user.joined_at).toLocaleDateString()}
                 </span>
               </div>
             ))}
           </div>
         ) : (
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            No referrals yet. Share your link to start earning rewards!
+            Тут пока никого нет..
           </p>
         )}
       </div>

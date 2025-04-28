@@ -31,6 +31,17 @@ import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 import DeliveryCalculator from "./pages/DeliveryCalculator";
 import Settings from "./pages/Settings";
+import LoadingSpinner from "./components/LoadingSpinner";
+
+// Create a query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  },
+});
 
 // Create a simple mock for useTelegram if the actual module is not available
 const useTelegram = () => {
@@ -64,19 +75,11 @@ const useTelegram = () => {
   };
 };
 
-// Create a persistent query client with optimized settings
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 2,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (garbage collection time, formerly cacheTime)
-    },
-  },
-});
-
-// Component to initialize Telegram WebApp
+/**
+ * TelegramInitializer component
+ * This component handles initialization of the Telegram WebApp
+ * and sets up navigation behavior and theme handling
+ */
 const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -114,50 +117,29 @@ const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
   // Check user existence in the API
   const checkUserInAPI = useCallback(async () => {
     try {
-      const userExists = await checkUserExists();
-      console.log("API user check result:", userExists);
+      const userResponse = await checkUserExists(true);
+      console.log("API user check result:", userResponse);
       
-      if (userExists) {
-        // If user exists, also get their rank
-        // const rank = await getUserRank();
-        // console.log("User rank:", rank);
-      } else {
-        console.log("User does not exist in the system yet");
+      if (userResponse && typeof userResponse !== 'boolean') {
+        // Show welcome toast for new users getting 500 DD coins with a delay
+        if (userResponse.is_new_client && userResponse.dd_coins_balance === 500) {
+          // Add a delay to ensure the toast appears after the app has loaded
+          setTimeout(() => {
+            toast.success(
+              "Добро пожаловать! Только что начислили вам 500 $DD коинов в честь нашего знакомства!",
+              { duration: 6000 }
+            );
+          }, 1500); // 1.5 second delay to ensure visibility
+        }
       }
     } catch (error) {
       console.error("Error checking user in API:", error);
     }
   }, []);
 
-  // Handle navigation to valid routes
-  const handleNavigation = useCallback(() => {
-    const validRoutes = ["/", "/shop", "/profile", "/cart", "/calculator", "/settings"];
-    const isProductRoute = location.pathname.startsWith("/product/");
-    
-    // Check if the path contains Telegram WebApp data
-    const isTelegramWebAppDataPath = location.pathname.includes("tgWebAppData=") || 
-                                    location.search.includes("tgWebAppData=");
-    
-    if (isTelegramWebAppDataPath) {
-      console.log("Detected Telegram WebApp data in URL, redirecting to home and preserving data");
-      // Don't navigate away, we'll handle the data in initializeTelegram
-      return true;
-    }
-    
-    if (!validRoutes.includes(location.pathname) && !isProductRoute) {
-      console.log("Redirecting to home from invalid path:", location.pathname);
-      navigate("/", { replace: true });
-      return false;
-    }
-    return true;
-  }, [location.pathname, location.search, navigate]);
-
   // Initialize Telegram WebApp
   const initializeTelegram = useCallback(async () => {
     if (initialized) return;
-    
-    // Check if navigation is needed first
-    if (!handleNavigation()) return;
     
     console.log("Initializing Telegram interface...");
     
@@ -169,12 +151,6 @@ const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
       console.log("Running in Telegram browser");
     } else {
       console.log("Not running in Telegram browser");
-    }
-    
-    // Check if we have tgWebAppData in the URL
-    const hasTgWebAppData = window.location.href.includes('tgWebAppData=');
-    if (hasTgWebAppData) {
-      console.log("Found tgWebAppData in URL, this is a direct launch from Telegram");
     }
     
     try {
@@ -203,12 +179,6 @@ const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
           // Check if user exists in the API system
           await checkUserInAPI();
           
-          // If we have tgWebAppData in the URL, navigate to home to clean up the URL
-          if (hasTgWebAppData && location.pathname !== '/') {
-            console.log("Navigating to home to clean up URL");
-            navigate('/', { replace: true });
-          }
-          
           setInitialized(true);
           setIsLoading(false);
         } else if (isTelegramBrowser) {
@@ -221,12 +191,6 @@ const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
             if (retryUserData) {
               console.log("User data retrieved after delay:", retryUserData);
               updateTelegramUser(retryUserData);
-              
-              // If we have tgWebAppData in the URL, navigate to home to clean up the URL
-              if (hasTgWebAppData && location.pathname !== '/') {
-                console.log("Navigating to home to clean up URL");
-                navigate('/', { replace: true });
-              }
             } else {
               console.log("Still no user data after retry. This might indicate:");
               console.log("1. The Mini App is not properly configured in BotFather");
@@ -280,7 +244,7 @@ const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
       setInitialized(true); // Mark as initialized to prevent further attempts
       setIsLoading(false);
     }
-  }, [initialized, handleNavigation, updateTelegramUser, navigate, location.pathname, tg, initWebApp, getUserData]);
+  }, [initialized, updateTelegramUser, tg, initWebApp, getUserData, checkUserInAPI]);
 
   // Handle back button functionality
   useEffect(() => {
@@ -334,15 +298,10 @@ const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
     });
   }, [initializeTelegram]);
 
-  // Handle route changes
-  useEffect(() => {
-    handleNavigation();
-  }, [location.pathname, handleNavigation]);
-
   // Show nothing while loading to prevent 404 page flash
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-telegram-blue"></div>
+      <LoadingSpinner size="xl" />
     </div>;
   }
 

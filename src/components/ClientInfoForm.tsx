@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { updateClientInfo, getClientInfo } from '@/services/api/clientService';
-import { Loader2 } from 'lucide-react';
 import { fetchDeliveryTypes } from '@/services/api/orderService';
 import { DeliveryRate } from '@/services/api/types';
 import { toast } from 'sonner';
+import { handleApiError } from '@/services/api/config';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface DeliveryType {
   id: number;
@@ -144,18 +145,18 @@ const ClientInfoForm: React.FC<ClientInfoFormProps> = ({
         // alert("Setting delivery type to " + selectedDeliveryRate?.delivery_type);
         onComplete(selectedDeliveryRate);
       } else {
-        toast.error('Failed to update client information');
+        // toast.error('Failed to update client information');
       }
     } catch (error) {
       console.error('Error updating client info:', error);
-      toast.error('Failed to update client information');
+      // toast.error('Failed to update client information');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 dark:bg-black/50 flex items-start justify-center z-50 p-4 overflow-y-auto">
+    <div className="fixed inset-0 flex items-start justify-center z-50 p-4 pb-20 overflow-y-auto bg-black bg-opacity-50 backdrop-blur-sm">
       <div className="bg-white dark:bg-sidebar-accent rounded-lg shadow-lg max-w-md w-full my-8">
         <div className="p-4 border-b dark:border-gray-700">
           <h2 className="text-lg font-semibold">Заполните свои данные</h2>
@@ -200,7 +201,7 @@ const ClientInfoForm: React.FC<ClientInfoFormProps> = ({
             </label>
             {isLoadingRates ? (
               <div className="flex items-center space-x-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <LoadingSpinner size="xs" inline className="mr-2" />
                 <span>Загрузка вариантов доставки...</span>
               </div>
             ) : deliveryTypes.length === 0 ? (
@@ -275,7 +276,7 @@ const ClientInfoForm: React.FC<ClientInfoFormProps> = ({
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="inline-block mr-2 h-4 w-4 animate-spin" />
+                  <LoadingSpinner size="xs" inline className="mr-2" />
                   Сохранение...
                 </>
               ) : (
