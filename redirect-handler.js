@@ -16,41 +16,21 @@
     return params;
   };
   
-  // If we have a path parameter from our 404.html redirect
+  // If we have a _path parameter from our 404.html redirect
   // convert it back to normal browser URL
   const params = getQueryParams();
   
-  if (params.path) {
-    // Get the proper path from the parameter
-    const path = params.path.replace(/^\/+/, '');
+  if (params._path) {
+    const newPath = params._path.replace(/^\/+/, '');
     
-    // Get the basename (should be /dd-app-v1/)
-    const pathname = window.location.pathname;
-    const basename = '/dd-app-v1/';
+    // Create a new URL without the _path parameter
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.pathname = url.pathname.split('/').slice(0, 2).join('/') + '/' + newPath;
     
-    // Keep all query parameters except 'path'
-    const newSearch = Array.from(new URL(window.location.href).searchParams.entries())
-      .filter(([key]) => key !== 'path')
-      .map(([key, value]) => `${key}=${value}`)
-      .join('&');
+    // Replace current URL with the new one
+    window.history.replaceState({}, document.title, url.toString());
     
-    // Create new URL making sure we don't duplicate the path
-    let newUrl = '';
-    
-    // Check if pathname already ends with dd-app-v1/
-    if (pathname.endsWith('dd-app-v1/')) {
-      newUrl = `${window.location.origin}${pathname}${path}`;
-    } else {
-      // Otherwise make sure we have the proper basename
-      newUrl = `${window.location.origin}${basename}${path}`;
-    }
-    
-    // Add any remaining query parameters and hash
-    newUrl += `${newSearch ? '?' + newSearch : ''}${window.location.hash}`;
-    
-    console.log('Redirect handler: Transforming to', newUrl);
-    
-    // Update history to show the proper URL
-    window.history.replaceState(null, document.title, newUrl);
+    console.log('Redirect handler: Transformed path', newPath);
   }
 })(); 
