@@ -15,8 +15,8 @@ import ProductCard from '@/components/ProductCard';
 
 // Import banner images
 import mainBanner from '@/assets/jointgbanner.webp';
-import csBanner from '@/assets/buycatsofabanner.webp';
-import ddCoinsBanner from '@/assets/ddcoinsbanner.webp';
+import csBanner from '@/assets/catsofa_banner.webp';
+import ddCoinsBanner from '@/assets/ddcoins_banner.webp';
 import calculatorBanner from '@/assets/calcbanner.webp';
 import shopBanner from '@/assets/gotoshopbanner.webp';
 import sneakersBanner from '@/assets/sneakers_category_banner.webp';

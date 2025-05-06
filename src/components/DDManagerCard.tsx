@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import managerBg from '@/assets/managerbg.webp';
+import managerBg from '@/assets/manager_banner.webp';
 
 const DDManagerCard: React.FC = () => {
   return (
