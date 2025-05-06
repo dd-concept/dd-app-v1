@@ -191,7 +191,7 @@ ${orderItems}
     cache.invalidate(CACHE_KEYS.ORDERS(user.id));
     
     // Show success message
-    toast.success('Заказ успешно создан! Проверьте чат в Telegram для получения деталей.');
+    // toast.success('Заказ успешно создан! Проверьте чат в Telegram для получения деталей.');
     
     return true;
   } catch (error: any) {

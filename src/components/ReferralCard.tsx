@@ -51,18 +51,38 @@ const ReferralCard: React.FC<ReferralCardProps> = ({ className }) => {
   }, [refetchReferralInfo, refetchStats]);
 
   const handleShare = async () => {
-    if (!referralInfo) return;
+    if (!referralInfo) {
+      toast.error('Реферальная информация недоступна');
+      return;
+    }
+    
+    if (!referralInfo.telegram_deep_link) {
+      toast.error('Реферальная ссылка отсутствует');
+      console.error('Empty referral link:', referralInfo);
+      return;
+    }
+    
     await shareReferralLink(referralInfo);
   };
 
   const handleCopyLink = async () => {
-    if (!referralInfo) return;
+    if (!referralInfo) {
+      toast.error('Реферальная информация недоступна');
+      return;
+    }
+    
+    if (!referralInfo.telegram_deep_link) {
+      toast.error('Реферальная ссылка отсутствует');
+      console.error('Empty referral link:', referralInfo);
+      return;
+    }
+    
     try {
       await navigator.clipboard.writeText(referralInfo.telegram_deep_link);
-      toast.success('Referral link copied to clipboard');
+      toast.success('Реферальная ссылка скопирована в буфер обмена');
     } catch (error) {
       console.error('Error copying to clipboard:', error);
-      toast.error('Failed to copy referral link');
+      toast.error('Не удалось скопировать реферальную ссылку');
     }
   };
 
@@ -109,12 +129,14 @@ const ReferralCard: React.FC<ReferralCardProps> = ({ className }) => {
             type="text"
             readOnly
             value={referralInfo?.telegram_deep_link || ''}
-            className="flex-1 p-2 text-sm bg-white dark:bg-sidebar-primary/30 border border-gray-300 dark:border-gray-700 rounded-md"
+            placeholder={!referralInfo?.telegram_deep_link ? "Ссылка не найдена" : ""}
+            className={`flex-1 p-2 text-sm bg-white dark:bg-sidebar-primary/30 border ${!referralInfo?.telegram_deep_link ? 'border-red-300 dark:border-red-700' : 'border-gray-300 dark:border-gray-700'} rounded-md`}
           />
           <button
             onClick={handleCopyLink}
             className="p-2 text-telegram-blue hover:text-telegram-dark"
             title="Copy link"
+            disabled={!referralInfo?.telegram_deep_link}
           >
             <Copy size={18} />
           </button>

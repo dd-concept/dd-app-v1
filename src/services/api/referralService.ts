@@ -57,6 +57,24 @@ export const getUserReferralInfo = async (retryAttempt = 0): Promise<ReferralInf
     const referralInfo: ReferralInfo = JSON.parse(responseText);
     
     console.log('Referral info fetched:', referralInfo);
+    
+    // Validate that the telegram_deep_link is present
+    if (!referralInfo.telegram_deep_link) {
+      console.error('API returned referral info without telegram_deep_link:', referralInfo);
+      
+      // Try to create a new referral code if we haven't retried yet
+      if (retryAttempt === 0) {
+        console.log('Attempting to create a new referral code due to missing link...');
+        const newReferral = await createReferralCode();
+        if (newReferral && newReferral.telegram_deep_link) {
+          return newReferral;
+        }
+      }
+      
+      toast.error('Ошибка: реферальная ссылка отсутствует');
+      return null;
+    }
+    
     return referralInfo;
   } catch (error) {
     console.error('Error fetching referral info:', error);
@@ -103,6 +121,14 @@ export const createReferralCode = async (): Promise<ReferralInfo | null> => {
     const referralInfo: ReferralInfo = JSON.parse(responseText);
     
     console.log('Referral code created:', referralInfo);
+    
+    // Validate that the telegram_deep_link is present
+    if (!referralInfo.telegram_deep_link) {
+      console.error('API returned created referral without telegram_deep_link:', referralInfo);
+      toast.error('Ошибка: не удалось создать реферальную ссылку');
+      return null;
+    }
+    
     return referralInfo;
   } catch (error) {
     console.error('Error creating referral code:', error);
@@ -160,19 +186,28 @@ export const getReferralStats = async (): Promise<ReferralStats | null> => {
  */
 export const shareReferralLink = async (referralInfo: ReferralInfo): Promise<boolean> => {
   try {
+    // Validate that referralInfo and telegram_deep_link exist and are not empty
+    if (!referralInfo || !referralInfo.telegram_deep_link) {
+      console.error('Missing referral link:', referralInfo);
+      toast.error('Ошибка: реферальная ссылка отсутствует');
+      return false;
+    }
+    
+    console.log('Sharing referral link:', referralInfo.telegram_deep_link);
+    
     // Check if the browser supports the Web Share API
     if (navigator.share) {
       await navigator.share({
-        title: 'Join me on DD Store',
-        text: 'Use my referral link to join DD Store',
+        title: 'Присоединяйся к DD:CONCEPT',
+        text: `Держи ссылку на приложение DD:CONCEPT!\n${referralInfo.telegram_deep_link}`,
         url: referralInfo.telegram_deep_link,
       });
-      toast.success('Referral link shared successfully');
+      toast.success('Ссылка на DD Store успешно отправлена');
       return true;
     } else {
       // Fallback: copy to clipboard
       await navigator.clipboard.writeText(referralInfo.telegram_deep_link);
-      toast.success('Referral link copied to clipboard');
+      toast.success('Реферальная ссылка скопирована в буфер обмена');
       return true;
     }
   } catch (error) {
@@ -180,11 +215,16 @@ export const shareReferralLink = async (referralInfo: ReferralInfo): Promise<boo
     
     // Try clipboard fallback if sharing fails
     try {
-      await navigator.clipboard.writeText(referralInfo.telegram_deep_link);
-      toast.success('Referral link copied to clipboard');
-      return true;
+      if (referralInfo && referralInfo.telegram_deep_link) {
+        await navigator.clipboard.writeText(referralInfo.telegram_deep_link);
+        toast.success('Реферальная ссылка скопирована в буфер обмена');
+        return true;
+      } else {
+        throw new Error('Missing referral link');
+      }
     } catch (clipboardError) {
-      toast.error('Failed to share referral link');
+      console.error('Clipboard error:', clipboardError);
+      toast.error('Не удалось поделиться реферальной ссылкой');
       return false;
     }
   }

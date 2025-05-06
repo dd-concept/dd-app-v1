@@ -98,17 +98,17 @@ export const updateClientInfo = async (
     // Just check the status code for success (200-299 range)
     if (response.ok) {
       console.log(`Client info update successful with status: ${response.status}`);
-      toast.success('Client information updated successfully');
+      // toast.success('Client information updated successfully');
       return true;
     } else {
       const errorText = await response.text();
       console.error(`API Error (${response.status}): ${errorText}`);
-      toast.error('Failed to update client information');
+      // toast.error('Failed to update client information');
       return false;
     }
   } catch (error) {
     console.error('Error updating client info:', error);
-    toast.error('Failed to update client information');
+    // toast.error('Failed to update client information');
     return false;
   }
 };
@@ -143,7 +143,7 @@ export const checkClientInformation = async (): Promise<boolean> => {
     return true;
   } catch (error) {
     console.error('Error checking client information:', error);
-    toast.error('Failed to check client information');
+    // toast.error('Failed to check client information');
     return false;
   }
 }; 

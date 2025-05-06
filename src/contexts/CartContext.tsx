@@ -201,7 +201,7 @@ export const CartProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
   const clearCart = () => {
     setItems([]);
-    toast.info('Cart cleared');
+    // toast.info('Cart cleared');
   };
 
   return (

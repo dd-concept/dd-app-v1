@@ -76,6 +76,10 @@ const Home: React.FC = () => {
   // Banner data
   const banners = [
     {
+      image: ddCoinsBanner,
+      link: '/profile'
+    },
+    {
       image: mainBanner,
       link: 'https://t.me/dd_concept',
       external: true
@@ -83,10 +87,6 @@ const Home: React.FC = () => {
     {
       image: csBanner, 
       link: '/shop?brand=Cat%26Sofa'
-    },
-    {
-      image: ddCoinsBanner,
-      link: '/profile'
     }
   ];
 
@@ -175,7 +175,8 @@ const Home: React.FC = () => {
         
         {/* Delivery Calculator Button - Full Width */}
         <Link 
-          to="/calculator" 
+          to="/calculator"
+          onClick={() => window.scrollTo(0, 0)} 
           className="w-full rounded-lg overflow-hidden relative hover-lift h-16 block mt-4"
           style={{ 
             backgroundImage: `url(${calculatorBanner})`,

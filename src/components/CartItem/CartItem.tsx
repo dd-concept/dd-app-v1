@@ -30,14 +30,12 @@ const CartItem: React.FC<CartItemProps> = ({ item, onRemove }) => {
   const getPlaceholderImage = () => {
     if (item.item_type === 'preorder') {
       // Use different emojis based on product category
-      if (item.category_type === 'sneakers') {
+      if (item.category_type === 'обувь') {
         return '👟'; // Sneaker emoji for shoes/sneakers
-      } else if (item.category_type === 'clothes') {
-        return '👕'; // T-shirt emoji for clothes
-      } else if (item.category_type === 'accessories') {
+      } else if (item.category_type === 'одежда') {
+        return '👕'; // T-shirt emoji for одежда
+      } else if (item.category_type === 'аксессуары') {
         return '👜'; // Bag emoji for accessories
-      } else if (item.category_type === 'shirt') {
-        return '👕'; // Bag emoji for accessories
       }
       return '🔮'; // Default crystal ball emoji for other preorders
     } else {
@@ -83,10 +81,9 @@ const CartItem: React.FC<CartItemProps> = ({ item, onRemove }) => {
             <p className="truncate">URL: {item.dewu_url}</p>
             <p>Размер: {item.size || 'Не указан'}</p>
             <p>Категория: {
-              item.category_type === 'sneakers' ? 'Обувь' : 
-              item.category_type === 'clothes' ? 'Одежда' : 
-              item.category_type === 'accessories' ? 'Аксессуары' : 
-              item.category_type === 'shirt' ? 'Рубашка' : 
+              item.category_type === 'обувь' ? 'Обувь' : 
+              item.category_type === 'одежда' ? 'Одежда' : 
+              item.category_type === 'аксессуары' ? 'Аксессуары' : 
               item.category_type
             }</p>
             <p>Доставка: {(item.shipping_type || item.delivery_type) === 'cargo' ? 'Автомобиль' : 'Самолет'}</p>
