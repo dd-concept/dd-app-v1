@@ -216,9 +216,9 @@ export const shareReferralLink = async (referralInfo: ReferralInfo): Promise<boo
     // Try clipboard fallback if sharing fails
     try {
       if (referralInfo && referralInfo.telegram_deep_link) {
-        await navigator.clipboard.writeText(referralInfo.telegram_deep_link);
-        toast.success('Реферальная ссылка скопирована в буфер обмена');
-        return true;
+      await navigator.clipboard.writeText(referralInfo.telegram_deep_link);
+      toast.success('Реферальная ссылка скопирована в буфер обмена');
+      return true;
       } else {
         throw new Error('Missing referral link');
       }

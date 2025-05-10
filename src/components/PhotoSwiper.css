@@ -38,19 +38,6 @@
   }
 }
 
-/* Pagination bullets */
-.photo-swiper-container .swiper-pagination-bullet {
-  width: 8px;
-  height: 8px;
-  background-color: white;
-  opacity: 0.5;
-}
-
-.photo-swiper-container .swiper-pagination-bullet-active {
-  opacity: 1;
-  background-color: white;
-}
-
 /* Better touch handling for mobile swipe */
 .photo-swiper-container .swiper {
   touch-action: pan-y;

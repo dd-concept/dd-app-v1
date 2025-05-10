@@ -248,16 +248,17 @@ const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
 
   // Handle back button functionality
   useEffect(() => {
-    // Only show back button if not on home page
-    if (location.pathname !== '/') {
+    // Hide back button on specific pages
+    const hideBackButtonPages = ['/', '/calculator', '/shop'];
+    if (hideBackButtonPages.includes(location.pathname)) {
+      console.log("Hiding back button for path:", location.pathname);
+      hideBackButton();
+    } else {
       console.log("Showing back button for path:", location.pathname);
       showBackButton(() => {
         console.log("Back button pressed, navigating back");
         navigate(-1); // Go back to previous page
       });
-    } else {
-      console.log("Hiding back button for home page");
-      hideBackButton();
     }
     
     // Clean up when component unmounts
@@ -265,6 +266,25 @@ const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
       hideBackButton();
     };
   }, [location.pathname, navigate]);
+
+  // Handle scroll to top functionality
+  useEffect(() => {
+    // Pages that should scroll to top on mount
+    const scrollToTopPages = ['/', '/calculator', '/cart', '/product'];
+    
+    // Check if current path matches any of the scroll-to-top pages
+    const shouldScrollToTop = scrollToTopPages.some(path => 
+      location.pathname === path || location.pathname.startsWith('/product/')
+    );
+    
+    if (shouldScrollToTop) {
+      console.log("Scrolling to top for path:", location.pathname);
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  }, [location.pathname]);
 
   // Listen for theme changes
   useEffect(() => {

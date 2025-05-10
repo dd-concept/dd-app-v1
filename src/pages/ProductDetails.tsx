@@ -12,6 +12,7 @@ import { hapticSelection, hapticImpact } from '@/utils/telegramUtils';
 import { sortSizes } from '@/utils/sizeUtils';
 import { toast } from 'sonner';
 import PhotoSwiper from '@/components/PhotoSwiper';
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 
 const ProductDetails: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -113,7 +114,8 @@ const ProductDetails: React.FC = () => {
       sizes: availableSizes,
       // Use the actual price from the API
       price: price,
-      quantity: 1
+      quantity: 1,
+      photo_url: photoUrls.length > 0 ? photoUrls[0] : undefined
     };
     
     addItemToCart(tempProduct, selectedSize);
@@ -145,6 +147,8 @@ const ProductDetails: React.FC = () => {
     hapticSelection();
     navigate('/cart');
   };
+  
+  useScrollToTop();
   
   if (isLoading) {
     return (
@@ -198,35 +202,24 @@ const ProductDetails: React.FC = () => {
         />
         
         <div className="p-4 flex-1">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-xl font-bold">{product.item_name}</h1>
-            <Link 
-              to="/cart" 
-              className="relative flex items-center justify-center w-10 h-10 bg-telegram-button text-white rounded-full hover:bg-telegram-button/90 transition-colors"
-              aria-label="View Cart"
-            >
-              <ShoppingCart size={20} className="text-white" />
-              {/* Show total quantity of this product in cart across all sizes */}
-              {availableSizes.reduce((total, size) => total + getItemQuantity(product.sku, size), 0) > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                  {availableSizes.reduce((total, size) => total + getItemQuantity(product.sku, size), 0)}
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h1 className="text-2xl font-bold mb-2">{product.item_name}</h1>
+              <div className="flex items-center gap-2">
+                {product.brand && (
+                  <Link 
+                    to={`/shop?brand=${encodeURIComponent(product.brand)}`}
+                    className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-xs rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    {product.brand}
+                  </Link>
+                )}
+                <span className="px-2 py-1 bg-telegram-light dark:bg-telegram-dark/20 text-telegram-blue dark:text-telegram-blue text-xs rounded-full">
+                  {product.color_code}
                 </span>
-              )}
-            </Link>
-          </div>
-          
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              {product.brand && (
-                <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-xs rounded-full">
-                  {product.brand}
-                </span>
-              )}
-              <span className="px-2 py-1 bg-telegram-light dark:bg-telegram-dark/20 text-telegram-blue dark:text-telegram-blue text-xs rounded-full">
-                {product.color_code}
-              </span>
+              </div>
             </div>
-            <p className="text-lg font-semibold text-telegram-blue">
+            <p className="text-2xl font-bold text-telegram-blue">
               ₽{typeof product.price_rub === 'string' 
                 ? parseFloat(product.price_rub.replace(/[^\d.-]/g, '')).toLocaleString() 
                 : product.price_rub.toLocaleString()}
@@ -253,54 +246,60 @@ const ProductDetails: React.FC = () => {
             )}
           </div>
           
-          <div className="sticky bottom-0 pt-4 pb-2 bg-white dark:bg-sidebar-primary">
-            {selectedSize && (
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">Размер: {selectedSize}</span>
-                  {getItemQuantity(product.sku, selectedSize) > 0 && (
-                    <span className="text-sm text-gray-500">
-                      В корзине: {getItemQuantity(product.sku, selectedSize)} шт.
-                    </span>
+          {/* Add padding at the bottom to account for the sticky panel */}
+          <div className="h-2" />
+          
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-sidebar-primary border-t border-gray-200 dark:border-gray-800 pb-16">
+            <div className="max-w-md mx-auto px-4 py-4">
+              {selectedSize && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">Размер: {selectedSize}</span>
+                    {getItemQuantity(product.sku, selectedSize) > 0 && (
+                      <span className="text-sm text-gray-500">
+                        В корзине: {getItemQuantity(product.sku, selectedSize)} шт.
+                      </span>
+                    )}
+                  </div>
+                  
+                  {getItemQuantity(product.sku, selectedSize) === 0 ? (
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={!selectedSize || availableSizes.length === 0}
+                      className="w-full py-3 px-4 bg-telegram-blue text-white rounded-lg flex items-center justify-center gap-2 hover:bg-telegram-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ShoppingBag size={20} />
+                      <span>Добавить в корзину</span>
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleViewCart}
+                        className="flex-1 py-3 px-4 bg-telegram-blue text-white rounded-lg flex items-center justify-center gap-2 hover:bg-telegram-dark transition-colors"
+                      >
+                        <ShoppingCart size={20} />
+                        <span>Перейти в корзину</span>
+                      </button>
+                      <div className="flex items-center justify-between border border-gray-200 dark:border-gray-700 rounded-lg p-1">
+                        <button 
+                          onClick={handleDecreaseQuantity}
+                          className="w-10 h-10 flex items-center justify-center text-telegram-text bg-gray-100 dark:bg-gray-800 rounded-md"
+                        >
+                          <Minus size={18} />
+                        </button>
+                        <span className="font-medium px-4">{getItemQuantity(product.sku, selectedSize)}</span>
+                        <button 
+                          onClick={handleIncreaseQuantity}
+                          className="w-10 h-10 flex items-center justify-center text-telegram-text bg-gray-100 dark:bg-gray-800 rounded-md"
+                        >
+                          <Plus size={18} />
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
-                
-                {getItemQuantity(product.sku, selectedSize) === 0 ? (
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={!selectedSize || availableSizes.length === 0}
-                    className="w-full py-3 px-4 bg-telegram-blue text-white rounded-lg flex items-center justify-center gap-2 hover:bg-telegram-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ShoppingBag size={20} />
-                    <span>Добавить в корзину</span>
-                  </button>
-                ) : (
-                  <div className="flex items-center justify-between border border-gray-200 dark:border-gray-700 rounded-lg p-1">
-                    <button 
-                      onClick={handleDecreaseQuantity}
-                      className="w-10 h-10 flex items-center justify-center text-telegram-text bg-gray-100 dark:bg-gray-800 rounded-md"
-                    >
-                      <Minus size={18} />
-                    </button>
-                    <span className="font-medium">{getItemQuantity(product.sku, selectedSize)}</span>
-                    <button 
-                      onClick={handleIncreaseQuantity}
-                      className="w-10 h-10 flex items-center justify-center text-telegram-text bg-gray-100 dark:bg-gray-800 rounded-md"
-                    >
-                      <Plus size={18} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            <button
-              onClick={handleViewCart}
-              className="w-full py-3 px-4 bg-telegram-blue text-white rounded-lg flex items-center justify-center gap-2 hover:bg-telegram-dark transition-colors"
-            >
-              <ShoppingCart size={20} />
-              <span>Перейти в корзину</span>
-            </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@ import { fetchCategories } from '@/services/api/productService';
 import { Category } from '@/services/api/types';
 import { toast } from 'sonner';
 import { useCart } from '@/contexts/CartContext';
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 
 // Constants for fallback calculation if API fails
 const CNY_USD_RATE = 0.14;
@@ -29,6 +30,7 @@ const formatCategoryName = (name: string): string => {
 };
 
 const DeliveryCalculator: React.FC = () => {
+  useScrollToTop();
   const { addPreorderToCart } = useCart();
   
   // State for form inputs
@@ -130,14 +132,6 @@ const DeliveryCalculator: React.FC = () => {
     // Allow only numbers
     if (value && !/^\d+$/.test(value)) {
       setPriceError('Введите только цифры');
-      setPrice(value);
-      return;
-    }
-    
-    // Check if price is within allowed range
-    const numValue = parseInt(value);
-    if (value && (numValue <= 0 || numValue >= 1000000)) {
-      setPriceError('Цена должна быть от 1 до 999,999 юаней');
     } else {
       setPriceError('');
     }
@@ -272,7 +266,7 @@ const DeliveryCalculator: React.FC = () => {
   };
   
   return (
-    <PageLayout>
+    <PageLayout className="pb-20">
       <div className="p-4">
         <div className="flex items-center mb-6">
           <Calculator className="mr-2 text-telegram-blue" size={24} />
@@ -296,12 +290,12 @@ const DeliveryCalculator: React.FC = () => {
               <p className="text-red-500 text-sm">{priceError}</p>
             )}
             <div className="flex items-center text-xs text-telegram-hint">
-              <button 
+              <a 
                 onClick={() => openTelegramUrl("https://telegra.ph/Poisk-i-kartochka-tovara-ceny-razmernaya-setka-i-sroki-dostavki-04-11")}
                 className="flex items-center text-telegram-link"
               >
                 Как проверить цену? <ExternalLink size={12} className="ml-1" />
-              </button>
+              </a>
             </div>
           </div>
           
@@ -416,9 +410,7 @@ const DeliveryCalculator: React.FC = () => {
             )}
             <div className="flex items-center text-xs text-telegram-hint">
               <a 
-                href="https://teletype.in/@poizonshop/link" 
-                target="_blank" 
-                rel="noopener noreferrer"
+                onClick={() => openTelegramUrl("https://telegra.ph/Gde-vzyat-ssylku-na-tovar-v-POIZON-05-10")}
                 className="flex items-center text-telegram-link"
               >
                 Как получить ссылку? <ExternalLink size={12} className="ml-1" />

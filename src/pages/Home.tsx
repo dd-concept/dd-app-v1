@@ -12,6 +12,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import BannerSwiper from '@/components/BannerSwiper';
 import DDManagerCard from '@/components/DDManagerCard';
 import ProductCard from '@/components/ProductCard';
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 
 // Import banner images
 import mainBanner from '@/assets/jointgbanner.webp';
@@ -25,6 +26,7 @@ import jeansBanner from '@/assets/jeans_category_banner.webp';
 import beltBanner from '@/assets/belt_category_banner.webp';
 
 const Home: React.FC = () => {
+  useScrollToTop();
   const { username, displayName, telegramUser, avatarEmoji, updateTelegramUser } = useUser();
   const navigate = useNavigate();
   const [ddCoinsBalance, setDDCoinsBalance] = useState<number>(0);
@@ -196,7 +198,7 @@ const Home: React.FC = () => {
         <h2 className="text-xl font-medium mb-4">Что купить?</h2>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <Link 
-            to="/shop?category=sneakers" 
+            to="/shop?category=обувь" 
             className="rounded-lg overflow-hidden relative hover-lift aspect-[5/3]"
             style={{ 
               backgroundImage: `url(${sneakersBanner})`,
@@ -211,7 +213,7 @@ const Home: React.FC = () => {
             </div>
           </Link>
           <Link 
-            to="/shop?category=tops" 
+            to="/shop?category=верх" 
             className="rounded-lg overflow-hidden relative hover-lift aspect-[5/3]"
             style={{ 
               backgroundImage: `url(${clothesBanner})`,
@@ -226,7 +228,7 @@ const Home: React.FC = () => {
             </div>
           </Link>
           <Link 
-            to="/shop?category=bottoms" 
+            to="/shop?category=низ" 
             className="rounded-lg overflow-hidden relative hover-lift aspect-[5/3]"
             style={{ 
               backgroundImage: `url(${jeansBanner})`,
@@ -241,7 +243,7 @@ const Home: React.FC = () => {
             </div>
           </Link>
           <Link 
-            to="/shop?category=accessories" 
+            to="/shop?category=аксессуары" 
             className="rounded-lg overflow-hidden relative hover-lift aspect-[5/3]"
             style={{ 
               backgroundImage: `url(${beltBanner})`,

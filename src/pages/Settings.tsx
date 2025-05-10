@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Save, Sun, Check } from 'lucide-react';
+import { ChevronLeft, Save, Sun, Check, Bell } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'sonner';
 import { getClientInfo, updateClientInfo } from '@/services/api/clientService';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
   const { telegramUser } = useUser();
+  const useScrollToTopHook = useScrollToTop();
   
   // Form state
   const [email, setEmail] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
   const [address, setAddress] = useState<string>('');
+  const [mailingFlg, setMailingFlg] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -31,6 +34,8 @@ const Settings: React.FC = () => {
           setEmail(clientInfo.email || '');
           setPhone(clientInfo.phone_number || '');
           setAddress(clientInfo.address || '');
+          // If mailing_flg exists in the response, use it, otherwise default to true
+          setMailingFlg(clientInfo.mailing_flg !== undefined ? clientInfo.mailing_flg : true);
         }
       } catch (error) {
         console.error('Error loading client info:', error);
@@ -70,7 +75,7 @@ const Settings: React.FC = () => {
       }
       
       // Call the API to update client info
-      const success = await updateClientInfo(phone, email, address);
+      const success = await updateClientInfo(phone, email, address, mailingFlg);
       
       if (success) {
         // Return to profile page
@@ -107,7 +112,7 @@ const Settings: React.FC = () => {
           >
             <ChevronLeft size={18} />
           </button>
-          <h1 className="text-xl font-semibold">Settings</h1>
+          <h1 className="text-xl font-semibold">Настройки</h1>
         </div>
         
         {isLoading ? (
@@ -118,7 +123,7 @@ const Settings: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-1">
               <label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email Address *
+                Адрес электронной почты *
               </label>
               <input
                 id="email"
@@ -133,7 +138,7 @@ const Settings: React.FC = () => {
             
             <div className="space-y-1">
               <label htmlFor="phone" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Phone Number *
+                Номер телефона *
               </label>
               <input
                 id="phone"
@@ -148,17 +153,42 @@ const Settings: React.FC = () => {
             
             <div className="space-y-1">
               <label htmlFor="address" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Address *
+                Адрес *
               </label>
               <textarea
                 id="address"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-telegram-blue focus:border-telegram-blue dark:bg-gray-800"
-                placeholder="Your full address"
+                placeholder="Ваш полный адрес"
                 rows={3}
                 required
               />
+            </div>
+            
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Bell size={18} className="text-gray-600 dark:text-gray-400" />
+                  <label htmlFor="mailing" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Получать уведомления
+                  </label>
+                </div>
+                <button
+                  type="button"
+                  id="mailing"
+                  onClick={() => setMailingFlg(!mailingFlg)}
+                  className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none focus:ring-2 focus:ring-telegram-blue focus:ring-offset-2 ${
+                    mailingFlg ? 'bg-telegram-blue' : 'bg-gray-300 dark:bg-gray-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block w-4 h-4 transform transition-transform bg-white rounded-full ${
+                      mailingFlg ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
             
             <button
@@ -169,58 +199,22 @@ const Settings: React.FC = () => {
               {isSubmitting ? (
                 <>
                   <LoadingSpinner size="xs" inline className="mr-2" />
-                  Saving...
+                  Сохраняем...
                 </>
               ) : (
                 <>
                   <Save size={16} />
-                  Save Settings
+                  Сохранить
                 </>
               )}
             </button>
           </form>
         )}
 
-        {isSaving ? (
+        {isSaving && (
           <div className="flex justify-center py-6">
             <LoadingSpinner size="md" />
           </div>
-        ) : (
-          <>
-            <h3 className="text-lg font-medium">Изменить тему</h3>
-            
-            <div className="space-y-4 mt-4">
-              {/* Light Theme */}
-              <button
-                onClick={() => handleThemeChange('light')}
-                className={`w-full p-4 border rounded-lg flex items-center justify-between ${
-                  currentTheme === 'light' 
-                    ? 'border-telegram-blue bg-telegram-bg/10' 
-                    : 'border-gray-300 dark:border-gray-700'
-                }`}
-              >
-                <div className="flex items-center">
-                  <Sun size={20} className="mr-3 text-yellow-500" />
-                  <span>Светлая</span>
-                </div>
-                {currentTheme === 'light' && (
-                  <Check className="h-5 w-5 text-telegram-blue" />
-                )}
-              </button>
-
-              <button 
-                className="px-4 py-2 text-white rounded"
-                disabled={isResetting}
-                onClick={handleResetSettings}
-              >
-                {isResetting ? (
-                  <LoadingSpinner size="xs" inline />
-                ) : (
-                  'Сбросить настройки'
-                )}
-              </button>
-            </div>
-          </>
         )}
       </div>
     </PageLayout>

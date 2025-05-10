@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Navigation, A11y } from 'swiper/modules';
+import { Navigation, A11y } from 'swiper/modules';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Import Swiper styles - make sure they are imported in this order for proper styling
 import 'swiper/css';
-import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import 'swiper/css/effect-fade';
 
@@ -50,15 +49,9 @@ const PhotoSwiper: React.FC<PhotoSwiperProps> = ({
   return (
     <div className={`photo-swiper-container w-full aspect-square bg-telegram-bg relative ${className}`}>
       <Swiper
-        modules={[Pagination, Navigation, A11y]}
+        modules={[Navigation, A11y]}
         spaceBetween={0}
         slidesPerView={1}
-        pagination={{ 
-          clickable: true,
-          type: 'bullets',
-          bulletClass: 'swiper-pagination-bullet',
-          bulletActiveClass: 'swiper-pagination-bullet-active'
-        }}
         navigation={true}
         onSlideChange={(swiper) => {
           setCurrentIndex(swiper.activeIndex);

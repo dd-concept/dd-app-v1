@@ -15,6 +15,7 @@ import { Promocode } from '@/services/api/promocodeService';
 import { DeliveryRate } from '@/services/api/types';
 import { getDDCoinsBalance } from '@/services/api/userService';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 
 const Cart: React.FC = () => {
   const { items, removeFromCart, clearCart } = useCart();
@@ -28,6 +29,8 @@ const Cart: React.FC = () => {
   const [isLoadingDDCoins, setIsLoadingDDCoins] = useState<boolean>(false);
   const [selectedDeliveryRate, setSelectedDeliveryRate] = useState<DeliveryRate | null>(null);
   const [clientInfo, setClientInfo] = useState<{ email: string; phone_number: string; address: string } | null>(null);
+  
+  useScrollToTop();
   
   // Fetch DD coins balance when component mounts
   useEffect(() => {
@@ -236,8 +239,8 @@ const Cart: React.FC = () => {
   };
 
   return (
-    <PageLayout>
-      <div className="max-w-4xl mx-auto px-4 py-6">
+    <PageLayout className="pb-20">
+      <div className="max-w-4xl mx-auto px-4 py-4">
         <h1 className="text-2xl font-bold mb-6">Корзина</h1>
         
         {items.length === 0 ? (
@@ -268,7 +271,7 @@ const Cart: React.FC = () => {
             </div>
             
             {/* Promocode Input */}
-            <div className="bg-white dark:bg-sidebar-accent rounded-lg p-4 shadow-sm mb-6 mt-6">
+            <div className="bg-white dark:bg-sidebar-accent rounded-lg p-4 shadow-sm mb-4 mt-6">
               <h3 className="text-sm font-medium mb-2">У вас есть промокод?</h3>
               <PromocodeInput
                 originalPrice={items.reduce((sum, item) => sum + (item.sale_price || item.price) * item.quantity, 0)}
@@ -279,7 +282,7 @@ const Cart: React.FC = () => {
             </div>
             
             {/* Order Summary */}
-            <div className="bg-white dark:bg-sidebar-accent rounded-lg p-4 shadow-sm">
+            <div className="bg-white dark:bg-sidebar-accent rounded-lg p-4 shadow-sm mb-2">
               <h3 className="text-lg font-medium mb-4">Информация о заказе</h3>
               <div className="space-y-2">
                 <div className="flex justify-between">

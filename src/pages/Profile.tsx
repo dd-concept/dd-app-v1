@@ -13,6 +13,7 @@ import { Settings as SettingsIcon, Coins, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL, createFetchOptions } from '@/services/api/config';
 import DDCoinsInfoModal from '@/components/DDCoinsInfoModal';
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 
 const Profile: React.FC = () => {
   const { username, displayName, telegramUser, profile, avatarEmoji, updateTelegramUser } = useUser();
@@ -26,6 +27,8 @@ const Profile: React.FC = () => {
   
   // Use the Telegram context
   const { tg, initWebApp, getUserData } = useTelegram();
+
+  useScrollToTop();
 
   // Initialize Telegram WebApp and get user data
   useEffect(() => {
@@ -119,7 +122,7 @@ const Profile: React.FC = () => {
 
   if (isError && error instanceof Error && !error.message.includes('not found')) {
     return (
-      <PageLayout>
+      <PageLayout className="pb-20">
         <div className="p-4 text-center">
           <h2 className="text-lg font-medium text-red-600 dark:text-red-400 mb-2">Error loading profile</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">

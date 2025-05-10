@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, ShoppingCart, Calculator } from 'lucide-react';
+import { Home, ShoppingBag, Calculator } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
 import { useTheme } from 'next-themes';
@@ -53,7 +53,7 @@ const BottomNavigation: React.FC = () => {
           aria-current={isActive('/shop') ? 'page' : undefined}
         >
           <div className="relative">
-            <ShoppingCart size={32} />
+            <ShoppingBag size={32} />
             {itemCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full badge">
                 {itemCount}

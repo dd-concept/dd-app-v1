@@ -86,9 +86,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
           )}
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-sm text-telegram-hint">
-            Color: {product.color_code}
-          </span>
           <span className="font-medium text-telegram-button">
             ₽{typeof product.price_rub === 'string' 
               ? parseFloat(product.price_rub).toLocaleString() 

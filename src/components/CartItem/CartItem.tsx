@@ -38,8 +38,6 @@ const CartItem: React.FC<CartItemProps> = ({ item, onRemove }) => {
         return '👜'; // Bag emoji for accessories
       }
       return '🔮'; // Default crystal ball emoji for other preorders
-    } else {
-      return '👕'; // Default clothing emoji
     }
   };
 

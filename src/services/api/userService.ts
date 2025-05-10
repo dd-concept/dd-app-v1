@@ -287,13 +287,13 @@ export const getDDCoinsBalance = async (): Promise<number> => {
     if (userResponse && typeof userResponse !== 'boolean') {
       const balance = userResponse.dd_coins_balance;
       console.log('DD coins balance from user check:', balance);
+        
+        // Cache the balance
+        cache.set(cacheKey, balance);
+        
+        return balance;
+      }
       
-      // Cache the balance
-      cache.set(cacheKey, balance);
-      
-      return balance;
-    }
-    
     return 0; // Default balance if we couldn't get it
   } catch (error: any) {
     console.error('Error getting DD coins balance:', error);

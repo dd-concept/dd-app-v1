@@ -145,6 +145,7 @@ export interface ClientInfo {
   phone_number?: string;
   email?: string;
   address?: string;
+  mailing_flg?: boolean;
 }
 
 export interface ClientInfoResponse {
@@ -152,6 +153,7 @@ export interface ClientInfoResponse {
   phone_number?: string;
   email?: string;
   address?: string;
+  mailing_flg?: boolean;
 }
 
 export interface UpdateClientInfoRequest {
@@ -159,6 +161,7 @@ export interface UpdateClientInfoRequest {
   phone_number?: string;
   email?: string;
   address?: string;
+  mailing_flg?: boolean;
 }
 
 export interface UpdateClientInfoResponse {

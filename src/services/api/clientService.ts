@@ -59,12 +59,14 @@ export const getClientInfo = async (telegramId?: number): Promise<ClientInfo | n
  * @param phoneNumber Optional phone number to update
  * @param email Optional email to update
  * @param address Optional address to update
+ * @param mailingFlg Optional mailing flag to update
  * @returns A promise that resolves to true if successful
  */
 export const updateClientInfo = async (
   phoneNumber?: string,
   email?: string,
-  address?: string
+  address?: string,
+  mailingFlg?: boolean
 ): Promise<boolean> => {
   try {
     // Get user data
@@ -86,6 +88,7 @@ export const updateClientInfo = async (
     if (phoneNumber) requestBody.phone_number = phoneNumber;
     if (email) requestBody.email = email;
     if (address) requestBody.address = address;
+    if (mailingFlg !== undefined) requestBody.mailing_flg = mailingFlg;
     
     console.log('Update client info request:', requestBody);
     

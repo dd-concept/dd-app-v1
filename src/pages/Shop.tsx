@@ -8,6 +8,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { fetchProducts, fetchCategories, StockItem, Category } from '@/services/api';
 import { toast } from 'sonner';
 import { useCart } from '@/contexts/CartContext';
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 
 const Shop: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -18,6 +19,8 @@ const Shop: React.FC = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const { itemCount } = useCart();
+
+  useScrollToTop();
 
   // Fetch products using React Query with retry and longer staleTime
   const { data: products, isLoading, error, isError, refetch } = useQuery({
@@ -230,7 +233,7 @@ const Shop: React.FC = () => {
   const hasActiveFilters = selectedSizes.length > 0 || selectedBrands.length > 0 || selectedCategories.length > 0 || searchTerm.length > 0;
 
   return (
-    <PageLayout>
+    <PageLayout className="pb-20">
       <div className="p-4">
         <header className="mb-6">
           <div className="flex justify-between items-center mb-4">
@@ -427,25 +430,25 @@ const Shop: React.FC = () => {
           </div>
         ) : isError ? (
           <div className="text-center py-10">
-            <h2 className="text-lg font-medium text-red-600 mb-2">Error loading products</h2>
-            <p className="text-gray-600 mb-4">Please try again later</p>
+            <h2 className="text-lg font-medium text-red-600 mb-2">Ошибка загрузки товаров</h2>
+            <p className="text-gray-600 mb-4">Пожалуйста, попробуйте позже</p>
             <button 
               className="px-4 py-2 bg-telegram-blue text-white rounded-lg"
               onClick={() => refetch()}
             >
-              Retry
+              Попробовать снова
             </button>
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-10">
-            <h2 className="text-lg font-medium text-gray-700">No products found</h2>
-            <p className="text-gray-500 mt-2">Try changing your filters or search term</p>
+            <h2 className="text-lg font-medium text-gray-700">Товары не найдены</h2>
+            <p className="text-gray-500 mt-2">Попробуйте изменить ваши фильтры или поисковый запрос</p>
             {hasActiveFilters && (
               <button 
                 className="mt-4 px-4 py-2 bg-telegram-blue text-white rounded-lg"
                 onClick={clearFilters}
               >
-                Clear all filters
+                Очистить все фильтры
               </button>
             )}
           </div>
