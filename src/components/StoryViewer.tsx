@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { X } from 'lucide-react';
 import { StoryContent } from './Stories';
 import { hapticSelection } from '@/utils/telegramUtils';
 
@@ -17,6 +17,13 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [progress, setProgress] = useState<number[]>([]);
   const storyDuration = 5000; // 5 seconds per image
+  
+  // Swipe state
+  const [isDragging, setIsDragging] = useState(false);
+  const [translateY, setTranslateY] = useState(0);
+  const [opacity, setOpacity] = useState(1);
+  const touchStartRef = useRef({ y: 0, x: 0 });
+  const viewerRef = useRef<HTMLDivElement>(null);
 
   // Initialize progress
   useEffect(() => {
@@ -30,7 +37,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
     let currentProgress = progress[currentImageIndex];
     let timer: ReturnType<typeof setInterval>;
 
-    if (currentProgress < 100) {
+    if (currentProgress < 100 && !isDragging) {
       timer = setInterval(() => {
         setProgress(prev => {
           const newProgress = [...prev];
@@ -62,7 +69,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [currentImageIndex, progress, story, onStoryViewed, onClose]);
+  }, [currentImageIndex, progress, story, onStoryViewed, onClose, isDragging]);
 
   // Handle navigation
   const goToPrevious = useCallback(() => {
@@ -99,6 +106,8 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
 
   // Handle click on left/right sides to navigate
   const handleScreenClick = (e: React.MouseEvent) => {
+    if (isDragging) return; // Don't handle clicks while dragging
+    
     const { clientX, currentTarget } = e;
     const { left, width } = currentTarget.getBoundingClientRect();
     const clickPosition = clientX - left;
@@ -109,11 +118,70 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
       goToNext();
     }
   };
+  
+  // Touch handlers for swipe-to-close
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = { 
+      y: e.touches[0].clientY,
+      x: e.touches[0].clientX
+    };
+  };
+  
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const touchY = e.touches[0].clientY;
+    const touchX = e.touches[0].clientX;
+    const deltaY = touchY - touchStartRef.current.y;
+    const deltaX = Math.abs(touchX - touchStartRef.current.x);
+    
+    // Only handle vertical swipes (deltaY > deltaX means more vertical than horizontal)
+    if (Math.abs(deltaY) > deltaX) {
+      setIsDragging(true);
+      // Limit the maximum drag distance and apply resistance
+      const newTranslateY = Math.min(Math.max(deltaY, -300), 300);
+      setTranslateY(newTranslateY);
+      
+      // Gradually decrease opacity as user swipes up or down
+      const newOpacity = Math.max(1 - Math.abs(newTranslateY) / 400, 0.3);
+      setOpacity(newOpacity);
+      
+      // Prevent scrolling
+      e.preventDefault();
+    }
+  };
+  
+  const handleTouchEnd = () => {
+    if (isDragging) {
+      // If dragged more than the threshold in either direction, close the story
+      if (Math.abs(translateY) > 100) {
+        hapticSelection();
+        onClose();
+      } else {
+        // Reset position with animation
+        setTranslateY(0);
+        setOpacity(1);
+      }
+      setIsDragging(false);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex flex-col">
+    <div 
+      ref={viewerRef}
+      className="fixed inset-0 bg-black z-50 flex flex-col"
+      style={{ 
+        transform: `translateY(${translateY}px)`, 
+        opacity: opacity,
+        transition: isDragging ? 'none' : 'transform 0.3s ease, opacity 0.3s ease'
+      }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Darker top gradient overlay without blur */}
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/95 via-black/75 to-transparent z-10"></div>
+
       {/* Progress bars */}
-      <div className="flex gap-1 px-4 pt-4 z-10">
+      <div className="flex gap-1 px-4 pt-4 z-20 relative">
         {story.images.map((_, index) => (
           <div 
             key={index}
@@ -127,13 +195,13 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
         ))}
       </div>
 
-      {/* Close button */}
+      {/* Close button - moved lower to avoid conflict with progress bar */}
       <button 
         onClick={() => {
           hapticSelection();
           onClose();
         }}
-        className="absolute top-4 right-4 z-10 text-white p-2"
+        className="absolute top-12 right-4 z-20 text-white p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
       >
         <X size={24} />
       </button>
@@ -148,31 +216,11 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
           alt={`${story.title} - ${currentImageIndex + 1}`}
           className="max-h-full max-w-full object-contain"
         />
-        
-        {/* Navigation buttons */}
-        {currentImageIndex > 0 && (
-          <button 
-            className="absolute left-4 text-white p-2 bg-black/30 rounded-full"
-            onClick={(e) => {
-              e.stopPropagation();
-              goToPrevious();
-            }}
-          >
-            <ChevronLeft size={24} />
-          </button>
-        )}
-        
-        {currentImageIndex < story.images.length - 1 && (
-          <button 
-            className="absolute right-4 text-white p-2 bg-black/30 rounded-full"
-            onClick={(e) => {
-              e.stopPropagation();
-              goToNext();
-            }}
-          >
-            <ChevronRight size={24} />
-          </button>
-        )}
+      </div>
+      
+      {/* Story indicator - positioned at the bottom */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 text-white text-xs px-3 py-1 bg-black/50 rounded-full">
+        {currentImageIndex + 1} / {story.images.length}
       </div>
     </div>
   );

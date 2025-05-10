@@ -12,16 +12,17 @@ export interface StoryContent {
 interface StoriesProps {
   stories: StoryContent[];
   onStoryClick: (storyId: string) => void;
+  className?: string;
 }
 
-const Stories: React.FC<StoriesProps> = ({ stories, onStoryClick }) => {
+const Stories: React.FC<StoriesProps> = ({ stories, onStoryClick, className = '' }) => {
   if (!stories || stories.length === 0) {
     return null;
   }
 
   return (
-    <div className="w-full mb-6">
-      <div className="flex overflow-x-auto gap-4 py-2 no-scrollbar">
+    <div className={`w-full ${className}`}>
+      <div className="flex overflow-x-auto gap-5 no-scrollbar">
         {stories.map((story) => (
           <Story
             key={story.id}

@@ -50,7 +50,7 @@ const Home: React.FC = () => {
   const stories: StoryContent[] = [
     {
       id: 'beginner-guide',
-      title: 'Гайд',
+      title: 'Краткий гайд',
       previewImage: stPreviewImage,
       images: [stBeginnerGuide1, stBeginnerGuide2],
       viewed: viewedStoryIds.includes('beginner-guide')
@@ -149,28 +149,47 @@ const Home: React.FC = () => {
 
   return (
     <PageLayout fullHeight className="p-4 pb-20">
-      <header className="mb-4">
-        {/* User profile section - clickable to navigate to profile */}
-        <Link to="/profile" className="flex items-center gap-3 hover:opacity-90 transition-opacity" onClick={handleProfileClick}>
-          <UserAvatar 
-            user={telegramUser}
-            emoji={avatarEmoji} 
-            size="md" 
-            className="hover-lift"
-          />
-          <div>
-            <h1 className="text-2xl font-semibold">Привет, {displayName}!</h1>
-            {displayUsername && (
-              <p className="text-gray-600 dark:text-gray-400">
-                @{displayUsername}
-              </p>
-            )}
+      <header className="mb-6">
+        {/* Create a container for better control over spacing and alignment */}
+        <div className="pt-2">
+          {/* Images row - perfectly aligned */}
+          <div className="flex items-center">
+            {/* User profile section */}
+            <div className="flex flex-col items-center shrink-0 mr-6">
+              {/* Avatar with glow effect */}
+              <div className="relative">
+                <div className="absolute inset-0 bg-telegram-blue/50 rounded-full blur-lg animate-pulse-slow"></div>
+                <div 
+                  className="cursor-pointer" 
+                  onClick={handleProfileClick}
+                >
+                  <UserAvatar 
+                    user={telegramUser}
+                    emoji={avatarEmoji} 
+                    size="lg" 
+                    className="relative z-10 hover-lift"
+                  />
+                </div>
+              </div>
+              
+              {/* Text labels for profile */}
+              <div className="flex flex-col items-center text-center mt-1">
+                <span className="text-xs text-gray-600 dark:text-gray-400 truncate w-16">
+                  @{displayUsername}
+                </span>
+                <span className="text-xs font-medium text-telegram-blue">
+                  DD:Профиль
+                </span>
+              </div>
+            </div>
+            
+            {/* Stories section */}
+            <div className="flex-1 overflow-x-auto no-scrollbar">
+              <Stories stories={stories} onStoryClick={handleStoryClick} />
+            </div>
           </div>
-        </Link>
+        </div>
       </header>
-
-      {/* Stories section */}
-      <Stories stories={stories} onStoryClick={handleStoryClick} />
       
       {/* Story viewer */}
       {selectedStory && (
