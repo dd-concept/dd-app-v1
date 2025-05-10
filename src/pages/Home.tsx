@@ -13,6 +13,11 @@ import BannerSwiper from '@/components/BannerSwiper';
 import DDManagerCard from '@/components/DDManagerCard';
 import ProductCard from '@/components/ProductCard';
 import { useScrollToTop } from '@/hooks/useScrollToTop';
+import Stories, { StoryContent } from '@/components/Stories';
+import StoryViewer from '@/components/StoryViewer';
+
+// Import CSS
+import '@/components/NoScrollbar.css';
 
 // Import banner images
 import mainBanner from '@/assets/jointgbanner.webp';
@@ -25,12 +30,48 @@ import clothesBanner from '@/assets/clothes_category_banner.webp';
 import jeansBanner from '@/assets/jeans_category_banner.webp';
 import beltBanner from '@/assets/belt_category_banner.webp';
 
+// Import story images
+import stPreviewImage from '@/assets/stories/st_preview_1.png';
+import stBeginnerGuide1 from '@/assets/stories/st_beginner_guide.png';
+import stBeginnerGuide2 from '@/assets/stories/st_beginner_guide_2.jpg';
+
 const Home: React.FC = () => {
   useScrollToTop();
   const { username, displayName, telegramUser, avatarEmoji, updateTelegramUser } = useUser();
   const navigate = useNavigate();
   const [ddCoinsBalance, setDDCoinsBalance] = useState<number>(0);
   const [isLoadingDDCoins, setIsLoadingDDCoins] = useState<boolean>(false);
+  
+  // Story state
+  const [selectedStory, setSelectedStory] = useState<StoryContent | null>(null);
+  const [viewedStoryIds, setViewedStoryIds] = useState<string[]>([]);
+
+  // Stories data
+  const stories: StoryContent[] = [
+    {
+      id: 'beginner-guide',
+      title: 'Гайд',
+      previewImage: stPreviewImage,
+      images: [stBeginnerGuide1, stBeginnerGuide2],
+      viewed: viewedStoryIds.includes('beginner-guide')
+    }
+  ];
+
+  // Handle story click
+  const handleStoryClick = (storyId: string) => {
+    hapticSelection();
+    const story = stories.find(s => s.id === storyId);
+    if (story) {
+      setSelectedStory(story);
+    }
+  };
+
+  // Mark story as viewed
+  const handleStoryViewed = (storyId: string) => {
+    if (!viewedStoryIds.includes(storyId)) {
+      setViewedStoryIds(prev => [...prev, storyId]);
+    }
+  };
 
   // Fetch DD coins when the component mounts
   useEffect(() => {
@@ -108,7 +149,7 @@ const Home: React.FC = () => {
 
   return (
     <PageLayout fullHeight className="p-4 pb-20">
-      <header className="mb-6">
+      <header className="mb-4">
         {/* User profile section - clickable to navigate to profile */}
         <Link to="/profile" className="flex items-center gap-3 hover:opacity-90 transition-opacity" onClick={handleProfileClick}>
           <UserAvatar 
@@ -127,6 +168,18 @@ const Home: React.FC = () => {
           </div>
         </Link>
       </header>
+
+      {/* Stories section */}
+      <Stories stories={stories} onStoryClick={handleStoryClick} />
+      
+      {/* Story viewer */}
+      {selectedStory && (
+        <StoryViewer 
+          story={selectedStory} 
+          onClose={() => setSelectedStory(null)}
+          onStoryViewed={handleStoryViewed}
+        />
+      )}
 
       <section className="mb-8 animate-slide-up">
         <BannerSwiper banners={banners} />
