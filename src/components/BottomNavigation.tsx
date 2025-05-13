@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
 import { useTheme } from 'next-themes';
 import { hapticSelection } from '@/utils/telegramUtils';
+import { scrollToTop, scrollToTopWithRetries } from '@/utils/scrollUtils';
 
 const BottomNavigation: React.FC = () => {
   const location = useLocation();
@@ -14,7 +15,7 @@ const BottomNavigation: React.FC = () => {
   
   const isActive = (path: string) => location.pathname === path;
   
-  // Custom navigation handler with haptic feedback
+  // Custom navigation handler with haptic feedback and scroll to top
   const handleNavigation = (path: string) => (e: React.MouseEvent) => {
     e.preventDefault();
     
@@ -23,8 +24,16 @@ const BottomNavigation: React.FC = () => {
       // Trigger haptic feedback
       hapticSelection();
       
+      // Force scroll to top immediately
+      scrollToTop();
+      
       // Navigate to the path
       navigate(path);
+      
+      // Try scrolling again after navigation with delays
+      [50, 100, 200].forEach(delay => {
+        setTimeout(scrollToTop, delay);
+      });
     }
   };
   

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { scrollToTop } from '@/utils/scrollUtils';
 
 interface BannerProps {
   image: string;
@@ -23,7 +24,16 @@ const Banner: React.FC<BannerProps> = ({
       if (external) {
         window.open(link, '_blank', 'noopener,noreferrer');
       } else {
+        // Force scroll to top immediately before navigation
+        scrollToTop();
+        
+        // Navigate to the link
         navigate(link);
+        
+        // Try scrolling again after navigation with delays
+        [50, 100, 200].forEach(delay => {
+          setTimeout(scrollToTop, delay);
+        });
       }
     }
   };

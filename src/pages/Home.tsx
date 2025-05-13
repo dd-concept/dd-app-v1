@@ -32,7 +32,7 @@ import beltBanner from '@/assets/belt_category_banner.webp';
 
 // Import story images
 import stPreviewImage from '@/assets/stories/st_preview_1.png';
-import stBeginnerGuide1 from '@/assets/stories/st_beginner_guide.png';
+import stBeginnerGuide1 from '@/assets/stories/stories_1.png';
 import stBeginnerGuide2 from '@/assets/stories/st_beginner_guide_2.jpg';
 
 const Home: React.FC = () => {

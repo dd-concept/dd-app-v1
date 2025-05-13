@@ -32,6 +32,7 @@ import NotFound from "./pages/NotFound";
 import DeliveryCalculator from "./pages/DeliveryCalculator";
 import Settings from "./pages/Settings";
 import LoadingSpinner from "./components/LoadingSpinner";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Create a query client
 const queryClient = new QueryClient({
@@ -267,25 +268,6 @@ const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
     };
   }, [location.pathname, navigate]);
 
-  // Handle scroll to top functionality
-  useEffect(() => {
-    // Pages that should scroll to top on mount
-    const scrollToTopPages = ['/', '/calculator', '/cart', '/product'];
-    
-    // Check if current path matches any of the scroll-to-top pages
-    const shouldScrollToTop = scrollToTopPages.some(path => 
-      location.pathname === path || location.pathname.startsWith('/product/')
-    );
-    
-    if (shouldScrollToTop) {
-      console.log("Scrolling to top for path:", location.pathname);
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }
-  }, [location.pathname]);
-
   // Listen for theme changes
   useEffect(() => {
     console.log("Setting up theme change listener");
@@ -339,6 +321,7 @@ const App = () => {
             <CartProvider>
               <Toaster richColors closeButton position="top-center" />
               <HashRouter>
+                <ScrollToTop />
                 <TelegramInitializer>
                   <Routes>
                     <Route path="/" element={<Home />} />

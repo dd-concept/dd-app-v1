@@ -5,6 +5,7 @@ import { sortSizes } from '@/utils/sizeUtils';
 import { cn } from '@/lib/utils';
 import { StockItem } from '@/services/api';
 import { hapticImpact } from '@/utils/telegramUtils';
+import { scrollToTop } from '@/utils/scrollUtils';
 
 interface ProductCardProps {
   product: StockItem;
@@ -46,8 +47,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
     // Trigger medium impact haptic feedback
     hapticImpact('medium');
     
+    // Force scroll to top immediately before navigation
+    scrollToTop();
+    
     // Navigate to product details
     navigate(`/product/${product.sku}`);
+    
+    // Try scrolling again after navigation with delays
+    [50, 100, 200].forEach(delay => {
+      setTimeout(scrollToTop, delay);
+    });
   };
   
   return (

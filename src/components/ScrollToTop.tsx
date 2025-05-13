@@ -3,18 +3,22 @@ import { useLocation } from 'react-router-dom';
 import { scrollToTopWithRetries } from '@/utils/scrollUtils';
 
 /**
- * A hook that scrolls the window to the top when the pathname changes.
- * Uses the scrollUtils utility for maximum reliability.
+ * ScrollToTop component that forces window to scroll to top when route changes
+ * Uses the scrollUtils utility for maximum reliability
  */
-export const useScrollToTop = () => {
+const ScrollToTop = () => {
   const { pathname } = useLocation();
-  
+
   useEffect(() => {
     // Use our utility function that handles multiple scroll attempts
     const cleanup = scrollToTopWithRetries();
-    console.log(`useScrollToTop hook executed for path: ${pathname}`);
+    console.log(`ScrollToTop component executed for path: ${pathname}`);
     
     // Return the cleanup function to clear all timeouts
     return cleanup;
   }, [pathname]);
-}; 
+
+  return null;
+};
+
+export default ScrollToTop; 

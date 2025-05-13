@@ -2,6 +2,7 @@ import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay, A11y, EffectFade } from 'swiper/modules';
 import { useNavigate } from 'react-router-dom';
+import { scrollToTop } from '@/utils/scrollUtils';
 
 // Import Swiper styles
 import 'swiper/css';
@@ -36,7 +37,16 @@ const BannerSwiper: React.FC<BannerSwiperProps> = ({
     if (banner.external) {
       window.open(banner.link, '_blank', 'noopener,noreferrer');
     } else {
+      // Force scroll to top immediately before navigation
+      scrollToTop();
+      
+      // Navigate to the link
       navigate(banner.link);
+      
+      // Try scrolling again after navigation with delays
+      [50, 100, 200].forEach(delay => {
+        setTimeout(scrollToTop, delay);
+      });
     }
   };
   
