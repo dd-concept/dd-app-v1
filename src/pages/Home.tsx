@@ -31,9 +31,10 @@ import jeansBanner from '@/assets/jeans_category_banner.webp';
 import beltBanner from '@/assets/belt_category_banner.webp';
 
 // Import story images
-import stPreviewImage from '@/assets/stories/st_preview_1.png';
-import stBeginnerGuide1 from '@/assets/stories/stories_1.png';
-import stBeginnerGuide2 from '@/assets/stories/st_beginner_guide_2.jpg';
+import stPreviewImage from '@/assets/stories/guide_preview.png';
+import stBeginnerGuide1 from '@/assets/stories/story_rebuilt_1.png';
+import stBeginnerGuide2 from '@/assets/stories/Instagram story - 7.png';
+import stBeginnerGuide3 from '@/assets/stories/Instagram story - 8.png';
 
 const Home: React.FC = () => {
   useScrollToTop();
@@ -52,7 +53,7 @@ const Home: React.FC = () => {
       id: 'beginner-guide',
       title: 'Краткий гайд',
       previewImage: stPreviewImage,
-      images: [stBeginnerGuide1, stBeginnerGuide2],
+      images: [stBeginnerGuide1, stBeginnerGuide2, stBeginnerGuide3],
       viewed: viewedStoryIds.includes('beginner-guide')
     }
   ];

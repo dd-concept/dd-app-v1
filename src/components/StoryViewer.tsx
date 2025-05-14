@@ -177,6 +177,18 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
+      {/* Main content with navigation areas - moved to top of the stack so image extends to top edge */}
+      <div 
+        className="absolute inset-0 z-0"
+        onClick={handleScreenClick}
+      >
+        <img 
+          src={story.images[currentImageIndex]} 
+          alt={`${story.title} - ${currentImageIndex + 1}`}
+          className="w-full h-full object-cover"
+        />
+      </div>
+
       {/* Darker top gradient overlay without blur */}
       <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/95 via-black/75 to-transparent z-10"></div>
 
@@ -205,18 +217,6 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
       >
         <X size={24} />
       </button>
-
-      {/* Main content with navigation areas */}
-      <div 
-        className="flex-1 flex items-center justify-center"
-        onClick={handleScreenClick}
-      >
-        <img 
-          src={story.images[currentImageIndex]} 
-          alt={`${story.title} - ${currentImageIndex + 1}`}
-          className="max-h-full max-w-full object-contain"
-        />
-      </div>
       
       {/* Story indicator - positioned at the bottom */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 text-white text-xs px-3 py-1 bg-black/50 rounded-full">
