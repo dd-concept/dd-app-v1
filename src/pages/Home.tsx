@@ -31,7 +31,7 @@ import jeansBanner from '@/assets/jeans_category_banner.webp';
 import beltBanner from '@/assets/belt_category_banner.webp';
 
 // Import story images
-import stPreviewImage from '@/assets/stories/guide_preview.png';
+import stPreviewImage from '@/assets/stories/guide_story_preview.png';
 import stBeginnerGuide1 from '@/assets/stories/story_rebuilt_1.png';
 import stBeginnerGuide2 from '@/assets/stories/Instagram story - 7.png';
 import stBeginnerGuide3 from '@/assets/stories/Instagram story - 8.png';
