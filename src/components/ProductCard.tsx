@@ -85,33 +85,40 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
         )}
       </div>
       
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-1">
-          <h3 className="font-medium text-telegram-text truncate">{product.item_name}</h3>
-          {product.brand && (
-            <span className="text-xs text-telegram-hint bg-telegram-bg px-2 py-0.5 rounded-full">
-              {product.brand}
-            </span>
-          )}
+      <div className="p-4 min-h-[120px] flex flex-col justify-between">
+        <div className="mb-2">
+          <div className="mb-1">
+            <h3 className="font-medium text-telegram-text break-words line-clamp-2">
+              {product.brand} {product.item_name}
+            </h3>
+          </div>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="font-medium text-telegram-button">
-            ₽{typeof product.price_rub === 'string' 
-              ? parseFloat(product.price_rub).toLocaleString() 
-              : product.price_rub.toLocaleString()}
-          </span>
-        </div>
-        <div className="mt-2 flex flex-wrap gap-1">
-          {availableSizes.slice(0, 3).map((size) => (
-            <span key={size} className="text-xs px-2 py-1 bg-telegram-bg text-telegram-text rounded-full">
-              {size}
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <span className="font-medium text-telegram-button">
+              {typeof product.price_rub === 'string' 
+                ? parseFloat(product.price_rub).toLocaleString() 
+                : product.price_rub.toLocaleString()}₽
             </span>
-          ))}
-          {availableSizes.length > 3 && (
-            <span className="text-xs px-2 py-1 bg-telegram-bg text-telegram-text rounded-full">
-              +{availableSizes.length - 3}
-            </span>
-          )}
+            {product.color_hex && (
+              <div 
+                className="w-3 h-3 rounded-full border border-gray-300" 
+                style={{ backgroundColor: product.color_hex }}
+              />
+            )}
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {availableSizes.slice(0, 3).map((size) => (
+              <span key={size} className="text-xs px-2 py-1 bg-telegram-bg text-telegram-text rounded-full">
+                {size}
+              </span>
+            ))}
+            {availableSizes.length > 3 && (
+              <span className="text-xs px-2 py-1 bg-telegram-bg text-telegram-text rounded-full">
+                +{availableSizes.length - 3}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </Link>

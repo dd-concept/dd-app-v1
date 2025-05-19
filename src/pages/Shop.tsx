@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Filter, Search, ShoppingCart, X, Tag } from 'lucide-react';
+import { Filter, Search, ShoppingCart, X, Tag, ArrowUpDown } from 'lucide-react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
 import ProductCard from '@/components/ProductCard';
@@ -10,6 +10,12 @@ import { toast } from 'sonner';
 import { useCart } from '@/contexts/CartContext';
 import { useScrollToTop } from '@/hooks/useScrollToTop';
 
+// Sort types
+type SortType = 'category-asc' | 'category-desc' | 'price-asc' | 'price-desc';
+
+// Category order for sorting
+const CATEGORY_ORDER = ['обувь', 'низ', 'верх', 'аксессуары'];
+
 const Shop: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -18,6 +24,8 @@ const Shop: React.FC = () => {
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [showSortOptions, setShowSortOptions] = useState(false);
+  const [sortBy, setSortBy] = useState<SortType>('category-asc');
   const { itemCount } = useCart();
 
   useScrollToTop();
@@ -46,6 +54,7 @@ const Shop: React.FC = () => {
     const categoryParam = searchParams.get('category');
     const sizeParam = searchParams.get('size');
     const searchParam = searchParams.get('search');
+    const sortParam = searchParams.get('sort');
     
     if (brandParam) {
       setSelectedBrands(brandParam.split(','));
@@ -61,6 +70,10 @@ const Shop: React.FC = () => {
     
     if (searchParam) {
       setSearchTerm(searchParam);
+    }
+
+    if (sortParam && ['category-asc', 'category-desc', 'price-asc', 'price-desc'].includes(sortParam)) {
+      setSortBy(sortParam as SortType);
     }
   }, [searchParams]);
 
@@ -84,11 +97,15 @@ const Shop: React.FC = () => {
       newParams.set('search', searchTerm);
     }
     
+    if (sortBy !== 'category-asc') {
+      newParams.set('sort', sortBy);
+    }
+    
     // Only update if params actually changed to avoid needless history entries
     if (newParams.toString() !== searchParams.toString()) {
       setSearchParams(newParams);
     }
-  }, [selectedBrands, selectedCategories, selectedSizes, searchTerm, setSearchParams, searchParams]);
+  }, [selectedBrands, selectedCategories, selectedSizes, searchTerm, sortBy, setSearchParams, searchParams]);
 
   useEffect(() => {
     if (isError && error instanceof Error) {
@@ -232,6 +249,59 @@ const Shop: React.FC = () => {
   // Check if any filters are active
   const hasActiveFilters = selectedSizes.length > 0 || selectedBrands.length > 0 || selectedCategories.length > 0 || searchTerm.length > 0;
 
+  // Get category position in predefined order
+  const getCategoryOrder = (category: string): number => {
+    const index = CATEGORY_ORDER.indexOf(category);
+    return index !== -1 ? index : CATEGORY_ORDER.length;
+  };
+
+  // Sort and filter products
+  const sortedAndFilteredProducts = useMemo(() => {
+    if (!filteredProducts) return [];
+    
+    return [...filteredProducts].sort((a, b) => {
+      if (sortBy === 'price-asc') {
+        const priceA = typeof a.price_rub === 'string' ? parseFloat(a.price_rub) : a.price_rub;
+        const priceB = typeof b.price_rub === 'string' ? parseFloat(b.price_rub) : b.price_rub;
+        return priceA - priceB;
+      } 
+      else if (sortBy === 'price-desc') {
+        const priceA = typeof a.price_rub === 'string' ? parseFloat(a.price_rub) : a.price_rub;
+        const priceB = typeof b.price_rub === 'string' ? parseFloat(b.price_rub) : b.price_rub;
+        return priceB - priceA;
+      }
+      else if (sortBy === 'category-desc') {
+        const categoryOrderA = getCategoryOrder(a.category || '');
+        const categoryOrderB = getCategoryOrder(b.category || '');
+        return categoryOrderB - categoryOrderA;
+      }
+      else { // default: category-asc
+        const categoryOrderA = getCategoryOrder(a.category || '');
+        const categoryOrderB = getCategoryOrder(b.category || '');
+        return categoryOrderA - categoryOrderB;
+      }
+    });
+  }, [filteredProducts, sortBy]);
+
+  const toggleSortOptions = () => {
+    setShowSortOptions(!showSortOptions);
+  };
+
+  const handleSortChange = (newSort: SortType) => {
+    setSortBy(newSort);
+    setShowSortOptions(false);
+  };
+
+  const getSortLabel = (sortType: SortType): string => {
+    switch (sortType) {
+      case 'price-asc': return 'По цене (от мин. к макс.)';
+      case 'price-desc': return 'По цене (от макс. к мин.)';
+      case 'category-asc': return 'По категории (обувь→низ→верх→аксессуары)';
+      case 'category-desc': return 'По категории (аксессуары→верх→низ→обувь)';
+      default: return 'По категории';
+    }
+  };
+
   return (
     <PageLayout className="pb-20">
       <div className="p-4">
@@ -266,15 +336,25 @@ const Shop: React.FC = () => {
             />
           </div>
           
-          {/* Filters button */}
+          {/* Sort and Filter buttons */}
           <div className="flex items-center justify-between mb-4">
-            <button
-              className="flex items-center gap-2 text-sm text-telegram-text"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <Filter size={18} className="text-telegram-hint" />
-              <span>{showFilters ? 'Скрыть фильтры' : 'Показать фильтры'}</span>
-            </button>
+            <div className="flex gap-4">
+              <button
+                className="flex items-center gap-2 text-sm text-telegram-text"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter size={18} className="text-telegram-hint" />
+                <span>{showFilters ? 'Скрыть фильтры' : 'Показать фильтры'}</span>
+              </button>
+              
+              <button
+                className="flex items-center gap-2 text-sm text-telegram-text"
+                onClick={toggleSortOptions}
+              >
+                <ArrowUpDown size={18} className="text-telegram-hint" />
+                <span>Сортировка</span>
+              </button>
+            </div>
             
             {hasActiveFilters && (
               <button
@@ -286,6 +366,28 @@ const Shop: React.FC = () => {
               </button>
             )}
           </div>
+          
+          {/* Sort options */}
+          {showSortOptions && (
+            <div className="mb-4 p-4 bg-telegram-secondary-bg rounded-lg animate-slide-down space-y-2">
+              <h3 className="text-sm font-medium mb-2 text-telegram-text">Сортировать по:</h3>
+              <div className="flex flex-col gap-2">
+                {(['category-asc', 'category-desc', 'price-asc', 'price-desc'] as SortType[]).map((option) => (
+                  <button
+                    key={option}
+                    className={`px-3 py-2 text-sm rounded-lg text-left transition-colors ${
+                      sortBy === option
+                        ? 'bg-telegram-button text-telegram-button-text'
+                        : 'bg-telegram-bg text-telegram-text hover:bg-telegram-bg/80'
+                    }`}
+                    onClick={() => handleSortChange(option)}
+                  >
+                    {getSortLabel(option)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           
           {/* Active filters display */}
           {hasActiveFilters && (
@@ -346,6 +448,28 @@ const Shop: React.FC = () => {
           
           {showFilters && (
             <div className="mb-4 p-4 bg-telegram-secondary-bg rounded-lg animate-slide-down space-y-4">
+              {/* Category filter */}
+              {availableCategories.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium mb-2 text-telegram-text">Фильтр по категории</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {availableCategories.map(category => (
+                      <button
+                        key={category}
+                        className={`px-3 py-1 text-sm rounded-full border transition-colors ${
+                          selectedCategories.includes(category) 
+                            ? 'bg-telegram-button text-telegram-button-text border-telegram-button' 
+                            : 'bg-telegram-bg text-telegram-text border-telegram-hint/30 hover:border-telegram-hint/50'
+                        }`}
+                        onClick={() => toggleCategorySelection(category)}
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               {/* Size filter */}
               <div>
                 <h3 className="text-sm font-medium mb-2 text-telegram-text">Фильтр по размеру</h3>
@@ -382,28 +506,6 @@ const Shop: React.FC = () => {
                         onClick={() => toggleBrandSelection(brand)}
                       >
                         {brand}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Category filter */}
-              {availableCategories.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2 text-telegram-text">Фильтр по категории</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {availableCategories.map(category => (
-                      <button
-                        key={category}
-                        className={`px-3 py-1 text-sm rounded-full border transition-colors ${
-                          selectedCategories.includes(category) 
-                            ? 'bg-telegram-button text-telegram-button-text border-telegram-button' 
-                            : 'bg-telegram-bg text-telegram-text border-telegram-hint/30 hover:border-telegram-hint/50'
-                        }`}
-                        onClick={() => toggleCategorySelection(category)}
-                      >
-                        {category}
                       </button>
                     ))}
                   </div>
@@ -454,7 +556,7 @@ const Shop: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4">
-            {filteredProducts.map((product) => (
+            {sortedAndFilteredProducts.map((product) => (
               <ProductCard 
                 key={product.sku} 
                 product={product}

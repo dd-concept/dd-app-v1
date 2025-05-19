@@ -541,6 +541,18 @@ export const calculateShipping = async (
   category: string
 ): Promise<number> => {
   try {
+    // Get user's Telegram ID from local storage or context
+    let telegramUserId = null;
+    try {
+      const userData = localStorage.getItem('telegramUser');
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        telegramUserId = parsedUser.id;
+      }
+    } catch (e) {
+      console.error("Error retrieving user data from localStorage:", e);
+    }
+    
     // Convert shipping type to API format if needed
     const apiShippingType = shippingType === 'car' ? 'cargo' : shippingType === 'plane' ? 'aero' : shippingType;
     
@@ -548,7 +560,8 @@ export const calculateShipping = async (
     const requestBody = {
       price_cny: priceCny,
       shipping_type: apiShippingType,
-      category
+      category,
+      telegram_id: telegramUserId // Add the Telegram user ID
     };
     
     console.log('Shipping calculation request:', requestBody);

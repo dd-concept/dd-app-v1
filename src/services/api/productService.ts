@@ -2,6 +2,7 @@ import { toast } from 'sonner';
 import { API_BASE_URL, TIMEOUTS, handleApiError, cache, CACHE_CONFIG, createFetchOptions } from './config';
 import { StockItem, StockResponse, SizeAvailability, ItemPhoto, CategoryResponse, Category } from './types';
 import { MOCK_PRODUCTS } from './mockData';
+import { getTelegramUser } from './userService';
 
 // Cache keys
 const CACHE_KEYS = {
@@ -14,6 +15,17 @@ export const fetchProducts = async (): Promise<StockItem[]> => {
   console.log('Fetching products...');
   
   try {
+    // Get user's Telegram ID using the centralized helper function
+    const user = getTelegramUser();
+    const telegramUserId = user?.id;
+    
+    // Log whether we found a user ID or not
+    if (telegramUserId) {
+      console.log(`Found Telegram user ID: ${telegramUserId}`);
+    } else {
+      console.warn('No Telegram user ID available for products fetch');
+    }
+    
     // Check cache first
     const cachedProducts = cache.get<StockItem[]>(CACHE_KEYS.PRODUCTS, CACHE_CONFIG.PRODUCTS_TTL);
     if (cachedProducts) {
@@ -27,7 +39,14 @@ export const fetchProducts = async (): Promise<StockItem[]> => {
     const { options, clearTimeout } = createFetchOptions('GET', undefined, TIMEOUTS.PRODUCTS);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/stock/in-stock`, options);
+      // Build URL with query parameter if telegram_user_id is available
+      let url = `${API_BASE_URL}/stock/in-stock`;
+      if (telegramUserId) {
+        url = `${url}?telegram_id=${telegramUserId}`;
+      }
+      
+      console.log(`Making request to: ${url}`);
+      const response = await fetch(url, options);
       clearTimeout();
       
       if (!response.ok) {

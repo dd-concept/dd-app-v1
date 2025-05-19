@@ -204,7 +204,7 @@ const ProductDetails: React.FC = () => {
         <div className="p-4 flex-1">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h1 className="text-2xl font-bold mb-2">{product.item_name}</h1>
+              <h1 className="text-2xl font-bold mb-2">{product.brand} {product.item_name}</h1>
               <div className="flex items-center gap-2">
                 {product.brand && (
                   <Link 

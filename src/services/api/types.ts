@@ -60,6 +60,7 @@ export interface StockItem {
   description?: string;
   category?: string;
   color_code: string;
+  color_hex?: string;
   photos?: ItemPhoto[];
   price_rub: string | number;
   sizes: SizeAvailability[];
