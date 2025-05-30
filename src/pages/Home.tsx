@@ -63,6 +63,13 @@ const Home: React.FC = () => {
       previewImage: stPreviewImage,
       images: [stBeginnerGuide1, stBeginnerGuide2, stBeginnerGuide3],
       viewed: viewedStoryIds.includes('beginner-guide')
+    },
+    {
+      id: 'faq',
+      title: 'FAQ',
+      previewImage: stFAQPreview,
+      images: [stFAQ1, stFAQ3, stFAQ4, stFAQ5, stFAQ7, stFAQ8],
+      viewed: viewedStoryIds.includes('faq')
     }
   ];
 
