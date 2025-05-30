@@ -41,7 +41,7 @@ import stFAQ1 from '@/assets/stories/Instagram story - 10.png';
 import stFAQ3 from '@/assets/stories/Instagram story - 12.png';
 import stFAQ4 from '@/assets/stories/Instagram story - 13.png';
 import stFAQ5 from '@/assets/stories/Instagram story - 14.png';
-import stFAQ7 from '@/assets/stories/Instagram story - 16.png';
+import stFAQ7 from '@/assets/stories/Instagram story - 15.png';
 import stFAQ8 from '@/assets/stories/Instagram story - 17.png'; 
 
 const Home: React.FC = () => {
