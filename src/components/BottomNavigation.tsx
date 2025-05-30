@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, ShoppingBag, Calculator } from 'lucide-react';
+import { Home, ShoppingBag, Calculator, ShoppingCart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
 import { useTheme } from 'next-themes';
@@ -39,7 +39,7 @@ const BottomNavigation: React.FC = () => {
   
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bottom-nav-bar pb-4">
-      <div className="grid grid-cols-3 w-full max-w-md mx-auto h-28">
+      <div className="grid grid-cols-4 w-full max-w-md mx-auto h-28">
         <Link
           to="/"
           onClick={handleNavigation('/')}
@@ -56,19 +56,12 @@ const BottomNavigation: React.FC = () => {
           to="/shop"
           onClick={handleNavigation('/shop')}
           className={cn(
-            'flex items-start justify-center pt-4 relative transition-all duration-200',
+            'flex items-start justify-center pt-4 transition-all duration-200',
             isActive('/shop') ? 'text-telegram-button active' : 'text-telegram-hint'
           )}
           aria-current={isActive('/shop') ? 'page' : undefined}
         >
-          <div className="relative">
-            <ShoppingBag size={32} />
-            {itemCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full badge">
-                {itemCount}
-              </span>
-            )}
-          </div>
+          <ShoppingBag size={32} />
         </Link>
         
         <Link
@@ -81,6 +74,25 @@ const BottomNavigation: React.FC = () => {
           aria-current={isActive('/calculator') ? 'page' : undefined}
         >
           <Calculator size={32} />
+        </Link>
+
+        <Link
+          to="/cart"
+          onClick={handleNavigation('/cart')}
+          className={cn(
+            'flex items-start justify-center pt-4 relative transition-all duration-200',
+            isActive('/cart') ? 'text-telegram-button active' : 'text-telegram-hint'
+          )}
+          aria-current={isActive('/cart') ? 'page' : undefined}
+        >
+          <div className="relative">
+            <ShoppingCart size={32} />
+            {itemCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full badge">
+                {itemCount}
+              </span>
+            )}
+          </div>
         </Link>
       </div>
     </nav>

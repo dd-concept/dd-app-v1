@@ -36,6 +36,14 @@ import stBeginnerGuide1 from '@/assets/stories/story_rebuilt_1.png';
 import stBeginnerGuide2 from '@/assets/stories/Instagram story - 7.png';
 import stBeginnerGuide3 from '@/assets/stories/Instagram story - 8.png';
 
+import stFAQPreview from '@/assets/stories/Frame 2669.png';
+import stFAQ1 from '@/assets/stories/Instagram story - 10.png';
+import stFAQ3 from '@/assets/stories/Instagram story - 12.png';
+import stFAQ4 from '@/assets/stories/Instagram story - 13.png';
+import stFAQ5 from '@/assets/stories/Instagram story - 14.png';
+import stFAQ7 from '@/assets/stories/Instagram story - 16.png';
+import stFAQ8 from '@/assets/stories/Instagram story - 17.png'; 
+
 const Home: React.FC = () => {
   useScrollToTop();
   const { username, displayName, telegramUser, avatarEmoji, updateTelegramUser } = useUser();

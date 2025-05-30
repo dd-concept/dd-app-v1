@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Filter, Search, ShoppingCart, X, Tag, ArrowUpDown } from 'lucide-react';
+import { Filter, Search, X, Tag, ArrowUpDown } from 'lucide-react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
 import ProductCard from '@/components/ProductCard';
@@ -308,18 +308,14 @@ const Shop: React.FC = () => {
         <header className="mb-6">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-semibold">Магазин</h1>
-            <Link 
-              to="/cart" 
-              className="relative flex items-center justify-center w-10 h-10 bg-telegram-button text-white rounded-full hover:bg-telegram-button/90 transition-colors"
-              aria-label="View Cart"
-            >
-              <ShoppingCart size={20} className="text-white" />
-              {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                  {itemCount}
-                </span>
-              )}
-            </Link>
+          </div>
+          
+          {/* Stock information bar */}
+          <div className="mb-3 text-xs text-telegram-hint">
+            <p className="text-justify">
+              В этом разделе пока есть только то, что прямо сейчас в наличии в Москве. 
+              Для заказа напрямую из Poizon используйте <Link to="/calculator" className="text-telegram-button hover:underline">рассчет доставки</Link>
+            </p>
           </div>
           
           {/* Search bar */}

@@ -273,6 +273,34 @@ const DeliveryCalculator: React.FC = () => {
           <h1 className="text-2xl font-semibold">Калькулятор доставки</h1>
         </div>
         
+        {/* Info block */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-6">
+          <div className="flex items-start space-x-2">
+            <div className="text-blue-600 dark:text-blue-400 mt-0.5">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="text-sm">
+              <p className="text-blue-700 dark:text-blue-300">
+                В этом разделе вы можете добавить в заказ товары из POIZON. Рассчитайте стоимость доставки и добавьте предзаказ в корзину.
+                <br /> 
+                <a 
+                  onClick={() => openTelegramUrl("https://telegra.ph/Ustanovka-POIZON-i-registraciya2-04-10")}
+                  className="text-blue-800 dark:text-blue-200 font-medium hover:underline cursor-pointer flex items-center"
+                >
+                  Как установить POIZON? <ExternalLink size={12} className="ml-1" />
+                </a> <a 
+                  onClick={() => openTelegramUrl("https://telegra.ph/Poisk-i-kartochka-tovara-ceny-razmernaya-setka-i-sroki-dostavki-04-11")}
+                  className="text-blue-800 dark:text-blue-200 font-medium hover:underline cursor-pointer flex items-center"
+                >
+                   Как искать товары? <ExternalLink size={12} className="ml-1" />
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+        
         <div className="space-y-6">
           {/* Price Input */}
           <div className="space-y-2">
@@ -357,6 +385,9 @@ const DeliveryCalculator: React.FC = () => {
                 <span className="font-medium">Самолет</span>
                 <span className="text-xs mt-1 opacity-80">5-10 дней</span>
               </button>
+            </div>
+            <div className="mt-2 text-xs text-telegram-hint">
+              * Указано время доставки только от склада в Китае до России. Срок доставки до склада в Китае всегда указан в самом Poizon на кнопке с ценой товара.
             </div>
           </div>
           

@@ -21,6 +21,11 @@ interface ClientInfoFormProps {
   clientInfo?: { email: string; phone_number: string; address: string } | null;
   onComplete: (deliveryRate?: DeliveryRate) => void;
   onCancel?: () => void;
+  // Order summary data
+  orderSubtotal?: number;
+  promocodeDiscount?: { text: string; amount: number; type: 'fixed' | 'percent' };
+  ddCoinsDiscount?: number;
+  finalPriceAfterDDCoins?: number; // The exact final price calculated in Cart
 }
 
 const ClientInfoForm: React.FC<ClientInfoFormProps> = ({
@@ -29,7 +34,12 @@ const ClientInfoForm: React.FC<ClientInfoFormProps> = ({
   initialAddress = '',
   clientInfo = null,
   onComplete,
-  onCancel
+  onCancel,
+  // Order summary data
+  orderSubtotal,
+  promocodeDiscount,
+  ddCoinsDiscount,
+  finalPriceAfterDDCoins
 }) => {
   // Use client info if provided, otherwise use initial values
   const [email, setEmail] = useState<string>(clientInfo?.email || initialEmail);
@@ -258,6 +268,95 @@ const ClientInfoForm: React.FC<ClientInfoFormProps> = ({
             )}
           </div>
 
+          {/* Order Summary */}
+          {orderSubtotal !== undefined && (
+            <div className="bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mt-4">
+              <h3 className="text-sm font-medium mb-3">Сумма заказа</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Товары</span>
+                  <span>₽{orderSubtotal.toLocaleString()}</span>
+                </div>
+                
+                {selectedDeliveryRate && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Доставка ({selectedDeliveryRate.delivery_type === 'self_pickup' 
+                        ? 'Самовывоз' 
+                        : selectedDeliveryRate.delivery_type === 'courier'
+                          ? 'Курьер'
+                          : 'Почта'})
+                    </span>
+                    <span>
+                      {selectedDeliveryRate.price_rub > 0 
+                        ? `₽${selectedDeliveryRate.price_rub.toLocaleString()}`
+                        : 'Бесплатно'}
+                    </span>
+                  </div>
+                )}
+                
+                {promocodeDiscount && promocodeDiscount.amount > 0 && (
+                  <div className="flex justify-between text-telegram-blue">
+                    <span>Скидка ({promocodeDiscount.text})</span>
+                    <span>
+                      -{promocodeDiscount.type === 'fixed' 
+                        ? `₽${promocodeDiscount.amount}` 
+                        : `${promocodeDiscount.amount}%`}
+                    </span>
+                  </div>
+                )}
+                
+                {ddCoinsDiscount && ddCoinsDiscount > 0 && (
+                  <div className="flex justify-between text-yellow-600 dark:text-yellow-400">
+                    <span>DD Коины</span>
+                    <span>-₽{ddCoinsDiscount}</span>
+                  </div>
+                )}
+                
+                <div className="flex justify-between font-medium text-base pt-2 border-t border-gray-200 dark:border-gray-600">
+                  <span>Итого к оплате</span>
+                  <span>
+                    ₽{finalPriceAfterDDCoins !== undefined 
+                      ? (finalPriceAfterDDCoins + (selectedDeliveryRate?.price_rub || 0)).toLocaleString()
+                      : Math.max(0, 
+                          orderSubtotal + 
+                          (selectedDeliveryRate?.price_rub || 0) - 
+                          (promocodeDiscount?.type === 'fixed' ? promocodeDiscount.amount : 0) - 
+                          (ddCoinsDiscount || 0)
+                        ).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Manager message */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mt-4">
+            <div className="flex items-start space-x-2">
+              <div className="text-blue-600 dark:text-blue-400 mt-0.5">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="text-sm">
+                <p className="text-blue-800 dark:text-blue-200 font-medium">
+                  Перед оплатой менеджер должен проверить заказ
+                </p>
+                <p className="text-blue-700 dark:text-blue-300 mt-1">
+                  Не переживайте, проверка обычно занимает не более 30 минут. После этого менеджер сам свяжется с вами и направит на оплату. Если вдруг возникнут вопросы — вы всегда можете написать нам первыми! Наш менеджер:{' '}
+                  <a 
+                    href="https://t.me/dd_helper" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="font-medium hover:underline"
+                  >
+                    @dd_helper
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="flex justify-end space-x-2 pt-4 border-t dark:border-gray-700">
             {onCancel && (
               <button
@@ -280,7 +379,7 @@ const ClientInfoForm: React.FC<ClientInfoFormProps> = ({
                   Сохранение...
                 </>
               ) : (
-                'Продолжить'
+                'Оформить заказ'
               )}
             </button>
           </div>

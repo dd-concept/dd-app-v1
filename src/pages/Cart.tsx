@@ -250,13 +250,20 @@ const Cart: React.FC = () => {
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
               Добавьте товары в корзину, чтобы продолжить покупки
             </p>
-            <Link
-              to="/shop"
-              className="mt-6 inline-flex items-center text-sm font-medium text-telegram-blue hover:text-telegram-dark"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Продолжить покупки
-            </Link>
+            <div className="mt-6 flex flex-col gap-3">
+              <Link
+                to="/shop"
+                className="inline-flex items-center justify-center px-4 py-3 text-sm font-medium text-telegram-blue bg-white border border-telegram-blue rounded-lg hover:bg-telegram-blue hover:text-white transition-colors"
+              >
+                Закупиться айтемами из нашего наличия
+              </Link>
+              <Link
+                to="/calculator"
+                className="inline-flex items-center justify-center px-4 py-3 text-sm font-medium text-telegram-blue bg-white border border-telegram-blue rounded-lg hover:bg-telegram-blue hover:text-white transition-colors"
+              >
+                Заказать что угодно прямиком с Poizon
+              </Link>
+            </div>
           </div>
         ) : (
           <div>
@@ -388,6 +395,14 @@ const Cart: React.FC = () => {
           onComplete={handleClientInfoComplete}
           onCancel={() => setShowClientInfoForm(false)}
           clientInfo={clientInfo}
+          orderSubtotal={items.reduce((sum, item) => sum + (item.sale_price || item.price) * item.quantity, 0)}
+          promocodeDiscount={currentPromocode ? {
+            text: currentPromocode.promocode_text,
+            amount: currentPromocode.discount_fixed || parseFloat(currentPromocode.discount_percent || '0'),
+            type: currentPromocode.discount_fixed ? 'fixed' : 'percent'
+          } : undefined}
+          ddCoinsDiscount={ddCoinsToUse}
+          finalPriceAfterDDCoins={finalPriceAfterDDCoins}
         />
       )}
     </PageLayout>
