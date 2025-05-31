@@ -6,12 +6,14 @@ interface PageLayoutProps {
   children: ReactNode;
   className?: string;
   fullHeight?: boolean;
+  hideNavigation?: boolean;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({
   children,
   className,
   fullHeight = false,
+  hideNavigation = false,
 }) => {
   return (
     <div
@@ -25,7 +27,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       <div className="animate-fade-in">
         {children}
       </div>
-      <BottomNavigation />
+      {!hideNavigation && <BottomNavigation />}
     </div>
   );
 };

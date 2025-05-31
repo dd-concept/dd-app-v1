@@ -75,8 +75,21 @@ export function initTelegramWebApp(): void {
       // Tell Telegram the WebApp is ready
       miniApp.ready();
       
-      // Expand the WebApp to full height
+      // Expand the WebApp to full height immediately
       viewport.expand();
+      
+      // Force full screen mode more aggressively
+      setTimeout(() => {
+        viewport.expand();
+        console.log("Secondary viewport expansion attempted");
+      }, 100);
+      
+      // Request full screen if available
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.log("Fullscreen request not allowed:", err);
+        });
+      }
       
       console.log("Telegram WebApp initialized successfully using SDK");
     } catch (sdkError) {
@@ -87,11 +100,38 @@ export function initTelegramWebApp(): void {
       if (webApp) {
         webApp.ready();
         webApp.expand();
+        
+        // Force full screen mode more aggressively
+        setTimeout(() => {
+          webApp.expand();
+          console.log("Secondary WebApp expansion attempted");
+        }, 100);
+        
+        // Request full screen if available
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(err => {
+            console.log("Fullscreen request not allowed:", err);
+          });
+        }
+        
         console.log("Telegram WebApp initialized successfully using direct WebApp API");
       } else {
         throw new Error("Telegram WebApp is not available");
       }
     }
+    
+    // Force viewport settings
+    const viewportMeta = document.querySelector('meta[name="viewport"]');
+    if (viewportMeta) {
+      viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+    }
+    
+    // Set body and html styles for full screen
+    document.body.style.height = '100vh';
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.height = '100vh';
+    document.documentElement.style.overflow = 'hidden';
+    
   } catch (error) {
     console.error("Error initializing Telegram WebApp:", error);
   }

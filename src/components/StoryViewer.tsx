@@ -16,6 +16,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [progress, setProgress] = useState<number[]>([]);
+  const [isPaused, setIsPaused] = useState(false);
   const storyDuration = 5000; // 5 seconds per image
   
   // Swipe state
@@ -37,7 +38,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
     let currentProgress = progress[currentImageIndex];
     let timer: ReturnType<typeof setInterval>;
 
-    if (currentProgress < 100 && !isDragging) {
+    if (currentProgress < 100 && !isDragging && !isPaused) {
       timer = setInterval(() => {
         setProgress(prev => {
           const newProgress = [...prev];
@@ -69,7 +70,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [currentImageIndex, progress, story, onStoryViewed, onClose, isDragging]);
+  }, [currentImageIndex, progress, story, onStoryViewed, onClose, isDragging, isPaused]);
 
   // Handle navigation
   const goToPrevious = useCallback(() => {
@@ -104,10 +105,24 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   }, [currentImageIndex, story.images.length, onClose, story.id, onStoryViewed]);
 
-  // Handle click on left/right sides to navigate
-  const handleScreenClick = (e: React.MouseEvent) => {
+  // Handle mobile touch to pause/resume only
+  const handleMobileTouch = useCallback(() => {
+    if (isDragging) return; // Don't handle touches while dragging
+    
+    // Toggle pause state for mobile
+    setIsPaused(prev => !prev);
+    hapticSelection();
+  }, [isDragging]);
+
+  // Handle desktop click for pause + navigation
+  const handleDesktopClick = useCallback((e: React.MouseEvent) => {
     if (isDragging) return; // Don't handle clicks while dragging
     
+    // Stop the story progression immediately
+    setIsPaused(true);
+    hapticSelection();
+    
+    // Handle navigation based on click position for desktop
     const { clientX, currentTarget } = e;
     const { left, width } = currentTarget.getBoundingClientRect();
     const clickPosition = clientX - left;
@@ -117,6 +132,11 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
     } else if (clickPosition > (width / 3) * 2) {
       goToNext();
     }
+  }, [isDragging, goToPrevious, goToNext]);
+
+  // Handle click on left/right sides to navigate (desktop only)
+  const handleScreenClick = (e: React.MouseEvent) => {
+    handleDesktopClick(e);
   };
   
   // Touch handlers for swipe-to-close
@@ -136,6 +156,8 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
     // Only handle vertical swipes (deltaY > deltaX means more vertical than horizontal)
     if (Math.abs(deltaY) > deltaX) {
       setIsDragging(true);
+      // Pause the story when dragging
+      setIsPaused(true);
       // Limit the maximum drag distance and apply resistance
       const newTranslateY = Math.min(Math.max(deltaY, -300), 300);
       setTranslateY(newTranslateY);
@@ -149,7 +171,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   };
   
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent) => {
     if (isDragging) {
       // If dragged more than the threshold in either direction, close the story
       if (Math.abs(translateY) > 100) {
@@ -161,8 +183,22 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
         setOpacity(1);
       }
       setIsDragging(false);
+    } else {
+      // Handle touch as a press to pause the story
+      handleMobileTouch();
     }
   };
+
+  // Resume story progression when user double taps or after a delay
+  useEffect(() => {
+    if (isPaused && !isDragging) {
+      const resumeTimer = setTimeout(() => {
+        setIsPaused(false);
+      }, 5000); // Resume after 5 seconds of inactivity (increased from 3)
+      
+      return () => clearTimeout(resumeTimer);
+    }
+  }, [isPaused, isDragging]);
 
   return (
     <div 
@@ -206,6 +242,14 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
           </div>
         ))}
       </div>
+
+      {/* Pause indicator */}
+      {isPaused && !isDragging && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 text-white text-lg px-6 py-3 bg-black/80 rounded-full flex items-center gap-2">
+          <span className="text-2xl">⏸️</span>
+          <span className="text-sm">Tap to resume</span>
+        </div>
+      )}
 
       {/* Close button - moved lower to avoid conflict with progress bar */}
       <button 

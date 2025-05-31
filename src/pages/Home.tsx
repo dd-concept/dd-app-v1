@@ -41,7 +41,6 @@ import stFAQ1 from '@/assets/stories/Instagram story - 10.png';
 import stFAQ3 from '@/assets/stories/Instagram story - 12.png';
 import stFAQ4 from '@/assets/stories/Instagram story - 13.png';
 import stFAQ5 from '@/assets/stories/Instagram story - 14.png';
-import stFAQ7 from '@/assets/stories/Instagram story - 15.png';
 import stFAQ8 from '@/assets/stories/Instagram story - 17.png'; 
 
 const Home: React.FC = () => {
@@ -68,7 +67,7 @@ const Home: React.FC = () => {
       id: 'faq',
       title: 'FAQ',
       previewImage: stFAQPreview,
-      images: [stFAQ1, stFAQ3, stFAQ4, stFAQ5, stFAQ7, stFAQ8],
+      images: [stFAQ1, stFAQ3, stFAQ4, stFAQ5, stFAQ8],
       viewed: viewedStoryIds.includes('faq')
     }
   ];
@@ -164,7 +163,7 @@ const Home: React.FC = () => {
   };
 
   return (
-    <PageLayout fullHeight className="p-4 pb-20">
+    <PageLayout fullHeight className="p-4 pb-20" hideNavigation={!!selectedStory}>
       <header className="mb-6">
         {/* Create a container for better control over spacing and alignment */}
         <div className="pt-2">

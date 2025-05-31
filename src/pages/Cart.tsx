@@ -255,13 +255,13 @@ const Cart: React.FC = () => {
                 to="/shop"
                 className="inline-flex items-center justify-center px-4 py-3 text-sm font-medium text-telegram-blue bg-white border border-telegram-blue rounded-lg hover:bg-telegram-blue hover:text-white transition-colors"
               >
-                Закупиться айтемами из нашего наличия
+                Купить айтемы из нашего наличия
               </Link>
               <Link
                 to="/calculator"
                 className="inline-flex items-center justify-center px-4 py-3 text-sm font-medium text-telegram-blue bg-white border border-telegram-blue rounded-lg hover:bg-telegram-blue hover:text-white transition-colors"
               >
-                Заказать что угодно прямиком с Poizon
+                Заказать айтемы прямиком с Poizon
               </Link>
             </div>
           </div>
