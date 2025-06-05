@@ -9,7 +9,7 @@ import CartItem from '@/components/CartItem/CartItem';
 import { toast } from 'sonner';
 import { createUnifiedOrder } from '@/services/api/orderService';
 import { checkClientInformation, getClientInfo } from '@/services/api/clientService';
-import { getTelegramUser } from '@/services/api/userService';
+import { getTelegramUser, hapticSelection } from '@/utils/telegramUtils';
 import PromocodeInput from '@/components/PromocodeInput';
 import { Promocode } from '@/services/api/promocodeService';
 import { DeliveryRate } from '@/services/api/types';
@@ -101,6 +101,7 @@ const Cart: React.FC = () => {
   const handleDDCoinsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     setDDCoinsToUse(value);
+    hapticSelection(); // Add haptic feedback when user changes the slider value
   };
 
   const handlePromocodeApplied = (promocode: Promocode, discountedPrice: number) => {
@@ -255,13 +256,13 @@ const Cart: React.FC = () => {
                 to="/shop"
                 className="inline-flex items-center justify-center px-4 py-3 text-sm font-medium text-telegram-blue bg-white border border-telegram-blue rounded-lg hover:bg-telegram-blue hover:text-white transition-colors"
               >
-                Купить айтемы из нашего наличия
+                Купить из наличия
               </Link>
               <Link
                 to="/calculator"
                 className="inline-flex items-center justify-center px-4 py-3 text-sm font-medium text-telegram-blue bg-white border border-telegram-blue rounded-lg hover:bg-telegram-blue hover:text-white transition-colors"
               >
-                Заказать айтемы прямиком с Poizon
+                Заказать прямиком с Poizon
               </Link>
             </div>
           </div>

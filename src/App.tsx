@@ -155,88 +155,86 @@ const TelegramInitializer = ({ children }: { children: React.ReactNode }) => {
     }
     
     try {
-      // CRITICAL: Initialize the WebApp FIRST using the direct method
+      // CRITICAL: Always use the proper initTelegramWebApp function for fullscreen support
+      console.log("Initializing Telegram WebApp with fullscreen support...");
+      initTelegramWebApp();
+      
+      // Apply Telegram colors based on user's theme
+      setTelegramColors();
+      
+      // Request the current theme to ensure we have the latest
+      requestTelegramTheme();
+      
+      // Wait a moment for Telegram to initialize
+      // This is important for Mini Apps to receive initData
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Try to get user data using multiple methods
+      let userData = null;
+      
+      // Method 1: Try useTelegram hook if tg is available
       if (tg) {
-        // Initialize using the useTelegram hook
-        initWebApp();
+        userData = getUserData();
+        console.log("User data from useTelegram hook:", userData);
+      }
+      
+      // Method 2: Try the telegramUtils method as fallback
+      if (!userData) {
+        userData = getTelegramUser();
+        console.log("User data from telegramUtils:", userData);
+      }
+      
+      if (userData) {
+        console.log("User data retrieved:", userData);
+        updateTelegramUser(userData);
         
-        // Apply Telegram colors based on user's theme
-        setTelegramColors();
+        // Check if user exists in the API system
+        await checkUserInAPI();
         
-        // Request the current theme to ensure we have the latest
-        requestTelegramTheme();
+        setInitialized(true);
+        setIsLoading(false);
+      } else if (isTelegramBrowser) {
+        console.log("No user data available despite being in Telegram browser");
         
-        // Wait a moment for Telegram to initialize
-        // This is important for Mini Apps to receive initData
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Try to get user data using the useTelegram hook
-        const userData = getUserData();
-        
-        if (userData) {
-          console.log("User data retrieved:", userData);
-          updateTelegramUser(userData);
+        // Try one more time after a delay
+        // This is sometimes necessary as Telegram might not provide the data immediately
+        setTimeout(() => {
+          let retryUserData = null;
           
-          // Check if user exists in the API system
-          await checkUserInAPI();
+          // Try both methods again
+          if (tg) {
+            retryUserData = getUserData();
+          }
+          if (!retryUserData) {
+            retryUserData = getTelegramUser();
+          }
           
-          setInitialized(true);
-          setIsLoading(false);
-        } else if (isTelegramBrowser) {
-          console.log("No user data available despite being in Telegram browser");
-          
-          // Try one more time after a delay
-          // This is sometimes necessary as Telegram might not provide the data immediately
-          setTimeout(() => {
-            const retryUserData = getUserData();
-            if (retryUserData) {
-              console.log("User data retrieved after delay:", retryUserData);
-              updateTelegramUser(retryUserData);
-            } else {
-              console.log("Still no user data after retry. This might indicate:");
-              console.log("1. The Mini App is not properly configured in BotFather");
-              console.log("2. The user is not using the official Telegram app");
-              console.log("3. There's an issue with the initData validation");
-              
-              // Try to use localStorage as a last resort
-              try {
-                const storedUser = localStorage.getItem('telegramUser');
-                if (storedUser) {
-                  const parsedUser = JSON.parse(storedUser);
-                  console.log("Using stored user data from localStorage:", parsedUser);
-                  updateTelegramUser(parsedUser);
-                }
-              } catch (e) {
-                console.error("Error retrieving user data from localStorage:", e);
+          if (retryUserData) {
+            console.log("User data retrieved after delay:", retryUserData);
+            updateTelegramUser(retryUserData);
+          } else {
+            console.log("Still no user data after retry. This might indicate:");
+            console.log("1. The Mini App is not properly configured in BotFather");
+            console.log("2. The user is not using the official Telegram app");
+            console.log("3. There's an issue with the initData validation");
+            
+            // Try to use localStorage as a last resort
+            try {
+              const storedUser = localStorage.getItem('telegramUser');
+              if (storedUser) {
+                const parsedUser = JSON.parse(storedUser);
+                console.log("Using stored user data from localStorage:", parsedUser);
+                updateTelegramUser(parsedUser);
               }
+            } catch (e) {
+              console.error("Error retrieving user data from localStorage:", e);
             }
-            setInitialized(true); // Mark as initialized anyway to prevent further attempts
-            setIsLoading(false);
-          }, 800);
-        } else {
-          console.log("Not in Telegram browser, continuing without user data");
-          setInitialized(true);
+          }
+          setInitialized(true); // Mark as initialized anyway to prevent further attempts
           setIsLoading(false);
-        }
+        }, 800);
       } else {
-        // Fallback to the old method if tg is not available
-        console.log("Telegram WebApp is not available, using fallback method");
-        initTelegramWebApp();
-        
-        // Apply Telegram colors based on user's theme
-        setTelegramColors();
-        
-        // Wait a moment for Telegram to initialize
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Try to get user data using the old method
-        const userData = getTelegramUser();
-        
-        if (userData) {
-          console.log("User data retrieved using fallback method:", userData);
-          updateTelegramUser(userData);
-        }
-        
+        console.log("Not in Telegram browser, continuing without user data");
         setInitialized(true);
         setIsLoading(false);
       }

@@ -14,7 +14,7 @@ import DDManagerCard from '@/components/DDManagerCard';
 import ProductCard from '@/components/ProductCard';
 import { useScrollToTop } from '@/hooks/useScrollToTop';
 import Stories, { StoryContent } from '@/components/Stories';
-import StoryViewer from '@/components/StoryViewer';
+import ImageSwiper from '@/components/StoryViewer';
 
 // Import CSS
 import '@/components/NoScrollbar.css';
@@ -41,6 +41,7 @@ import stFAQ1 from '@/assets/stories/Instagram story - 10.png';
 import stFAQ3 from '@/assets/stories/Instagram story - 12.png';
 import stFAQ4 from '@/assets/stories/Instagram story - 13.png';
 import stFAQ5 from '@/assets/stories/Instagram story - 14.png';
+import stFAQ7 from '@/assets/stories/Instagram story - 16.png'; 
 import stFAQ8 from '@/assets/stories/Instagram story - 17.png'; 
 
 const Home: React.FC = () => {
@@ -50,11 +51,11 @@ const Home: React.FC = () => {
   const [ddCoinsBalance, setDDCoinsBalance] = useState<number>(0);
   const [isLoadingDDCoins, setIsLoadingDDCoins] = useState<boolean>(false);
   
-  // Story state
+  // Gallery state
   const [selectedStory, setSelectedStory] = useState<StoryContent | null>(null);
   const [viewedStoryIds, setViewedStoryIds] = useState<string[]>([]);
 
-  // Stories data
+  // Gallery data
   const stories: StoryContent[] = [
     {
       id: 'beginner-guide',
@@ -67,12 +68,12 @@ const Home: React.FC = () => {
       id: 'faq',
       title: 'FAQ',
       previewImage: stFAQPreview,
-      images: [stFAQ1, stFAQ3, stFAQ4, stFAQ5, stFAQ8],
+      images: [stFAQ4, stFAQ1, stFAQ3, stFAQ5, stFAQ8, stFAQ7],
       viewed: viewedStoryIds.includes('faq')
     }
   ];
 
-  // Handle story click
+  // Handle gallery click
   const handleStoryClick = (storyId: string) => {
     hapticSelection();
     const story = stories.find(s => s.id === storyId);
@@ -81,7 +82,7 @@ const Home: React.FC = () => {
     }
   };
 
-  // Mark story as viewed
+  // Mark gallery as viewed (optional - can be removed if not needed)
   const handleStoryViewed = (storyId: string) => {
     if (!viewedStoryIds.includes(storyId)) {
       setViewedStoryIds(prev => [...prev, storyId]);
@@ -163,7 +164,7 @@ const Home: React.FC = () => {
   };
 
   return (
-    <PageLayout fullHeight className="p-4 pb-20" hideNavigation={!!selectedStory}>
+    <PageLayout fullHeight className="px-4 pb-20" hideNavigation={!!selectedStory}>
       <header className="mb-6">
         {/* Create a container for better control over spacing and alignment */}
         <div className="pt-2">
@@ -198,7 +199,7 @@ const Home: React.FC = () => {
               </div>
             </div>
             
-            {/* Stories section */}
+            {/* Galleries section */}
             <div className="flex-1 overflow-x-auto no-scrollbar">
               <Stories stories={stories} onStoryClick={handleStoryClick} />
             </div>
@@ -206,12 +207,11 @@ const Home: React.FC = () => {
         </div>
       </header>
       
-      {/* Story viewer */}
+      {/* Image viewer */}
       {selectedStory && (
-        <StoryViewer 
+        <ImageSwiper 
           story={selectedStory} 
           onClose={() => setSelectedStory(null)}
-          onStoryViewed={handleStoryViewed}
         />
       )}
 

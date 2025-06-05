@@ -7,12 +7,16 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="theme-color" content="#232730" />
+    <!-- Telegram Mini App Fullscreen Support -->
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
     <base href="/dd-app-v1/" />
     <title>DD App</title>
     <meta name="description" content="DD App - Telegram Shopping Experience" />
     <meta name="author" content="DD App Team" />
     <meta property="og:image" content="og-image.png" />
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Updated Telegram Web App script with latest version supporting Bot API 8.0+ fullscreen -->
+    <script src="https://telegram.org/js/telegram-web-app.js?57"></script>
     <style>
       :root {
         --tg-theme-bg-color: #232730;

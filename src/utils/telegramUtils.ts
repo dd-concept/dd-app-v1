@@ -27,7 +27,7 @@ interface ThemeParams {
 }
 
 // Define event types for Telegram WebApp
-type TelegramEventType = 'themeChanged' | 'viewportChanged' | 'mainButtonClicked';
+type TelegramEventType = 'themeChanged' | 'viewportChanged' | 'mainButtonClicked' | 'fullscreenChanged' | 'fullscreenFailed' | 'activated' | 'deactivated' | 'safeAreaChanged' | 'contentSafeAreaChanged';
 
 // Define the complete TelegramWebApp interface
 interface TelegramWebApp {
@@ -43,6 +43,23 @@ interface TelegramWebApp {
   initDataUnsafe?: {
     user?: TelegramUser;
   };
+  // Bot API 8.0+ Full-screen mode properties and methods
+  isFullscreen?: boolean;
+  isActive?: boolean;
+  safeAreaInset?: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  };
+  contentSafeAreaInset?: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  };
+  requestFullscreen?: () => void;
+  exitFullscreen?: () => void;
   // Optional method that might be available in some Telegram clients
   setHeaderColor?: (color: string) => void;
   setBackgroundColor?: (color: string) => void;
@@ -63,12 +80,59 @@ export function getTelegramWebApp(): TelegramWebApp | undefined {
 }
 
 /**
+ * Detect if the current device is mobile
+ */
+export function isMobileDevice(): boolean {
+  try {
+    // Check multiple indicators for mobile device
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    
+    // Check for mobile user agents
+    const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+    const isMobileUA = mobileRegex.test(userAgent.toLowerCase());
+    
+    // Check for touch capability
+    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    // Check viewport width (mobile-first approach)
+    const isNarrowScreen = window.innerWidth <= 768;
+    
+    // Check if running in Telegram mobile app specifically
+    const platform = navigator.platform || '';
+    const isTelegramMobile = platform.includes('iPhone') || platform.includes('Android') || 
+                            userAgent.includes('Mobile') || userAgent.includes('Telegram');
+    
+    // Combine all checks - device is mobile if any mobile indicator is true
+    const isMobile = isMobileUA || (hasTouch && isNarrowScreen) || isTelegramMobile;
+    
+    console.log('Mobile detection:', {
+      userAgent,
+      isMobileUA,
+      hasTouch,
+      isNarrowScreen,
+      isTelegramMobile,
+      finalResult: isMobile
+    });
+    
+    return isMobile;
+  } catch (error) {
+    console.error('Error detecting mobile device:', error);
+    // Default to mobile for safety in Telegram environment
+    return true;
+  }
+}
+
+/**
  * Initialize the Telegram WebApp
  * This must be called before any other Telegram WebApp functions
  */
 export function initTelegramWebApp(): void {
   try {
     console.log("Initializing Telegram WebApp...");
+    
+    // Detect if we're on mobile device
+    const isMobile = isMobileDevice();
+    console.log(`Device detected as: ${isMobile ? 'Mobile' : 'Desktop'}`);
     
     // Try SDK method first
     try {
@@ -84,11 +148,43 @@ export function initTelegramWebApp(): void {
         console.log("Secondary viewport expansion attempted");
       }, 100);
       
-      // Request full screen if available
-      if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen().catch(err => {
-          console.log("Fullscreen request not allowed:", err);
-        });
+      // Use official Telegram fullscreen API (Bot API 8.0+) - ONLY ON MOBILE
+      const webApp = getTelegramWebApp();
+      if (webApp && webApp.requestFullscreen && isMobile) {
+        // Add a delay to ensure WebApp is fully initialized before requesting fullscreen
+        setTimeout(() => {
+          console.log("Requesting fullscreen using Telegram API (mobile device detected)...");
+          webApp.requestFullscreen();
+          
+          // Set up fullscreen event listeners
+          webApp.onEvent('fullscreenChanged', () => {
+            console.log('Fullscreen state changed:', webApp.isFullscreen);
+          });
+          
+          webApp.onEvent('fullscreenFailed', () => {
+            console.log('Fullscreen request failed');
+          });
+          
+          webApp.onEvent('activated', () => {
+            console.log('Mini App activated');
+          });
+          
+          webApp.onEvent('deactivated', () => {
+            console.log('Mini App deactivated');
+          });
+          
+          webApp.onEvent('safeAreaChanged', () => {
+            console.log('Safe area changed:', webApp.safeAreaInset);
+          });
+          
+          webApp.onEvent('contentSafeAreaChanged', () => {
+            console.log('Content safe area changed:', webApp.contentSafeAreaInset);
+          });
+        }, 500); // 500ms delay to ensure WebApp is ready
+      } else if (!isMobile) {
+        console.log("Desktop device detected - skipping fullscreen request");
+      } else {
+        console.log("Telegram fullscreen API not available, using viewport expansion only");
       }
       
       console.log("Telegram WebApp initialized successfully using SDK");
@@ -107,11 +203,42 @@ export function initTelegramWebApp(): void {
           console.log("Secondary WebApp expansion attempted");
         }, 100);
         
-        // Request full screen if available
-        if (document.documentElement.requestFullscreen) {
-          document.documentElement.requestFullscreen().catch(err => {
-            console.log("Fullscreen request not allowed:", err);
-          });
+        // Use official Telegram fullscreen API (Bot API 8.0+) - ONLY ON MOBILE
+        if (webApp.requestFullscreen && isMobile) {
+          // Add a delay to ensure WebApp is fully initialized before requesting fullscreen
+          setTimeout(() => {
+            console.log("Requesting fullscreen using Telegram API (fallback, mobile device detected)...");
+            webApp.requestFullscreen();
+            
+            // Set up fullscreen event listeners
+            webApp.onEvent('fullscreenChanged', () => {
+              console.log('Fullscreen state changed:', webApp.isFullscreen);
+            });
+            
+            webApp.onEvent('fullscreenFailed', () => {
+              console.log('Fullscreen request failed');
+            });
+            
+            webApp.onEvent('activated', () => {
+              console.log('Mini App activated');
+            });
+            
+            webApp.onEvent('deactivated', () => {
+              console.log('Mini App deactivated');
+            });
+            
+            webApp.onEvent('safeAreaChanged', () => {
+              console.log('Safe area changed:', webApp.safeAreaInset);
+            });
+            
+            webApp.onEvent('contentSafeAreaChanged', () => {
+              console.log('Content safe area changed:', webApp.contentSafeAreaInset);
+            });
+          }, 500); // 500ms delay to ensure WebApp is ready
+        } else if (!isMobile) {
+          console.log("Desktop device detected - skipping fullscreen request");
+        } else {
+          console.log("Telegram fullscreen API not available, using viewport expansion only");
         }
         
         console.log("Telegram WebApp initialized successfully using direct WebApp API");
@@ -126,11 +253,9 @@ export function initTelegramWebApp(): void {
       viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
     }
     
-    // Set body and html styles for full screen
+    // Set body and html styles for full screen (removed overflow: hidden to allow scrolling)
     document.body.style.height = '100vh';
-    document.body.style.overflow = 'hidden';
     document.documentElement.style.height = '100vh';
-    document.documentElement.style.overflow = 'hidden';
     
   } catch (error) {
     console.error("Error initializing Telegram WebApp:", error);
@@ -1312,5 +1437,146 @@ export function openTelegramUrl(url: string): void {
     console.error("Error opening URL in Telegram:", error);
     // Fallback to regular open
     window.open(url, '_blank');
+  }
+}
+
+/**
+ * Request fullscreen mode using Telegram's official API (Bot API 8.0+)
+ */
+export function requestFullscreen(): void {
+  try {
+    const webApp = getTelegramWebApp();
+    if (webApp && webApp.requestFullscreen) {
+      console.log("Requesting fullscreen mode...");
+      webApp.requestFullscreen();
+    } else {
+      console.warn("Telegram fullscreen API not available");
+    }
+  } catch (error) {
+    console.error("Error requesting fullscreen:", error);
+  }
+}
+
+/**
+ * Exit fullscreen mode using Telegram's official API (Bot API 8.0+)
+ */
+export function exitFullscreen(): void {
+  try {
+    const webApp = getTelegramWebApp();
+    if (webApp && webApp.exitFullscreen) {
+      console.log("Exiting fullscreen mode...");
+      webApp.exitFullscreen();
+    } else {
+      console.warn("Telegram fullscreen API not available");
+    }
+  } catch (error) {
+    console.error("Error exiting fullscreen:", error);
+  }
+}
+
+/**
+ * Check if the app is currently in fullscreen mode
+ */
+export function isFullscreen(): boolean {
+  try {
+    const webApp = getTelegramWebApp();
+    return webApp?.isFullscreen ?? false;
+  } catch (error) {
+    console.error("Error checking fullscreen status:", error);
+    return false;
+  }
+}
+
+/**
+ * Check if the app is currently active (not minimized)
+ */
+export function isAppActive(): boolean {
+  try {
+    const webApp = getTelegramWebApp();
+    return webApp?.isActive ?? true;
+  } catch (error) {
+    console.error("Error checking app active status:", error);
+    return true;
+  }
+}
+
+/**
+ * Get the safe area insets for the device
+ */
+export function getSafeAreaInset(): { top: number; bottom: number; left: number; right: number } | null {
+  try {
+    const webApp = getTelegramWebApp();
+    return webApp?.safeAreaInset ?? null;
+  } catch (error) {
+    console.error("Error getting safe area inset:", error);
+    return null;
+  }
+}
+
+/**
+ * Get the content safe area insets
+ */
+export function getContentSafeAreaInset(): { top: number; bottom: number; left: number; right: number } | null {
+  try {
+    const webApp = getTelegramWebApp();
+    return webApp?.contentSafeAreaInset ?? null;
+  } catch (error) {
+    console.error("Error getting content safe area inset:", error);
+    return null;
+  }
+}
+
+/**
+ * Set up fullscreen event listeners
+ * @param onFullscreenChange - Callback for when fullscreen state changes
+ * @param onFullscreenFailed - Callback for when fullscreen request fails
+ * @param onActivated - Callback for when app is activated
+ * @param onDeactivated - Callback for when app is deactivated
+ */
+export function setupFullscreenEventListeners(
+  onFullscreenChange?: (isFullscreen: boolean) => void,
+  onFullscreenFailed?: () => void,
+  onActivated?: () => void,
+  onDeactivated?: () => void
+): () => void {
+  try {
+    const webApp = getTelegramWebApp();
+    if (!webApp) {
+      console.warn("Telegram WebApp not available for event listeners");
+      return () => {};
+    }
+
+    const handlers: Array<{ event: TelegramEventType; handler: () => void }> = [];
+
+    if (onFullscreenChange) {
+      const handler = () => onFullscreenChange(webApp.isFullscreen ?? false);
+      webApp.onEvent('fullscreenChanged', handler);
+      handlers.push({ event: 'fullscreenChanged', handler });
+    }
+
+    if (onFullscreenFailed) {
+      webApp.onEvent('fullscreenFailed', onFullscreenFailed);
+      handlers.push({ event: 'fullscreenFailed', handler: onFullscreenFailed });
+    }
+
+    if (onActivated) {
+      webApp.onEvent('activated', onActivated);
+      handlers.push({ event: 'activated', handler: onActivated });
+    }
+
+    if (onDeactivated) {
+      webApp.onEvent('deactivated', onDeactivated);
+      handlers.push({ event: 'deactivated', handler: onDeactivated });
+    }
+
+    // Return cleanup function
+    return () => {
+      handlers.forEach(({ event, handler }) => {
+        webApp.offEvent(event, handler);
+      });
+    };
+  } catch (error) {
+    console.error("Error setting up fullscreen event listeners:", error);
+    return () => {};
   }
 }

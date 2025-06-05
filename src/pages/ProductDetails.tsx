@@ -192,7 +192,7 @@ const ProductDetails: React.FC = () => {
   }
   
   return (
-    <PageLayout>
+    <PageLayout className="pt-0">
       <div className="flex flex-col min-h-screen">
         {/* Product image slider using PhotoSwiper component */}
         <PhotoSwiper
