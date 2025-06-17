@@ -189,13 +189,16 @@ const Home: React.FC = () => {
               </div>
               
               {/* Text labels for profile */}
-              <div className="flex flex-col items-center text-center mt-1">
-                <span className="text-xs text-gray-600 dark:text-gray-400 truncate w-16">
-                  @{displayUsername}
-                </span>
-                <span className="text-xs font-medium text-telegram-blue">
-                  DD:Профиль
-                </span>
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center text-center mt-1">
+                  <span className="text-xs text-gray-600 dark:text-gray-400 truncate w-16">
+                    @{displayUsername}
+                  </span>
+                  <span className="text-xs font-medium text-telegram-blue">
+                    DD:Профиль
+                  </span>
+                </div>
+
               </div>
             </div>
             
